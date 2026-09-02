@@ -1,0 +1,19 @@
+# Python
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+backend/pathwise.db
+backend/.env
+
+# Node（同时覆盖英文 frontend/ 和中文 前端/ 目录）
+frontend/node_modules/
+frontend/dist/
+前端/node_modules/
+前端/dist/
+node_modules/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db

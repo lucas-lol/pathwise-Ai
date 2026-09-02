@@ -1,0 +1,9 @@
+{
+  "subjects": [
+    {
+      "id": "mathematics",
+      "name": "数学",
+      "track": "science"
+    }
+  ]
+}
