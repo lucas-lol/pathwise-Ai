@@ -1,0 +1,2 @@
+fatal: User cancelled dialog.
+Everything up-to-date

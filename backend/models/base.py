@@ -27,6 +27,6 @@ def get_db():
 
 
 def init_db() -> None:
-    from backend.models import tables  # noqa: F401
+    from models import tables  # noqa: F401
 
     Base.metadata.create_all(bind=engine)

@@ -3,10 +3,10 @@ import json
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from backend.models.base import get_db
-from backend.models.tables import StudentProfile, User
-from backend.schemas import CreateUserBody, ProfileUpdate
-from backend.services import state_manager
+from models.base import get_db
+from models.tables import StudentProfile, User
+from schemas import CreateUserBody, ProfileUpdate
+from services import state_manager
 
 router = APIRouter(prefix="/api", tags=["students"])
 

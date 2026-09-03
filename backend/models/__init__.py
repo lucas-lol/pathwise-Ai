@@ -1,3 +1,3 @@
-from backend.models.base import Base, SessionLocal, engine, get_db, init_db
+from models.base import Base, SessionLocal, engine, get_db, init_db
 
 __all__ = ["Base", "SessionLocal", "engine", "get_db", "init_db"]

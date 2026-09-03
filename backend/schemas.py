@@ -22,3 +22,21 @@ class ProfileUpdate(BaseModel):
     self_assessment: list[str] = Field(default_factory=list)
     goals: list[str] = Field(default_factory=list)
     profile_complete: bool = False
+
+
+class QuestionResponse(BaseModel):
+    id: str
+    subject_id: str
+    knowledge_point_id: str
+    question: str
+    option_a: str
+    option_b: str
+    option_c: str
+    option_d: str
+    answer: str
+    difficulty: int | str
+    explanation: str
+
+    class Config:
+        from_attributes = True
+

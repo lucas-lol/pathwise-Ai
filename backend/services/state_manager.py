@@ -3,7 +3,7 @@ import json
 
 from sqlalchemy.orm import Session
 
-from backend.models.tables import StudentState
+from models.tables import StudentState
 
 
 def default_state(user_id: int) -> dict:

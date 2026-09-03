@@ -1,0 +1,36 @@
+# PathWise AI 核心规则
+
+## 不可违反的原则
+1. 前端不直接调用 LLM API，必须通过 FastAPI → AI Service。
+2. Student State 必须带 version 字段，使用乐观锁（Optimistic Concurrency Control）。
+3. AI 只负责解释、建议、总结，不修改核心事实数据（如 mastery、skills、profile）。
+4. 所有掌握度 (mastery) 保持在 0~1 之间。
+5. 漏斗状态 (funnel) 只能向前推进，不能回退。
+6. 所有 AI 输出必须为结构化 JSON，后端必须验证后再返回前端。
+7. 即使 AI API 不可用，核心学习系统仍必须可以运行（规则引擎兜底）。
+
+## 禁止修改清单
+- backend/models/base.py（数据库引擎与会话）
+- student_states 表的 version 字段逻辑
+- AI Service 的隔离层设计（前端 → FastAPI → AI Service → LLM）
+- .env 文件结构
+- 漏斗 (funnel) 的推进逻辑
+
+## 代码风格
+- 后端：Python 3.10+ / FastAPI / SQLAlchemy / Pydantic v2
+- 前端：React 18 / TypeScript / Tailwind CSS / Vite
+- 数据库：SQLite（MVP），正式环境可迁移 PostgreSQL
+- 所有 API 响应必须使用 Pydantic 模型
+- 所有数据库操作通过 SQLAlchemy ORM，不写裸 SQL
+
+## 文件引用规则
+- 如果任务涉及架构修改、新增模块或修改数据流，必须先阅读 docs/ARCHITECTURE.md。
+- 如果任务涉及 API 接口，必须先阅读 docs/API_CONTRACT.md。
+- 如果任务涉及学生状态，必须先阅读 docs/STATE_SCHEMA.md。
+- 每次任务只阅读 docs/CURRENT_TASK.md 中指定的相关文件，不要扫描整个仓库。
+
+## 修改纪律
+- 每次最多修改 3～5 个文件。
+- 修改前必须先输出【架构合规性检查】和【实现计划】。
+- 不要一次性重构多个模块。
+- 不要引入新的第三方依赖，除非明确要求。

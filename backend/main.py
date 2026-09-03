@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.api.students import router as students_router
-from backend.models.base import init_db
+from api.students import router as students_router
+from api.assessment import router as assessment_router
+from models.base import init_db
 
 app = FastAPI(title="PathWise AI")
 app.add_middleware(
@@ -13,6 +14,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(students_router)
+app.include_router(assessment_router)
 
 
 @app.on_event("startup")
@@ -23,3 +25,4 @@ def on_startup():
 @app.get("/health")
 def health():
     return {"ok": True, "service": "pathwise"}
+
