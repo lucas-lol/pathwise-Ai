@@ -24,6 +24,15 @@
 - 所有数据库操作通过 SQLAlchemy ORM，不写裸 SQL
 
 ## 文件引用规则
+
+# UI 设计规格（前端所有页面必须遵守）
+- 组件库：daisyUI；优先 btn/card/badge/stat/modal 内置组件类
+- 背景 base-200；卡片 rounded-2xl + shadow
+- 数字展示用 stat；状态一律 badge
+- 间距统一 space-y-4 / gap-4，禁止手拼像素
+- 按钮文字不带 emoji；图标用 SVG
+- 全站中文；一页最多一个主操作按钮
+
 - 如果任务涉及架构修改、新增模块或修改数据流，必须先阅读 docs/ARCHITECTURE.md。
 - 如果任务涉及 API 接口，必须先阅读 docs/API_CONTRACT.md。
 - 如果任务涉及学生状态，必须先阅读 docs/STATE_SCHEMA.md。
