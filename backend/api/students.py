@@ -73,7 +73,7 @@ def put_profile(user_id: int, body: ProfileUpdate, db: Session = Depends(get_db)
     profile.interests = json.dumps(body.interests[:3], ensure_ascii=False)
     profile.self_assessment = json.dumps(body.self_assessment, ensure_ascii=False)
     profile.goals = json.dumps(body.goals, ensure_ascii=False)
-    profile.profile_complete = body.profile_complete
+    profile.profile_complete = bool((user.grade and body.interests) or body.profile_complete or profile.profile_complete)
     db.add(user)
     db.add(profile)
     db.commit()
