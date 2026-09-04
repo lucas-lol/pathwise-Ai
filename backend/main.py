@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.students import router as students_router
-from api.assessment import router as assessment_router
-from models.base import init_db
+from api.assessment import router as assessment_router, seed_questions_and_subjects
+from models.base import init_db, SessionLocal
 
 app = FastAPI(title="PathWise AI")
 app.add_middleware(
@@ -20,6 +20,11 @@ app.include_router(assessment_router)
 @app.on_event("startup")
 def on_startup():
     init_db()
+    db = SessionLocal()
+    try:
+        seed_questions_and_subjects(db)
+    finally:
+        db.close()
 
 
 @app.get("/health")

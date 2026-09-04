@@ -60,9 +60,6 @@ def seed_questions_and_subjects(db: Session):
 
 @router.get("/assessments/{subject_id}/questions", response_model=list[QuestionResponse])
 def get_assessment_questions(subject_id: str, limit: int = 10, db: Session = Depends(get_db)):
-    # Run the seeding first to ensure data is populated
-    seed_questions_and_subjects(db)
-
     # Query all questions for this subject
     questions = db.query(Question).filter(Question.subject_id == subject_id).all()
     if not questions:
