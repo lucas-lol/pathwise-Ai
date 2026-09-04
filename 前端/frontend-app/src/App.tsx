@@ -5,17 +5,43 @@ function App() {
   const [resultMessage, setResultMessage] = useState('');
 
   const handleProfileSubmit = async (data: any) => {
+    let studentId = localStorage.getItem('pw_student_id');
+
+    if (!studentId) {
+      try {
+        const userRes = await fetch('http://localhost:8000/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: '新同学' }),
+        });
+        if (!userRes.ok) throw new Error('创建用户失败');
+        const user = await userRes.json();
+        studentId = user.id;
+        localStorage.setItem('pw_student_id', studentId);
+      } catch (err) {
+        console.error(err);
+        alert('网络异常：无法连接到后端，请确保后端已启动');
+        return;
+      }
+    }
+
     try {
-      const response = await fetch('http://localhost:8000/api/students/1/profile', {
+      const response = await fetch(`http://localhost:8000/api/students/${studentId}/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+      
       const result = await response.json();
-      setResultMessage('🎉 成功保存并同步到后端！返回数据: ' + JSON.stringify(result, null, 2));
+      
+      if (response.ok) {
+        setResultMessage(`🎉 保存成功（学号：${studentId}）`);
+      } else {
+        setResultMessage(`❌ 保存失败：${result.detail || JSON.stringify(result)}`);
+      }
     } catch (err) {
       console.error(err);
-      alert('保存失败！请确保你的 FastAPI 后端已经在 localhost:8000 启动运行。');
+      alert('网络异常：无法连接到后端');
     }
   };
 

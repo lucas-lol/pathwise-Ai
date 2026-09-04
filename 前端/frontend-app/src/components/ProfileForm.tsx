@@ -28,10 +28,13 @@ export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => voi
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({
-      grade,
+      grade: String(grade),
       interests: selectedInterests,
       scores: { math: mathScore },
-      self_assessment: { level: mathScore >= 80 ? 'advanced' : 'intermediate' }
+      self_assessment: [mathScore >= 80 ? 'advanced' : 'intermediate'],
+      goals: [],
+      no_grade: false,
+      profile_complete: true
     });
   };
 
@@ -39,7 +42,7 @@ export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => voi
     <form onSubmit={handleSubmit} className="max-w-xl mx-auto p-8 bg-white rounded-2xl shadow-xl space-y-8">
       <div>
         <h2 className="text-2xl font-bold text-gray-800">PathWise AI - 定制你的学习画像</h2>
-        <p class="text-sm text-gray-500 mt-1">拖动滑块与点选标签，轻松完成画像配置</p>
+        <p className="text-sm text-gray-500 mt-1">拖动滑块与点选标签，轻松完成画像配置</p>
       </div>
 
       {/* 1. 年级选择 */}
