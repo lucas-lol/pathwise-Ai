@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.students import router as students_router
 from api.assessment import router as assessment_router, seed_questions_and_subjects
+from api.careers import router as careers_router
 from models.base import init_db, SessionLocal
 
 app = FastAPI(title="PathWise AI")
@@ -15,6 +16,7 @@ app.add_middleware(
 )
 app.include_router(students_router)
 app.include_router(assessment_router)
+app.include_router(careers_router)
 
 
 @app.on_event("startup")
