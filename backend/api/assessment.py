@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from models.base import get_db
 from models.tables import Question, Subject
-from schemas import QuestionResponse
+from schemas import QuestionResponse, AssessmentSubmit
 
 router = APIRouter(prefix="/api", tags=["assessment"])
 
@@ -63,7 +63,9 @@ def get_assessment_questions(subject_id: str, limit: int = 10, db: Session = Dep
     # Query all questions for this subject
     questions = db.query(Question).filter(Question.subject_id == subject_id).all()
     if not questions:
-        raise HTTPException(status_code=404, detail=f"No questions found for subject: {subject_id}")
+        subjects = db.query(Subject).all()
+        ids = [s.id for s in subjects]
+        raise HTTPException(status_code=404, detail=f"Subject '{subject_id}' not found. Available subjects: {ids}")
 
     # Randomly select a sample from questions
     sample_size = min(len(questions), limit)
@@ -92,3 +94,74 @@ def get_assessment_questions(subject_id: str, limit: int = 10, db: Session = Dep
             )
         )
     return result
+
+
+@router.post("/students/{user_id}/assessment")
+def submit_assessment(user_id: int, body: AssessmentSubmit, db: Session = Depends(get_db)):
+    # 1. 验证用户存在
+    from models.tables import User
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # 2. 判卷逻辑
+    correct_count = 0
+    total = len(body.answers)
+    mastery_update = {}
+    
+    for item in body.answers:
+        question = db.query(Question).filter(Question.id == item.question_id).first()
+        if not question:
+            continue
+            
+        is_correct = (question.answer == item.answer)
+        if is_correct:
+            correct_count += 1
+            
+        # 知识点更新逻辑
+        kp = question.knowledge_point_id
+        if kp not in mastery_update:
+            mastery_update[kp] = {"correct": 0, "total": 0}
+        mastery_update[kp]["total"] += 1
+        if is_correct:
+            mastery_update[kp]["correct"] += 1
+            
+    score = int((correct_count / total * 100) if total > 0 else 0)
+    
+    # 3. 状态更新逻辑 (复用 state_manager)
+    from services import state_manager
+    state_row = state_manager.get_or_create_state(db, user_id)
+    state = state_manager.read_state(state_row)
+    
+    # 更新 mastery
+    if "mastery" not in state:
+        state["mastery"] = {}
+    for kp, counts in mastery_update.items():
+        current_mastery = state["mastery"].get(kp, 0.5)
+        # 简单的正确率计算更新
+        new_rate = counts["correct"] / counts["total"]
+        state["mastery"][kp] = round(0.7 * current_mastery + 0.3 * new_rate, 2)
+        
+    # 更新 scores
+    if "scores" not in state["profile"]:
+        state["profile"]["scores"] = {}
+    state["profile"]["scores"][body.subject_id] = float(score)
+    
+    # 更新漏斗
+    state["funnel"]["assessment_complete"] = True
+    
+    state_manager.write_state(db, state_row, state)
+    
+    return {
+        "correct": correct_count,
+        "total": total,
+        "score": score,
+        "mastery": state["mastery"]
+    }
+
+
+@router.get("/assessments/subjects")
+def get_subjects(db: Session = Depends(get_db)):
+    subjects = db.query(Subject).all()
+    return [{"id": s.id, "name": s.name} for s in subjects]
+

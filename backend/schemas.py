@@ -8,6 +8,16 @@ class CreateUserBody(BaseModel):
 class ScoresBody(BaseModel):
     math: float | None = None
     science: float | None = None
+
+class AnswerItem(BaseModel):
+    question_id: str
+    answer: str
+
+
+class AssessmentSubmit(BaseModel):
+    subject_id: str
+    answers: list[AnswerItem]
+
     history: float | None = None
     geography: float | None = None
     business: float | None = None
