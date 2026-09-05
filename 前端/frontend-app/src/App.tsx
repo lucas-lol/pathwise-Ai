@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import Dashboard from './pages/Dashboard'
+import Assessment from './pages/Assessment'
 import ProfileForm from './components/ProfileForm' 
+import NavBar from './components/NavBar'
 
 function App() {
   const [studentId, setStudentId] = useState(localStorage.getItem('pw_student_id'))
+  const [currentView, setCurrentView] = useState('dashboard')
 
   const handleProfileSave = (id: string) => {
     localStorage.setItem('pw_student_id', id)
@@ -11,9 +14,9 @@ function App() {
   }
 
   const handleProfileSubmit = async (data: any) => {
-    let studentId = localStorage.getItem('pw_student_id');
+    let activeId = localStorage.getItem('pw_student_id');
 
-    if (!studentId) {
+    if (!activeId) {
       try {
         const userRes = await fetch('http://localhost:8000/api/users', {
           method: 'POST',
@@ -22,7 +25,7 @@ function App() {
         });
         if (!userRes.ok) throw new Error('创建用户失败');
         const user = await userRes.json();
-        studentId = user.id;
+        activeId = user.id;
       } catch (err) {
         console.error(err);
         alert('网络异常：无法连接到后端');
@@ -31,14 +34,14 @@ function App() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/api/students/${studentId}/profile`, {
+      const response = await fetch(`http://localhost:8000/api/students/${activeId}/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
       
       if (response.ok) {
-        handleProfileSave(studentId!);
+        handleProfileSave(activeId!);
       } else {
         const result = await response.json();
         alert(`❌ 保存失败：${result.detail || JSON.stringify(result)}`);
@@ -49,11 +52,23 @@ function App() {
     }
   };
 
+  const renderPage = () => {
+    switch (currentView) {
+      case 'assessment':
+        return <Assessment />;
+      case 'dashboard':
+      default:
+        return <Dashboard />;
+    }
+  };
 
   return (
     <main className="min-h-screen bg-base-200 p-4">
       {studentId ? (
-        <Dashboard />
+        <>
+          <NavBar onViewChange={setCurrentView} />
+          {renderPage()}
+        </>
       ) : (
         <ProfileForm onSubmit={handleProfileSubmit} />
       )}
@@ -62,4 +77,3 @@ function App() {
 }
 
 export default App
-

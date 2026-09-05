@@ -1,6 +1,6 @@
 import React from 'react';
 
-const NavBar = () => {
+const NavBar = ({ onViewChange }: { onViewChange: (view: string) => void }) => {
   const menuItems = [
     { name: '仪表盘', id: 'dashboard' },
     { name: '能力地图', id: 'map' },
@@ -15,7 +15,7 @@ const NavBar = () => {
       <ul className="menu menu-horizontal px-1 w-full flex justify-between">
         {menuItems.map((item) => (
           <li key={item.id}>
-            <a>{item.name}</a>
+            <a onClick={() => onViewChange(item.id)}>{item.name}</a>
           </li>
         ))}
       </ul>
