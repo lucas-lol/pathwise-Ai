@@ -61,6 +61,7 @@ class KnowledgeNode(Base):
     name: Mapped[str] = mapped_column(String(120))
     parent_id: Mapped[str | None] = mapped_column(String(80), nullable=True)
     difficulty: Mapped[int] = mapped_column(Integer, default=1)
+    skill_tags: Mapped[str] = mapped_column(Text, default="[]")
 
 
 class Question(Base):

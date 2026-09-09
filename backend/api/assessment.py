@@ -6,10 +6,19 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from models.base import get_db
-from models.tables import Question, Subject
+from models.tables import Question, Subject, KnowledgeNode
 from schemas import QuestionResponse, AssessmentSubmit
 
 router = APIRouter(prefix="/api", tags=["assessment"])
+
+CANONICAL_SKILLS = {
+    "analytical_reasoning",
+    "problem_solving",
+    "quantitative_thinking",
+    "scientific_thinking",
+    "business_thinking",
+    "learning_agility"
+}
 
 
 def seed_questions_and_subjects(db: Session):
@@ -30,6 +39,34 @@ def seed_questions_and_subjects(db: Session):
                         track=item.get("track", "")
                     )
                     db.add(sub)
+        db.commit()
+
+    # 1.5. Seed Knowledge Nodes
+    kn_file = data_dir / "knowledge_nodes.json"
+    if kn_file.exists():
+        with open(kn_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            kn_list = data.get("knowledge_nodes", []) if isinstance(data, dict) else data
+            for item in kn_list:
+                # 校验 skill_tags 是否全部属于六个 Canonical Skills
+                tags = item.get("skill_tags", [])
+                for tag in tags:
+                    if tag not in CANONICAL_SKILLS:
+                        raise ValueError(f"Invalid canonical skill tag: {tag}")
+                
+                kn = db.get(KnowledgeNode, item["id"])
+                if not kn:
+                    kn = KnowledgeNode(
+                        id=item["id"],
+                        subject_id=item.get("subject_id"),
+                        name=item.get("name", ""),
+                        parent_id=item.get("parent_id"),
+                        difficulty=item.get("difficulty", 1),
+                        skill_tags=json.dumps(tags, ensure_ascii=False)
+                    )
+                    db.add(kn)
+                else:
+                    kn.skill_tags = json.dumps(tags, ensure_ascii=False)
         db.commit()
 
     # 2. Seed Questions
@@ -133,16 +170,24 @@ def submit_assessment(user_id: int, body: AssessmentSubmit, db: Session = Depend
     state_row = state_manager.get_or_create_state(db, user_id)
     state = state_manager.read_state(state_row)
     
-    # 更新 mastery
-    if "mastery" not in state:
-        state["mastery"] = {}
+    # 更新知识状态 (原 mastery -> 新 student_vector.knowledge)
+    if "student_vector" not in state:
+        state["student_vector"] = {"knowledge": {}}
+    if "knowledge" not in state["student_vector"]:
+        state["student_vector"]["knowledge"] = {}
+        
     for kp, counts in mastery_update.items():
-        current_mastery = state["mastery"].get(kp, 0.5)
+        current_mastery = state["student_vector"]["knowledge"].get(kp, 0.5)
         # 简单的正确率计算更新
         new_rate = counts["correct"] / counts["total"]
-        state["mastery"][kp] = round(0.7 * current_mastery + 0.3 * new_rate, 2)
+        state["student_vector"]["knowledge"][kp] = round(0.7 * current_mastery + 0.3 * new_rate, 2)
+        
+    # 同步更新旧 mastery 以保持向下兼容 (可选，但为了 P0-01 稳定性)
+    state["mastery"] = state["student_vector"]["knowledge"]
         
     # 更新 scores
+    if "profile" not in state:
+        state["profile"] = {}
     if "scores" not in state["profile"]:
         state["profile"]["scores"] = {}
     state["profile"]["scores"][body.subject_id] = float(score)
@@ -156,7 +201,7 @@ def submit_assessment(user_id: int, body: AssessmentSubmit, db: Session = Depend
         "correct": correct_count,
         "total": total,
         "score": score,
-        "mastery": state["mastery"]
+        "mastery": state["student_vector"]["knowledge"]
     }
 
 

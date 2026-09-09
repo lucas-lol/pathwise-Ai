@@ -1,0 +1,52 @@
+{
+  "knowledge_nodes": [
+    {
+      "id": "基础运算",
+      "subject_id": "mathematics",
+      "name": "基础运算",
+      "parent_id": null,
+      "difficulty": 1,
+      "skill_tags": ["quantitative_thinking", "analytical_reasoning"]
+    },
+    {
+      "id": "代数",
+      "subject_id": "mathematics",
+      "name": "代数",
+      "parent_id": null,
+      "difficulty": 2,
+      "skill_tags": ["analytical_reasoning", "quantitative_thinking"]
+    },
+    {
+      "id": "方程",
+      "subject_id": "mathematics",
+      "name": "方程",
+      "parent_id": null,
+      "difficulty": 2,
+      "skill_tags": ["analytical_reasoning", "problem_solving"]
+    },
+    {
+      "id": "函数",
+      "subject_id": "mathematics",
+      "name": "函数",
+      "parent_id": null,
+      "difficulty": 3,
+      "skill_tags": ["analytical_reasoning", "quantitative_thinking"]
+    },
+    {
+      "id": "几何",
+      "subject_id": "mathematics",
+      "name": "几何",
+      "parent_id": null,
+      "difficulty": 2,
+      "skill_tags": ["analytical_reasoning", "quantitative_thinking"]
+    },
+    {
+      "id": "综合应用",
+      "subject_id": "mathematics",
+      "name": "综合应用",
+      "parent_id": null,
+      "difficulty": 3,
+      "skill_tags": ["problem_solving", "analytical_reasoning", "learning_agility"]
+    }
+  ]
+}
