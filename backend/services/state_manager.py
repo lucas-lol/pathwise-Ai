@@ -10,6 +10,20 @@ def default_state(user_id: int) -> dict:
     now = datetime.now(timezone.utc).isoformat()
     return {
         "student_id": str(user_id),
+        "student_vector": {
+            "skills": {
+                "analytical_reasoning": 0.5,
+                "problem_solving": 0.5,
+                "quantitative_thinking": 0.5,
+                "scientific_thinking": 0.5,
+                "business_thinking": 0.5,
+                "learning_agility": 0.5,
+            },
+            "knowledge": {},
+            "interests": {},
+            "goals": {},
+            "behavior": {},
+        },
         "profile": {
             "grade": None,
             "interests": [],

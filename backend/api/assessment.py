@@ -2,6 +2,7 @@ import json
 import random
 from pathlib import Path
 
+from decimal import Decimal, ROUND_HALF_UP
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -19,6 +20,40 @@ CANONICAL_SKILLS = {
     "business_thinking",
     "learning_agility"
 }
+
+
+def calculate_alpha(difficulty: str | int) -> float:
+    data_dir = Path(__file__).resolve().parents[1] / "data"
+    with open(data_dir / "engine_params.json", "r", encoding="utf-8") as f:
+        params = json.load(f)
+    update_cfg = params.get("mastery", {}).get("update", {})
+    base_rate = update_cfg.get("base_rate", 0.25)
+    diff_factors = update_cfg.get("difficulty_factor", {"easy": 0.7, "medium": 1.0, "hard": 1.3})
+    
+    diff_key = "medium"
+    if isinstance(difficulty, str):
+        diff_key = difficulty.lower()
+    elif isinstance(difficulty, (int, float)):
+        if difficulty <= 1:
+            diff_key = "easy"
+        elif difficulty == 2:
+            diff_key = "medium"
+        else:
+            diff_key = "hard"
+            
+    factor = diff_factors.get(diff_key, 1.0)
+    alpha = base_rate * factor
+    if not (0 <= alpha <= 1):
+        raise ValueError(f"Invalid alpha value generated: {alpha}")
+    return alpha
+
+
+def update_mastery(m_old: float, e: float, alpha: float) -> float:
+    m_new = (1 - alpha) * m_old + alpha * e
+    m_new = max(0.0, min(1.0, m_new))
+    d = Decimal(str(m_new)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    return float(d)
+
 
 
 def seed_questions_and_subjects(db: Session):
@@ -178,9 +213,15 @@ def submit_assessment(user_id: int, body: AssessmentSubmit, db: Session = Depend
         
     for kp, counts in mastery_update.items():
         current_mastery = state["student_vector"]["knowledge"].get(kp, 0.5)
-        # 简单的正确率计算更新
-        new_rate = counts["correct"] / counts["total"]
-        state["student_vector"]["knowledge"][kp] = round(0.7 * current_mastery + 0.3 * new_rate, 2)
+        e = counts["correct"] / counts["total"] if counts["total"] > 0 else 0.0
+        
+        # 获取该知识点对应的题目难度或默认 medium
+        # 寻找该 kp 任意一道题目的 difficulty
+        sample_q = db.query(Question).filter(Question.knowledge_point_id == kp).first()
+        diff = sample_q.difficulty if sample_q else "medium"
+        
+        alpha = calculate_alpha(diff)
+        state["student_vector"]["knowledge"][kp] = update_mastery(current_mastery, e, alpha)
         
     # 同步更新旧 mastery 以保持向下兼容 (可选，但为了 P0-01 稳定性)
     state["mastery"] = state["student_vector"]["knowledge"]
