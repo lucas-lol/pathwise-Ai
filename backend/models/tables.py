@@ -1,8 +1,9 @@
 from datetime import datetime, timezone
-
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
-
+from sqlalchemy import Column, String, Integer, JSON, ForeignKey
+from sqlalchemy.orm import relationship
+from .base import Base
 from models.base import Base
 
 
@@ -79,16 +80,17 @@ class Question(Base):
     difficulty: Mapped[str] = mapped_column(String(20), default="medium")
     explanation: Mapped[str] = mapped_column(Text, default="")
 
+from datetime import datetime
 
 class AnswerRecord(Base):
     __tablename__ = "answer_records"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column(Integer)
-    question_id: Mapped[str] = mapped_column(String(80))
-    selected_answer: Mapped[str] = mapped_column(String(8))
-    correct: Mapped[bool] = mapped_column(Boolean, default=False)
-    answered_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    student_id = Column(String, index=True) # 关联学生
+    question_id = Column(String, ForeignKey("questions.id"), index=True) # 关联题目
+    student_answer = Column(String) # 学生选的答案
+    is_correct = Column(Boolean) # 是否正确
+    submitted_at = Column(DateTime, default=datetime.utcnow) # 答题时间
 
 
 class LearningEvent(Base):
@@ -129,3 +131,28 @@ class AiCache(Base):
     cache_key: Mapped[str] = mapped_column(String(200), unique=True)
     payload: Mapped[str] = mapped_column(Text, default="{}")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+
+class KnowledgePoint(Base):
+    __tablename__ = "knowledge_points"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, index=True) # 例如: "math-j1-algebra-linear-eq"
+    subject: Mapped[str] = mapped_column(String, default="math", index=True)
+    grade: Mapped[str] = mapped_column(String, index=True) # 例如: "初一", "高一"
+    domain: Mapped[str] = mapped_column(String, index=True) # 例如: "代数"
+    topic: Mapped[str] = mapped_column(String) # 例如: "线性方程"
+    name: Mapped[str] = mapped_column(String) # 具体知识点名称
+    
+    # 树状结构与依赖
+    parent_id = Column(String, ForeignKey("knowledge_points.id"), nullable=True)
+    prerequisite_id = Column(String, ForeignKey("knowledge_points.id"), nullable=True)
+    
+    # 属性
+    difficulty = Column(Integer, default=1) # 1-5
+    importance = Column(Integer, default=1) # 1-5
+    tags = Column(JSON, nullable=True) # 例如: ["核心", "易错"]
+
+    # 关系（可选，方便后续查询）
+    parent = relationship("KnowledgePoint", remote_side=[id], foreign_keys=[parent_id])
+    prerequisite = relationship("KnowledgePoint", remote_side=[id], foreign_keys=[prerequisite_id])

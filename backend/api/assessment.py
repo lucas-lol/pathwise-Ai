@@ -1,27 +1,169 @@
-import json
-import random
-from pathlib import Path
-
-from decimal import Decimal, ROUND_HALF_UP
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-
-from models.base import get_db
-from models.tables import Question, Subject, KnowledgeNode
-from schemas import QuestionResponse, AssessmentSubmit
+from models.base import SessionLocal
+from models.tables import Question, AnswerRecord, User # <--- 新增 AnswerRecord
+from schemas import AssessmentSubmit
+from typing import List
+import random
+from pathlib import Path
+import json
+from decimal import Decimal, ROUND_HALF_UP
+from datetime import datetime
 
 router = APIRouter(prefix="/api", tags=["assessment"])
 
-CANONICAL_SKILLS = {
-    "analytical_reasoning",
-    "problem_solving",
-    "quantitative_thinking",
-    "scientific_thinking",
-    "business_thinking",
-    "learning_agility"
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# ==========================================
+# 修复 P0-02：年级累计诊断范围映射
+# ==========================================
+GRADE_SCOPE = {
+    "初一": ["初一"],
+    "初二": ["初一", "初二"],
+    "初三": ["初一", "初二", "初三"],
+    "高一": ["初一", "初二", "初三", "高一"],
+    "高二": ["初一", "初二", "初三", "高一", "高二"],
+    "高三": ["初一", "初二", "初三", "高一", "高二", "高三"]
 }
 
+# ==========================================
+# 修复 P0-04：防答案泄露的抽题接口
+# ==========================================
+@router.get("/assessments/questions")
+def get_assessment_questions(grade: str, subject: str = "math", limit: int = 10, db: Session = Depends(get_db)):
+    # 1. 获取累计范围 (P0-02)
+    scope = GRADE_SCOPE.get(grade, [grade])
+    
+    # 2. 在累计范围内抽题
+    questions = db.query(Question).filter(
+        Question.subject == subject,
+        Question.grade.in_(scope)
+    ).all()
+    
+    if not questions:
+        raise HTTPException(status_code=404, detail=f"年级 '{grade}' 暂无题目")
 
+    # 3. 随机抽样
+    sample_size = min(len(questions), limit)
+    selected = random.sample(questions, sample_size)
+
+    # 4. 【关键修复 P0-04】：绝对不返回 answer 和 explanation
+    result = []
+    for q in selected:
+        try:
+            diff_val = int(q.difficulty)
+        except (ValueError, TypeError):
+            diff_val = 1
+            
+        result.append({
+            "id": q.id,
+            "subject": q.subject,
+            "grade": q.grade,
+            "knowledge_point_id": q.knowledge_point_id,
+            "content": q.question, # 假设原字段叫 question，如果叫 content 请自行调整
+            "options": [q.option_a, q.option_b, q.option_c, q.option_d], # 整合为数组方便前端
+            "difficulty": diff_val
+            # ⚠️ 注意：这里故意没有 answer 和 explanation！
+        })
+    return result
+
+# ==========================================
+# 保留并增强 P0-03：判题、记录与 Mastery 更新
+# ==========================================
+@router.post("/students/{user_id}/assessment")
+def submit_assessment(user_id: int, body: AssessmentSubmit, db: Session = Depends(get_db)):
+    # 1. 验证用户存在
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # 2. 判卷逻辑
+    correct_count = 0
+    total = len(body.answers)
+    mastery_update = {}
+    
+    for item in body.answers:
+        question = db.query(Question).filter(Question.id == item.question_id).first()
+        if not question:
+            continue
+            
+        is_correct = (question.answer == item.answer)
+        if is_correct:
+            correct_count += 1
+            
+        # 【新增 P0-03 链路】：写入 AnswerRecord，建立追溯链
+        record = AnswerRecord(
+            student_id=str(user_id),
+            question_id=item.question_id,
+            student_answer=item.answer,
+            is_correct=is_correct,
+            submitted_at=datetime.utcnow()
+        )
+        db.add(record)
+            
+        # 知识点更新逻辑
+        kp = question.knowledge_point_id
+        if kp not in mastery_update:
+            mastery_update[kp] = {"correct": 0, "total": 0}
+        mastery_update[kp]["total"] += 1
+        if is_correct:
+            mastery_update[kp]["correct"] += 1
+            
+    score = int((correct_count / total * 100) if total > 0 else 0)
+    
+    # 3. 状态更新逻辑 (复用 state_manager)
+    from services import state_manager
+    state_row = state_manager.get_or_create_state(db, user_id)
+    state = state_manager.read_state(state_row)
+    
+    # 更新知识状态
+    if "student_vector" not in state:
+        state["student_vector"] = {"knowledge": {}}
+    if "knowledge" not in state["student_vector"]:
+        state["student_vector"]["knowledge"] = {}
+        
+    for kp, counts in mastery_update.items():
+        current_mastery = state["student_vector"]["knowledge"].get(kp, 0.5)
+        e = counts["correct"] / counts["total"] if counts["total"] > 0 else 0.0
+        
+        # 获取该知识点对应的题目难度或默认 medium
+        sample_q = db.query(Question).filter(Question.knowledge_point_id == kp).first()
+        diff = sample_q.difficulty if sample_q else "medium"
+        
+        alpha = calculate_alpha(diff)
+        state["student_vector"]["knowledge"][kp] = update_mastery(current_mastery, e, alpha)
+        
+    # 同步更新旧 mastery 以保持向下兼容
+    state["mastery"] = state["student_vector"]["knowledge"]
+        
+    # 更新 scores
+    if "profile" not in state:
+        state["profile"] = {}
+    if "scores" not in state["profile"]:
+        state["profile"]["scores"] = {}
+    state["profile"]["scores"][body.subject_id] = float(score)
+    
+    # 更新漏斗
+    state["funnel"]["assessment_complete"] = True
+    
+    state_manager.write_state(db, state_row, state)
+    db.commit() # <--- 确保 AnswerRecord 也被提交
+    
+    return {
+        "correct": correct_count,
+        "total": total,
+        "score": score,
+        "mastery": state["student_vector"]["knowledge"]
+    }
+
+# ==========================================
+# 保留原有的 EMA 计算逻辑
+# ==========================================
 def calculate_alpha(difficulty: str | int) -> float:
     data_dir = Path(__file__).resolve().parents[1] / "data"
     with open(data_dir / "engine_params.json", "r", encoding="utf-8") as f:
@@ -47,207 +189,8 @@ def calculate_alpha(difficulty: str | int) -> float:
         raise ValueError(f"Invalid alpha value generated: {alpha}")
     return alpha
 
-
 def update_mastery(m_old: float, e: float, alpha: float) -> float:
     m_new = (1 - alpha) * m_old + alpha * e
     m_new = max(0.0, min(1.0, m_new))
     d = Decimal(str(m_new)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     return float(d)
-
-
-
-def seed_questions_and_subjects(db: Session):
-    data_dir = Path(__file__).resolve().parents[1] / "data"
-
-    # 1. Seed Subjects
-    subjects_file = data_dir / "subjects.json"
-    if subjects_file.exists():
-        with open(subjects_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            subjects = data.get("subjects", []) if isinstance(data, dict) else data
-            for item in subjects:
-                sub = db.get(Subject, item["id"])
-                if not sub:
-                    sub = Subject(
-                        id=item["id"],
-                        name=item["name"],
-                        track=item.get("track", "")
-                    )
-                    db.add(sub)
-        db.commit()
-
-    # 1.5. Seed Knowledge Nodes
-    kn_file = data_dir / "knowledge_nodes.json"
-    if kn_file.exists():
-        with open(kn_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            kn_list = data.get("knowledge_nodes", []) if isinstance(data, dict) else data
-            for item in kn_list:
-                # 校验 skill_tags 是否全部属于六个 Canonical Skills
-                tags = item.get("skill_tags", [])
-                for tag in tags:
-                    if tag not in CANONICAL_SKILLS:
-                        raise ValueError(f"Invalid canonical skill tag: {tag}")
-                
-                kn = db.get(KnowledgeNode, item["id"])
-                if not kn:
-                    kn = KnowledgeNode(
-                        id=item["id"],
-                        subject_id=item.get("subject_id"),
-                        name=item.get("name", ""),
-                        parent_id=item.get("parent_id"),
-                        difficulty=item.get("difficulty", 1),
-                        skill_tags=json.dumps(tags, ensure_ascii=False)
-                    )
-                    db.add(kn)
-                else:
-                    kn.skill_tags = json.dumps(tags, ensure_ascii=False)
-        db.commit()
-
-    # 2. Seed Questions
-    questions_file = data_dir / "questions_math.json"
-    if questions_file.exists():
-        with open(questions_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            q_list = data.get("questions", []) if isinstance(data, dict) else data
-            for item in q_list:
-                q = db.get(Question, item["id"])
-                if not q:
-                    q = Question(
-                        id=item["id"],
-                        subject_id=item["subject_id"],
-                        knowledge_point_id=item["knowledge_point_id"],
-                        question=item["question"],
-                        option_a=item["option_a"],
-                        option_b=item["option_b"],
-                        option_c=item["option_c"],
-                        option_d=item["option_d"],
-                        answer=item["answer"],
-                        difficulty=str(item["difficulty"]),
-                        explanation=item["explanation"]
-                    )
-                    db.add(q)
-        db.commit()
-
-
-@router.get("/assessments/{subject_id}/questions", response_model=list[QuestionResponse])
-def get_assessment_questions(subject_id: str, limit: int = 10, db: Session = Depends(get_db)):
-    # Query all questions for this subject
-    questions = db.query(Question).filter(Question.subject_id == subject_id).all()
-    if not questions:
-        subjects = db.query(Subject).all()
-        ids = [s.id for s in subjects]
-        raise HTTPException(status_code=404, detail=f"Subject '{subject_id}' not found. Available subjects: {ids}")
-
-    # Randomly select a sample from questions
-    sample_size = min(len(questions), limit)
-    selected = random.sample(questions, sample_size)
-
-    result = []
-    for q in selected:
-        try:
-            diff_val = int(q.difficulty)
-        except ValueError:
-            diff_val = q.difficulty
-
-        result.append(
-            QuestionResponse(
-                id=q.id,
-                subject_id=q.subject_id,
-                knowledge_point_id=q.knowledge_point_id,
-                question=q.question,
-                option_a=q.option_a,
-                option_b=q.option_b,
-                option_c=q.option_c,
-                option_d=q.option_d,
-                answer=q.answer,
-                difficulty=diff_val,
-                explanation=q.explanation
-            )
-        )
-    return result
-
-
-@router.post("/students/{user_id}/assessment")
-def submit_assessment(user_id: int, body: AssessmentSubmit, db: Session = Depends(get_db)):
-    # 1. 验证用户存在
-    from models.tables import User
-    user = db.get(User, user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    # 2. 判卷逻辑
-    correct_count = 0
-    total = len(body.answers)
-    mastery_update = {}
-    
-    for item in body.answers:
-        question = db.query(Question).filter(Question.id == item.question_id).first()
-        if not question:
-            continue
-            
-        is_correct = (question.answer == item.answer)
-        if is_correct:
-            correct_count += 1
-            
-        # 知识点更新逻辑
-        kp = question.knowledge_point_id
-        if kp not in mastery_update:
-            mastery_update[kp] = {"correct": 0, "total": 0}
-        mastery_update[kp]["total"] += 1
-        if is_correct:
-            mastery_update[kp]["correct"] += 1
-            
-    score = int((correct_count / total * 100) if total > 0 else 0)
-    
-    # 3. 状态更新逻辑 (复用 state_manager)
-    from services import state_manager
-    state_row = state_manager.get_or_create_state(db, user_id)
-    state = state_manager.read_state(state_row)
-    
-    # 更新知识状态 (原 mastery -> 新 student_vector.knowledge)
-    if "student_vector" not in state:
-        state["student_vector"] = {"knowledge": {}}
-    if "knowledge" not in state["student_vector"]:
-        state["student_vector"]["knowledge"] = {}
-        
-    for kp, counts in mastery_update.items():
-        current_mastery = state["student_vector"]["knowledge"].get(kp, 0.5)
-        e = counts["correct"] / counts["total"] if counts["total"] > 0 else 0.0
-        
-        # 获取该知识点对应的题目难度或默认 medium
-        # 寻找该 kp 任意一道题目的 difficulty
-        sample_q = db.query(Question).filter(Question.knowledge_point_id == kp).first()
-        diff = sample_q.difficulty if sample_q else "medium"
-        
-        alpha = calculate_alpha(diff)
-        state["student_vector"]["knowledge"][kp] = update_mastery(current_mastery, e, alpha)
-        
-    # 同步更新旧 mastery 以保持向下兼容 (可选，但为了 P0-01 稳定性)
-    state["mastery"] = state["student_vector"]["knowledge"]
-        
-    # 更新 scores
-    if "profile" not in state:
-        state["profile"] = {}
-    if "scores" not in state["profile"]:
-        state["profile"]["scores"] = {}
-    state["profile"]["scores"][body.subject_id] = float(score)
-    
-    # 更新漏斗
-    state["funnel"]["assessment_complete"] = True
-    
-    state_manager.write_state(db, state_row, state)
-    
-    return {
-        "correct": correct_count,
-        "total": total,
-        "score": score,
-        "mastery": state["student_vector"]["knowledge"]
-    }
-
-
-@router.get("/assessments/subjects")
-def get_subjects(db: Session = Depends(get_db)):
-    subjects = db.query(Subject).all()
-    return [{"id": s.id, "name": s.name} for s in subjects]
-

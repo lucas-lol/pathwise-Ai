@@ -5,8 +5,12 @@ from api.students import router as students_router
 from api.assessment import router as assessment_router, seed_questions_and_subjects
 from api.careers import router as careers_router
 from models.base import init_db, SessionLocal
+from api import knowledge
+
+
 
 app = FastAPI(title="PathWise AI")
+app.include_router(knowledge.router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],

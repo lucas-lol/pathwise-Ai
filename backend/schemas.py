@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
-
+from pydantic import BaseModel
+from typing import Optional, List, Dict, Any
 
 class CreateUserBody(BaseModel):
     name: str = "学生"
@@ -50,3 +51,23 @@ class QuestionResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class KnowledgePointBase(BaseModel):
+    subject: str = "math"
+    grade: str
+    domain: str
+    topic: str
+    name: str
+    parent_id: Optional[str] = None
+    prerequisite_id: Optional[str] = None
+    difficulty: int = 1
+    importance: int = 1
+    tags: Optional[List[str]] = None
+
+class KnowledgePointCreate(KnowledgePointBase):
+    id: str # 创建时必须提供唯一 ID
+
+class KnowledgePointResponse(KnowledgePointBase):
+    id: str
+
+    class Config:
+        from_attributes = True

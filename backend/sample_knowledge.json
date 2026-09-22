@@ -1,0 +1,41 @@
+[
+  {
+    "id": "math-j1",
+    "subject": "math",
+    "grade": "初一",
+    "domain": "综合",
+    "topic": "初一数学",
+    "name": "初一数学基础",
+    "parent_id": null,
+    "prerequisite_id": null,
+    "difficulty": 1,
+    "importance": 5,
+    "tags": ["年级基础"]
+  },
+  {
+    "id": "math-j1-algebra",
+    "subject": "math",
+    "grade": "初一",
+    "domain": "代数",
+    "topic": "代数基础",
+    "name": "代数初步",
+    "parent_id": "math-j1",
+    "prerequisite_id": null,
+    "difficulty": 1,
+    "importance": 4,
+    "tags": ["核心"]
+  },
+  {
+    "id": "math-j1-linear-eq",
+    "subject": "math",
+    "grade": "初一",
+    "domain": "代数",
+    "topic": "线性方程",
+    "name": "一元一次方程",
+    "parent_id": "math-j1-algebra",
+    "prerequisite_id": "math-j1-DOES-NOT-EXIST", 
+    "difficulty": 2,
+    "importance": 5,
+    "tags": ["重点", "易错"]
+  }
+]
