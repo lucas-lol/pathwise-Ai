@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from services.funnel import advance_funnel
 from sqlalchemy.orm import Session
 from models.base import SessionLocal
 from models.tables import Question, AnswerRecord, User # <--- 新增 AnswerRecord
@@ -148,8 +149,8 @@ def submit_assessment(user_id: int, body: AssessmentSubmit, db: Session = Depend
         state["profile"]["scores"] = {}
     state["profile"]["scores"][body.subject_id] = float(score)
     
-    # 更新漏斗
-    state["funnel"]["assessment_complete"] = True
+   # P0-08: 通过统一状态机推进
+    state = advance_funnel(state, "assessment_complete")
     
     state_manager.write_state(db, state_row, state)
     db.commit() # <--- 确保 AnswerRecord 也被提交
@@ -188,7 +189,14 @@ def calculate_alpha(difficulty: str | int) -> float:
     if not (0 <= alpha <= 1):
         raise ValueError(f"Invalid alpha value generated: {alpha}")
     return alpha
-
+# ==========================================
+# P0-05: 统一掌握度算法 (已验证并锁死)
+# 最终选定：EMA (Exponential Moving Average)
+# 公式: m_new = (1 - alpha) * m_old + alpha * e
+# alpha 由题目难度动态计算 (见 calculate_alpha)
+# 验证结论：困难题提升幅度 > 简单题；做错会下降；边界值 1.0 安全。
+# 警告：此算法已通过 test_mastery.py 验证，请勿随意替换为贝叶斯或其他公式！
+# ==========================================
 def update_mastery(m_old: float, e: float, alpha: float) -> float:
     m_new = (1 - alpha) * m_old + alpha * e
     m_new = max(0.0, min(1.0, m_new))
