@@ -49,9 +49,10 @@ export default function Assessment() {
       return;
     }
 
-    setSubmitting(true);
+       setSubmitting(true); // 1. 开始 loading，防止重复点击
+    
     try {
-      // 后端合同：POST /api/students/{user_id}/assessment
+      // 2. 发起网络请求
       const res = await fetch(`http://localhost:8000/api/students/${studentId}/assessment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -64,18 +65,24 @@ export default function Assessment() {
         })
       });
 
+      // 👇 【植入点】：请求完成后，根据结果进行处理 👇
+
       if (res.ok) {
-        const data = await res.json();
-        setResult(data);
+        // 成功 (200 OK)：直接跳转回 Dashboard 页面
+        window.location.href = '/dashboard';
       } else {
-        alert('提交失败');
+        // 失败 (例如 400 错误)：读取后端返回的 JSON，提取 detail 字段显示给用户
+        const errorData = await res.json();
+        setError(errorData.detail || '提交失败，请检查是否已完成前置步骤。');
       }
+
     } catch (e) {
-      alert('网络异常');
+      // 3. 捕获网络彻底断开等意外错误
+      setError('网络请求失败，请检查连接。');
     } finally {
-      setSubmitting(false);
+      // 4. 无论成功还是失败，最后都要关闭 loading 状态
+      setSubmitting(false); 
     }
-  };
 
   if (loading) return <div className="p-4 text-center text-gray-500">加载题目中...</div>;
   if (questions.length === 0) return <div className="alert alert-warning m-4">暂无数学题目</div>;
