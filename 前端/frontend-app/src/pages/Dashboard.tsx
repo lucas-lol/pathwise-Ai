@@ -74,7 +74,7 @@ export default function Dashboard() {
         <div className="flex justify-between mb-1">
           <span className="text-sm font-medium">{key}</span>
           {/* 思考点 1：这里需要显示百分比，比如 "85%" */}
-          <span className="text-sm font-medium">???</span>
+          <span className="text-sm font-medium">{(value * 100).toFixed(0)}%</span>
         </div>
         {/* DaisyUI 进度条组件 */}
         <progress 
