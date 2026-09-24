@@ -80,7 +80,7 @@ export default function Dashboard() {
         <progress 
           className="progress progress-primary w-full" 
           /* 思考点 2：progress 的 value 属性需要 0 到 100 之间的数字，比如 85 */
-          value={???} 
+          value={value*100} 
           max="100"
         ></progress>
       </div>
