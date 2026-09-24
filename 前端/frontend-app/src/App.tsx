@@ -1,79 +1,62 @@
-import { useState } from 'react'
-import Dashboard from './pages/Dashboard'
-import Assessment from './pages/Assessment'
-import ProfileForm from './components/ProfileForm' 
-import NavBar from './components/NavBar'
+import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import ProfileForm from './components/ProfileForm';
+import Dashboard from './pages/Dashboard';
+import Assessment from './pages/Assessment';
 
 function App() {
-  const [studentId, setStudentId] = useState(localStorage.getItem('pw_student_id'))
-  const [currentView, setCurrentView] = useState('dashboard')
-
-  const handleProfileSave = (id: string) => {
-    localStorage.setItem('pw_student_id', id)
-    setStudentId(id)
-  }
-
+  // 处理画像提交的核心逻辑
   const handleProfileSubmit = async (data: any) => {
-    let activeId = localStorage.getItem('pw_student_id');
-
-    if (!activeId) {
-      try {
-        const userRes = await fetch('http://localhost:8000/api/users', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: '新同学' }),
-        });
-        if (!userRes.ok) throw new Error('创建用户失败');
-        const user = await userRes.json();
-        activeId = user.id;
-      } catch (err) {
-        console.error(err);
-        alert('网络异常：无法连接到后端');
-        return;
-      }
+    // 1. 获取或生成学生 ID
+    let studentId = localStorage.getItem('pw_student_id');
+    if (!studentId) {
+      studentId = 'stu_' + Math.random().toString(36).substring(2, 10);
+      localStorage.setItem('pw_student_id', studentId);
     }
 
     try {
-      const response = await fetch(`http://localhost:8000/api/students/${activeId}/profile`, {
-        method: 'PUT',
+      // 2. 尝试发送给后端 (请确保后端有 /api/students/{id}/profile 接口)
+      // 如果后端接口是 POST /api/students/，请相应修改 URL 和 method
+      const res = await fetch(`http://localhost:8000/api/students/${studentId}/profile`, {
+        method: 'PUT', // 或 'POST'，取决于你的后端设计
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(data)
       });
-      
-      if (response.ok) {
-        handleProfileSave(activeId!);
-      } else {
-        const result = await response.json();
-        alert(`❌ 保存失败：${result.detail || JSON.stringify(result)}`);
-      }
-    } catch (err) {
-      console.error(err);
-      alert('网络异常：无法连接到后端');
-    }
-  };
 
-  const renderPage = () => {
-    switch (currentView) {
-      case 'assessment':
-        return <Assessment />;
-      case 'dashboard':
-      default:
-        return <Dashboard />;
+      if (res.ok) {
+        // 3. 成功后，平滑跳转到 Dashboard
+        window.location.href = '/dashboard';
+      } else {
+        const errorData = await res.json();
+        alert(`保存失败: ${errorData.detail || '未知错误'}`);
+      }
+    } catch (error) {
+      // 4. 捕获真正的网络异常（比如后端没开）
+      console.error('后端连接失败:', error);
+      alert('网络异常：无法连接到后端。\n\n请确保：\n1. 后端服务 (uvicorn) 正在运行\n2. 端口为 8000');
     }
   };
 
   return (
-    <main className="min-h-screen bg-base-200 p-4">
-      {studentId ? (
-        <>
-          <NavBar onViewChange={setCurrentView} />
-          {renderPage()}
-        </>
-      ) : (
-        <ProfileForm onSubmit={handleProfileSubmit} />
-      )}
-    </main>
-  )
+    <Router>
+      <Routes>
+        {/* 首页：画像填写 */}
+        <Route 
+          path="/" 
+          element={<ProfileForm onSubmit={handleProfileSubmit} />} 
+        />
+        
+        {/* 仪表盘 */}
+        <Route path="/dashboard" element={<Dashboard />} />
+        
+        {/* 评估测试 */}
+        <Route path="/assessment" element={<Assessment />} />
+        
+        {/* 默认重定向 */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
