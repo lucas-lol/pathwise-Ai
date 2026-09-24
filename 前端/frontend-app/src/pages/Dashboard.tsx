@@ -65,3 +65,25 @@ export default function Dashboard() {
     </div>
   );
 }
+{state?.mastery && Object.keys(state.mastery).length > 0 && (
+  <div className="space-y-4 mt-6">
+    <h3 className="text-lg font-bold">当前知识点掌握度</h3>
+    
+    {Object.entries(state.mastery).map(([key, value]) => (
+      <div key={key} className="flex flex-col">
+        <div className="flex justify-between mb-1">
+          <span className="text-sm font-medium">{key}</span>
+          {/* 思考点 1：这里需要显示百分比，比如 "85%" */}
+          <span className="text-sm font-medium">???</span>
+        </div>
+        {/* DaisyUI 进度条组件 */}
+        <progress 
+          className="progress progress-primary w-full" 
+          /* 思考点 2：progress 的 value 属性需要 0 到 100 之间的数字，比如 85 */
+          value={???} 
+          max="100"
+        ></progress>
+      </div>
+    ))}
+  </div>
+)}
