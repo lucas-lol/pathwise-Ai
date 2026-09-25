@@ -63,6 +63,7 @@ def put_profile(user_id: int, body: ProfileUpdate, db: Session = Depends(get_db)
     if not user:
         raise HTTPException(404, "user not found")
     profile = db.query(StudentProfile).filter(StudentProfile.user_id == user_id).one()
+    
     if body.name is not None:
         user.name = body.name
     if body.grade is not None:
@@ -73,6 +74,11 @@ def put_profile(user_id: int, body: ProfileUpdate, db: Session = Depends(get_db)
     profile.interests = json.dumps(body.interests[:3], ensure_ascii=False)
     profile.self_assessment = json.dumps(body.self_assessment, ensure_ascii=False)
     profile.goals = json.dumps(body.goals, ensure_ascii=False)
+    
+    # 👇 添加这两行：保存职业选择
+    if body.selected_career is not None:
+        profile.selected_career = body.selected_career
+    
     profile.profile_complete = bool((user.grade and body.interests) or body.profile_complete or profile.profile_complete)
     db.add(user)
     db.add(profile)
@@ -88,6 +94,10 @@ def put_profile(user_id: int, body: ProfileUpdate, db: Session = Depends(get_db)
         "self_assessment": json.loads(profile.self_assessment),
         "no_grade": profile.no_grade,
     }
+    
+    # 👇 添加这一行：把职业写入 state
+    state["selected_career"] = profile.selected_career
+    
     state["funnel"]["profile_complete"] = profile.profile_complete
     state_manager.write_state(db, row, state)
     db.refresh(user)

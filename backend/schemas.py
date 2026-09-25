@@ -33,6 +33,7 @@ class ProfileUpdate(BaseModel):
     self_assessment: list[str] = Field(default_factory=list)
     goals: list[str] = Field(default_factory=list)
     profile_complete: bool = False
+    selected_career: Optional[str] = None
 
 
 class QuestionResponse(BaseModel):

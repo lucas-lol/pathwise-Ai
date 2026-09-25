@@ -1,69 +1,75 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => void }) {
   const [step, setStep] = useState(1);
   const [grade, setGrade] = useState('');
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [mathScore, setMathScore] = useState(50);
+  const [selectedCareer, setSelectedCareer] = useState('');
 
-  // 自动跳转逻辑
+  // 测试职业数据 (稍后替换为 Excel 数据)
+  const CAREERS = [
+    { id: 'business_analyst', name: '商业分析师' },
+    { id: 'data_scientist', name: '数据科学家' },
+    { id: 'software_engineer', name: '软件工程师' },
+    { id: 'product_manager', name: '产品经理' },
+    { id: 'ux_designer', name: 'UX 设计师' },
+    { id: 'financial_advisor', name: '财务顾问' },
+  ];
+
   const handleAutoNext = (action: () => void) => {
     action();
-    setTimeout(() => setStep((prev) => prev + 1), 600); // 0.6秒后自动跳
+    setTimeout(() => setStep((prev) => prev + 1), 400);
   };
 
-  const toggleInterest = (item: string) => {
-    if (selectedInterests.includes(item)) {
-      setSelectedInterests(selectedInterests.filter(i => i !== item));
-    } else {
-      if (selectedInterests.length < 3) {
-        const newSelection = [...selectedInterests, item];
-        setSelectedInterests(newSelection);
-        // 如果选满 3 个，自动跳转
-        if (newSelection.length === 3) {
-          setTimeout(() => setStep(3), 800);
-        }
+ const toggleInterest = (item: string) => {
+  if (selectedInterests.includes(item)) {
+    // 取消选择
+    setSelectedInterests(selectedInterests.filter(i => i !== item));
+  } else {
+    if (selectedInterests.length < 3) {
+      const newSelection = [...selectedInterests, item];
+      setSelectedInterests(newSelection);
+      
+      // 🎯 如果选满 3 个，0.8 秒后自动跳转
+      if (newSelection.length === 3) {
+        setTimeout(() => {
+          setStep(3); // 跳到第 3 步（数学分数）
+        }, 800);
       }
     }
+  }
+};
+
+  // 最终提交
+  const handleFinalSubmit = () => {
+    onSubmit({
+      grade,
+      interests: selectedInterests,
+      scores: { math: mathScore },
+      selected_career: selectedCareer, //  把职业传给后端
+      profile_complete: true //  只标记画像完成
+    });
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative">
-      {/* 背景光晕 */}
-      <div className="aurora-bg">
-        <div className="aurora-blob blob-1"></div>
-        <div className="aurora-blob blob-2"></div>
-      </div>
-
-      <div className="glass-card w-full max-w-2xl p-10 min-h-[500px] flex flex-col justify-center relative overflow-hidden">
+      <div className="aurora-background" />
+      <div className="glass-card w-full max-w-2xl p-10 min-h-[500px] flex flex-col justify-center relative">
         
         {/* 顶部进度条 */}
         <div className="absolute top-0 left-0 w-full h-1 bg-slate-800">
-          <div 
-            className="h-full bg-indigo-500 transition-all duration-700 ease-out shadow-[0_0_10px_#6366f1]"
-            style={{ width: `${(step / 3) * 100}%` }}
-          />
+          <div className="h-full bg-indigo-500 transition-all duration-500" style={{ width: `${(step / 4) * 100}%` }} />
         </div>
 
-        {/* 第一步：年级 */}
+        {/* Step 1: 年级 */}
         {step === 1 && (
-          <div className="space-y-8 animate-[slideUpFade_0.6s_ease-out_forwards]">
-            <div className="text-center space-y-2">
-              <h2 className="text-3xl font-serif-cn font-bold text-white">你现在读几年级？</h2>
-              <p className="text-slate-400 font-light">这将决定我们为你匹配的知识库深度。</p>
-            </div>
-            
+          <div className="space-y-8 animate-[slideUpFade_0.5s_ease-out_forwards]">
+            <h2 className="text-3xl font-serif-cn font-bold text-white text-center">你现在读几年级？</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {['初一', '初二', '初三', '高一', '高二', '高三'].map((g) => (
-                <button
-                  key={g}
-                  onClick={() => handleAutoNext(() => setGrade(g))}
-                  className={`p-6 rounded-xl border text-lg font-medium transition-all duration-300 ${
-                    grade === g 
-                      ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-[0_0_20px_rgba(99,102,241,0.3)] scale-105' 
-                      : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:border-white/20 hover:scale-105'
-                  }`}
-                >
+                <button key={g} onClick={() => handleAutoNext(() => setGrade(g))}
+                  className={`p-6 rounded-xl border text-lg font-medium transition-all ${grade === g ? 'bg-indigo-600/20 border-indigo-500 text-white' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'}`}>
                   {g}
                 </button>
               ))}
@@ -71,87 +77,54 @@ export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => voi
           </div>
         )}
 
-        {/* 第二步：兴趣 */}
+        {/* Step 2: 兴趣 */}
         {step === 2 && (
-          <div className="space-y-8 animate-[slideUpFade_0.6s_ease-out_forwards]">
-            <div className="text-center space-y-2">
-              <h2 className="text-3xl font-serif-cn font-bold text-white">你对什么领域感兴趣？</h2>
-              <p className="text-slate-400 font-light">
-                {selectedInterests.length === 3 ? '已选满，即将进入下一步...' : `已选 ${selectedInterests.length} 个，最多选 3 个。`}
-              </p>
-            </div>
-
+          <div className="space-y-8 animate-[slideUpFade_0.5s_ease-out_forwards]">
+            <h2 className="text-3xl font-serif-cn font-bold text-white text-center">你对什么感兴趣？(选 1-3 个)</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {['科技编程', '艺术设计', '商业金融', '科学探索', '文学历史', '社会科学'].map((item) => {
-                const isSelected = selectedInterests.includes(item);
-                return (
-                  <button
-                    key={item}
-                    onClick={() => toggleInterest(item)}
-                    className={`p-6 rounded-xl border text-lg font-medium transition-all duration-300 ${
-                      isSelected
-                        ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-[0_0_20px_rgba(99,102,241,0.3)] scale-105'
-                        : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:border-white/20'
-                    }`}
-                  >
-                    {item}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* 如果没选满 3 个，显示优雅的继续按钮 */}
-            {selectedInterests.length > 0 && selectedInterests.length < 3 && (
-              <div className="flex justify-center pt-4">
-                <button 
-                  onClick={() => setStep(3)}
-                  className="px-8 py-3 bg-white/10 border border-white/20 text-white rounded-full hover:bg-white/20 transition-all backdrop-blur-md"
-                >
-                  确认并继续 →
+              {['科技编程', '艺术设计', '商业金融', '科学探索', '文学历史', '社会科学'].map((item) => (
+                <button key={item} onClick={() => toggleInterest(item)}
+                  className={`p-6 rounded-xl border text-lg font-medium transition-all ${selectedInterests.includes(item) ? 'bg-indigo-600/20 border-indigo-500 text-white' : 'bg-white/5 border-white/10 text-slate-300'}`}>
+                  {item}
                 </button>
-              </div>
-            )}
+              ))}
+            </div>
+            <div className="flex justify-center">
+              <button onClick={() => setStep(3)} disabled={selectedInterests.length === 0}
+                className="px-8 py-3 bg-indigo-600 text-white rounded-lg disabled:opacity-50">下一步</button>
+            </div>
           </div>
         )}
 
-        {/* 第三步：分数 */}
+        {/* Step 3: 分数 */}
         {step === 3 && (
-          <div className="space-y-10 animate-[slideUpFade_0.6s_ease-out_forwards] px-4">
-            <div className="text-center space-y-2">
-              <h2 className="text-3xl font-serif-cn font-bold text-white">目前的数学水平？</h2>
-              <p className="text-slate-400 font-light">拖动滑块，诚实评估自己。</p>
+          <div className="space-y-8 animate-[slideUpFade_0.5s_ease-out_forwards] px-4">
+            <h2 className="text-3xl font-serif-cn font-bold text-white text-center">目前的数学水平？</h2>
+            <div className="text-center text-6xl font-bold text-indigo-400">{mathScore}</div>
+            <input type="range" min="0" max="100" value={mathScore} onChange={(e) => setMathScore(Number(e.target.value))} className="w-full accent-indigo-500" />
+            <div className="flex justify-center">
+              <button onClick={() => setStep(4)} className="px-8 py-3 bg-indigo-600 text-white rounded-lg">下一步</button>
             </div>
+          </div>
+        )}
 
-            <div className="space-y-6 py-8">
-              <div className="text-center">
-                <span className="text-6xl font-display font-bold text-white tabular-nums">{mathScore}</span>
-                <span className="text-xl text-slate-400 ml-2">/ 100</span>
-              </div>
-              
-              {/* 自定义滑块 */}
-              <input
-                type="range"
-                min="0" max="100"
-                value={mathScore}
-                onChange={(e) => setMathScore(Number(e.target.value))}
-                className="w-full h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer"
-              />
-              
-              <div className="flex justify-between text-xs text-slate-500 font-medium uppercase tracking-wider">
-                <span>需要补基础</span>
-                <span>学霸级别</span>
-              </div>
+        {/* Step 4: 职业选择 (新增!) */}
+        {step === 4 && (
+          <div className="space-y-8 animate-[slideUpFade_0.5s_ease-out_forwards]">
+            <h2 className="text-3xl font-serif-cn font-bold text-white text-center">你想成为什么样的人？</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {CAREERS.map((career) => (
+                <button key={career.id} onClick={() => setSelectedCareer(career.id)}
+                  className={`p-6 rounded-xl border text-left transition-all ${selectedCareer === career.id ? 'bg-indigo-600/20 border-indigo-500 text-white' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'}`}>
+                  <div className="text-sm text-indigo-400 mb-1">{career.id.replace('_', ' ').toUpperCase()}</div>
+                  <div className="text-lg font-medium">{career.name}</div>
+                </button>
+              ))}
             </div>
-
-            <div className="flex justify-center pt-4">
-              <button 
-                onClick={() => onSubmit({
-                  grade, interests: selectedInterests, scores: { math: mathScore }, profile_complete: true
-                })}
-                className="group relative px-10 py-4 bg-indigo-600 text-white font-medium rounded-full overflow-hidden transition-all hover:scale-105 shadow-[0_0_30px_rgba(99,102,241,0.4)]"
-              >
-                <span className="relative z-10 text-lg">生成我的学习路径</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex justify-center">
+              <button onClick={handleFinalSubmit} disabled={!selectedCareer}
+                className="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)]">
+                生成我的学习路径
               </button>
             </div>
           </div>
