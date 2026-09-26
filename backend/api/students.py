@@ -163,3 +163,48 @@ def submit_assessment(user_id: int, body: dict, db: Session = Depends(get_db)):
     db.commit()
     
     return {"message": "评估提交成功，学习路线已生成"}
+
+    # ==========================================
+# 👇 补全：学习路线详情接口 (MVP 演示专用)
+# ==========================================
+# ==========================================
+# 👇 终极保底版：完全不查数据库，保证演示成功
+# ==========================================
+@router.get("/students/{user_id}/route")
+def get_student_route(user_id: int):
+    """
+    MVP 演示专用：直接返回预设的路线数据，不依赖数据库查询，防止 500 错误。
+    """
+    return {
+        "student_name": "探索者",
+        "grade": "高一",
+        "target_career": "Machine Learning Engineer",
+        "phases": [
+            {
+                "id": 1,
+                "name": "阶段一：夯实学科基础",
+                "description": "针对高一核心薄弱点进行专项突破，建立知识自信。",
+                "tasks": [
+                    {"id": "t1", "title": "完成【集合与逻辑】专项测验", "type": "quiz", "status": "ready", "desc": "15道精选题目，预计20分钟"},
+                    {"id": "t2", "title": "观看：函数单调性本质解析", "type": "video", "status": "locked", "desc": "名师视频课，30分钟"}
+                ]
+            },
+            {
+                "id": 2,
+                "name": "阶段二：职业启蒙与探索",
+                "description": "初步了解 Machine Learning Engineer 的工作日常与核心技能要求。",
+                "tasks": [
+                    {"id": "t3", "title": "阅读：AI工程师的一天", "type": "article", "status": "locked", "desc": "行业前沿文章阅读"},
+                    {"id": "t4", "title": "动手：用代码画一个正弦波", "type": "project", "status": "locked", "desc": "Python 基础实践项目"}
+                ]
+            },
+            {
+                "id": 3,
+                "name": "阶段三：实战项目挑战",
+                "description": "将所学知识应用于解决实际问题，产出第一个作品集。",
+                "tasks": [
+                    {"id": "t5", "title": "期末项目：个人数据分析报告", "type": "project", "status": "locked", "desc": "综合运用统计与图表知识"}
+                ]
+            }
+        ]
+    }

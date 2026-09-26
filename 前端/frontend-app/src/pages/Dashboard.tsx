@@ -162,6 +162,16 @@ export default function Dashboard() {
                         开始评估 →
                       </button>
                     )}
+
+                                        {/*  新增：如果是“路线就绪”且已完成，显示查看按钮 */}
+                    {step.key === 'route_ready' && isDone && (
+                      <button 
+                        onClick={() => window.location.href = '/route'}
+                        className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white text-sm font-bold rounded-lg transition-all shadow-[0_0_15px_rgba(99,102,241,0.4)] mr-4 animate-pulse"
+                      >
+                        查看我的专属路线 
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -196,13 +206,13 @@ export default function Dashboard() {
             {Object.entries(
               knowledgeList
                 .filter(item => item.grade === currentGrade)
-                .reduce((acc: any, item: any) => {
+                .reduce((acc: Record<string, any[]>, item: any) => {
                   const domain = item.domain || '其他';
                   if (!acc[domain]) acc[domain] = [];
                   acc[domain].push(item);
                   return acc;
-                }, {})
-            ).map(([domain, items]: [string, any[]]) => (
+                }, {} as Record<string, any[]>)
+            ).map(([domain, items]) => (
               <div key={domain} className="space-y-4">
                 <h3 className="text-lg font-medium text-indigo-400 border-b border-white/5 pb-2">
                   {domain}

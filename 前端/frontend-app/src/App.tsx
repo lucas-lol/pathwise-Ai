@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import ProfileForm from './components/ProfileForm';
 import Assessment from './pages/Assessment';
 import Dashboard from './pages/Dashboard';
+import RoutePage from './pages/Route';
 
 function App() {
   // 处理画像（包含职业）提交的核心逻辑
@@ -61,6 +62,8 @@ function App() {
         
         {/* 仪表盘 */}
         <Route path="/dashboard" element={<Dashboard />} />
+
+         <Route path="/route" element={<RoutePage />} /> 
         
         {/* 默认重定向到首页 */}
         <Route path="*" element={<Navigate to="/" replace />} />
