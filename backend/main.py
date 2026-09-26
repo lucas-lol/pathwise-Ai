@@ -3,18 +3,24 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="PathWise AI")
 
-from fastapi.middleware.cors import CORSMiddleware
+# ✅ 新增：启动时自动调用你的初始化函数，创建数据库表
+try:
+    from init_db import init_database
+    init_database()  # <--- 这里直接调用你写好的函数
+    print("✅ 数据库表已自动创建/同步")
+except Exception as e:
+    print(f"⚠️ 警告: 数据库初始化失败，请检查 init_db.py ({e})")
 
-# 确保这段代码在 app = FastAPI() 之后
+# 配置跨域 (CORS)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # <--- 必须是星号，允许所有网站访问
+    allow_origins=["*"],  # 允许所有网站访问
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 2. 安全加载路由 (如果某个文件缺失，不会导致整个后端崩溃)
+# 加载路由
 try:
     from api.careers import router as careers_router
     app.include_router(careers_router, prefix="/api", tags=["careers"])
@@ -24,11 +30,10 @@ except Exception as e:
 
 try:
     from api.students import router as students_router
-    # 👇 关键：这里只写 /api
     app.include_router(students_router, prefix="/api", tags=["students"])
     print("✅ 成功加载 students 路由")
 except Exception as e:
-    print(f"⚠️ 警告: 无法加载 students 路由 ({e})")
+    print(f"️ 警告: 无法加载 students 路由 ({e})")
 
 try:
     from api.assessment import router as assessment_router
@@ -37,7 +42,7 @@ try:
 except Exception as e:
     print(f"⚠️ 警告: 无法加载 assessment 路由 ({e})")
 
-# 3. 基础接口
+# 基础接口
 @app.get("/")
 def read_root():
     return {"message": "PathWise AI Backend is running!"}
