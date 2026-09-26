@@ -7,6 +7,11 @@ from models.tables import User, LearningRoute, RouteNode, Question
 from services import state_manager
 
 router = APIRouter(prefix="/api", tags=["careers"])
+@router.get("/careers")
+def get_all_careers():
+    data_dir = Path(__file__).resolve().parents[1] / "data"
+    with open(data_dir / "careers.json", "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 def _knowledge01(scores: dict, subject: str) -> float:

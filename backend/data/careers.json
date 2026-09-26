@@ -1,1 +1,3553 @@
-{"careers": [{"id": "software_engineer", "name": "软件工程师", "related_subjects": ["mathematics"], "related_interests": ["technology", "coding"], "related_goals": ["coding", "engineering"]}, {"id": "business_analyst", "name": "商业分析师", "related_subjects": ["business"], "related_interests": ["business", "data"], "related_goals": ["management", "analysis"]}, {"id": "teacher", "name": "教育工作者", "related_subjects": ["history", "science"], "related_interests": ["teaching", "social"], "related_goals": ["education", "mentoring"]}, {"id": "designer", "name": "创意设计师", "related_subjects": ["history", "science"], "related_interests": ["art", "design"], "related_goals": ["design", "creativity"]}, {"id": "scientist", "name": "科学研究员", "related_subjects": ["science", "mathematics"], "related_interests": ["research", "science"], "related_goals": ["discovery", "research"]}]}
+[
+  {
+    "id": "software_engineer",
+    "name_cn": "软件工程师",
+    "name_en": "Software Engineer",
+    "category": "科技 Technology",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Programming",
+      "Data Structures",
+      "Algorithms",
+      "Software Engineering",
+      "Databases",
+      "Operating Systems"
+    ],
+    "related_subjects": [
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Technology",
+      "Data",
+      "Engineering"
+    ],
+    "goal_tags": [
+      "Technology",
+      "Engineering",
+      "Research"
+    ],
+    "career_path": "Junior Developer → Software Engineer → Senior Engineer → Tech Lead / Architect"
+  },
+  {
+    "id": "ai_engineer",
+    "name_cn": "AI工程师",
+    "name_en": "AI Engineer",
+    "category": "科技 Technology",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Machine Learning",
+      "Deep Learning",
+      "Programming",
+      "Statistics",
+      "Linear Algebra",
+      "Calculus"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Physics"
+    ],
+    "interest_tags": [
+      "Technology",
+      "Data",
+      "Science"
+    ],
+    "goal_tags": [
+      "Technology",
+      "Research",
+      "Engineering"
+    ],
+    "career_path": "AI Engineer → Senior AI Engineer → AI Team Lead → AI Research Scientist"
+  },
+  {
+    "id": "data_scientist",
+    "name_cn": "数据科学家",
+    "name_en": "Data Scientist",
+    "category": "科技 Technology",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Statistics",
+      "Probability",
+      "Programming",
+      "Machine Learning",
+      "Data Visualization",
+      "Databases"
+    ],
+    "related_subjects": [
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Data",
+      "Technology",
+      "Science"
+    ],
+    "goal_tags": [
+      "Technology",
+      "Research",
+      "Finance"
+    ],
+    "career_path": "Data Analyst → Data Scientist → Senior Data Scientist → Chief Data Officer"
+  },
+  {
+    "id": "cybersecurity_analyst",
+    "name_cn": "网络安全分析师",
+    "name_en": "Cybersecurity Analyst",
+    "category": "科技 Technology",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Learning Agility",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Network Security",
+      "Cryptography",
+      "Operating Systems",
+      "Programming",
+      "Risk Management",
+      "Incident Response"
+    ],
+    "related_subjects": [
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Technology",
+      "Data",
+      "Engineering"
+    ],
+    "goal_tags": [
+      "Technology",
+      "Engineering",
+      "Public Policy"
+    ],
+    "career_path": "Security Analyst → Cybersecurity Engineer → Security Architect → CISO"
+  },
+  {
+    "id": "cloud_engineer",
+    "name_cn": "云计算工程师",
+    "name_en": "Cloud Engineer",
+    "category": "科技 Technology",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Cloud Platforms (AWS/Azure/GCP)",
+      "Distributed Systems",
+      "Networking",
+      "Virtualization",
+      "Automation",
+      "Security"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Physics"
+    ],
+    "interest_tags": [
+      "Technology",
+      "Engineering",
+      "Data"
+    ],
+    "goal_tags": [
+      "Technology",
+      "Engineering",
+      "Business"
+    ],
+    "career_path": "Cloud Engineer → Senior Cloud Engineer → Cloud Architect → Cloud Director"
+  },
+  {
+    "id": "machine_learning_engineer",
+    "name_cn": "机器学习工程师",
+    "name_en": "Machine Learning Engineer",
+    "category": "科技 Technology",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Machine Learning",
+      "Programming",
+      "Data Engineering",
+      "Statistics",
+      "Linear Algebra",
+      "Software Engineering"
+    ],
+    "related_subjects": [
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Technology",
+      "Data",
+      "Science"
+    ],
+    "goal_tags": [
+      "Technology",
+      "Research",
+      "Engineering"
+    ],
+    "career_path": "ML Engineer → Senior ML Engineer → ML Tech Lead → AI Research Lead"
+  },
+  {
+    "id": "data_engineer",
+    "name_cn": "数据工程师",
+    "name_en": "Data Engineer",
+    "category": "科技 Technology",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Data Pipelines",
+      "Databases",
+      "ETL",
+      "Programming",
+      "Distributed Systems",
+      "Cloud Computing"
+    ],
+    "related_subjects": [
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Data",
+      "Technology",
+      "Engineering"
+    ],
+    "goal_tags": [
+      "Technology",
+      "Engineering",
+      "Business"
+    ],
+    "career_path": "Data Engineer → Senior Data Engineer → Data Architect → Head of Data Engineering"
+  },
+  {
+    "id": "systems_engineer",
+    "name_cn": "系统工程师",
+    "name_en": "Systems Engineer",
+    "category": "科技 Technology",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "System Architecture",
+      "Operating Systems",
+      "Networking",
+      "Hardware",
+      "Software Integration",
+      "Performance Tuning"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Physics"
+    ],
+    "interest_tags": [
+      "Technology",
+      "Engineering",
+      "Science"
+    ],
+    "goal_tags": [
+      "Technology",
+      "Engineering",
+      "Research"
+    ],
+    "career_path": "Systems Engineer → Senior Systems Engineer → Systems Architect → Principal Engineer"
+  },
+  {
+    "id": "game_developer",
+    "name_cn": "游戏开发工程师",
+    "name_en": "Game Developer",
+    "category": "科技 Technology",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Game Engines (Unity/Unreal)",
+      "Programming",
+      "Computer Graphics",
+      "Physics",
+      "Mathematics",
+      "User Experience"
+    ],
+    "related_subjects": [
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Technology",
+      "Creative",
+      "Design"
+    ],
+    "goal_tags": [
+      "Technology",
+      "Design",
+      "Engineering"
+    ],
+    "career_path": "Junior Game Developer → Game Developer → Senior Developer → Lead Game Developer"
+  },
+  {
+    "id": "qa_engineer",
+    "name_cn": "软件测试工程师",
+    "name_en": "QA Engineer",
+    "category": "科技 Technology",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Learning Agility",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Testing Frameworks",
+      "Programming",
+      "Software Engineering",
+      "Automation",
+      "Bug Tracking",
+      "Quality Assurance"
+    ],
+    "related_subjects": [
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Technology",
+      "Engineering",
+      "Data"
+    ],
+    "goal_tags": [
+      "Technology",
+      "Engineering",
+      "Business"
+    ],
+    "career_path": "QA Engineer → Senior QA Engineer → QA Lead → Quality Director"
+  },
+  {
+    "id": "mechanical_engineer",
+    "name_cn": "机械工程师",
+    "name_en": "Mechanical Engineer",
+    "category": "② 工程 Engineering",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Mechanics",
+      "Thermodynamics",
+      "Fluid Mechanics",
+      "Materials Science",
+      "Design",
+      "CAD"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Physics"
+    ],
+    "interest_tags": [
+      "Engineering",
+      "Science",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Engineering",
+      "Research",
+      "Technology"
+    ],
+    "career_path": "Junior Mechanical Engineer → Mechanical Engineer → Senior Engineer → Principal Engineer / Project Manager"
+  },
+  {
+    "id": "civil_engineer",
+    "name_cn": "土木工程师",
+    "name_en": "Civil Engineer",
+    "category": "② 工程 Engineering",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Structural Analysis",
+      "Geotechnical Engineering",
+      "Construction Materials",
+      "Project Management",
+      "Surveying"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Physics"
+    ],
+    "interest_tags": [
+      "Engineering",
+      "Environment",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Engineering",
+      "Environment",
+      "Public Policy"
+    ],
+    "career_path": "Civil Engineer → Senior Civil Engineer → Project Manager → Director of Civil Engineering"
+  },
+  {
+    "id": "chemical_engineer",
+    "name_cn": "化学工程师",
+    "name_en": "Chemical Engineer",
+    "category": "② 工程 Engineering",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Chemical Reactions",
+      "Thermodynamics",
+      "Process Design",
+      "Fluid Mechanics",
+      "Materials Science",
+      "Safety"
+    ],
+    "related_subjects": [
+      "Chemistry",
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Science",
+      "Engineering",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Engineering",
+      "Research",
+      "Environment"
+    ],
+    "career_path": "Chemical Engineer → Senior Chemical Engineer → Process Manager → Plant Director"
+  },
+  {
+    "id": "electrical_engineer",
+    "name_cn": "电气工程师",
+    "name_en": "Electrical Engineer",
+    "category": "② 工程 Engineering",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Circuit Analysis",
+      "Power Systems",
+      "Electronics",
+      "Control Systems",
+      "Signal Processing",
+      "Electromagnetics"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Physics"
+    ],
+    "interest_tags": [
+      "Engineering",
+      "Technology",
+      "Science"
+    ],
+    "goal_tags": [
+      "Engineering",
+      "Technology",
+      "Research"
+    ],
+    "career_path": "Electrical Engineer → Senior Electrical Engineer → Lead Engineer → Engineering Manager"
+  },
+  {
+    "id": "electronics_engineer",
+    "name_cn": "电子工程师",
+    "name_en": "Electronics Engineer",
+    "category": "② 工程 Engineering",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Digital/Analog Electronics",
+      "Microcontrollers",
+      "PCB Design",
+      "Communication Systems",
+      "Embedded Systems"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Physics"
+    ],
+    "interest_tags": [
+      "Engineering",
+      "Technology",
+      "Science"
+    ],
+    "goal_tags": [
+      "Engineering",
+      "Technology",
+      "Research"
+    ],
+    "career_path": "Electronics Engineer → Senior Engineer → Lead Engineer → Director of Electronics"
+  },
+  {
+    "id": "environmental_engineer",
+    "name_cn": "环境工程师",
+    "name_en": "Environmental Engineer",
+    "category": "② 工程 Engineering",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Environmental Science",
+      "Water/Wastewater Treatment",
+      "Air Pollution Control",
+      "Ecology",
+      "Regulations"
+    ],
+    "related_subjects": [
+      "Chemistry",
+      "Biology"
+    ],
+    "interest_tags": [
+      "Environment",
+      "Science",
+      "Engineering"
+    ],
+    "goal_tags": [
+      "Environment",
+      "Engineering",
+      "Public Policy"
+    ],
+    "career_path": "Environmental Engineer → Senior Engineer → Project Manager → Environmental Director"
+  },
+  {
+    "id": "aerospace_engineer",
+    "name_cn": "航空航天工程师",
+    "name_en": "Aerospace Engineer",
+    "category": "② 工程 Engineering",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Aerodynamics",
+      "Propulsion",
+      "Structural Mechanics",
+      "Avionics",
+      "Control Systems",
+      "Materials"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Physics"
+    ],
+    "interest_tags": [
+      "Engineering",
+      "Science",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Engineering",
+      "Research",
+      "Technology"
+    ],
+    "career_path": "Aerospace Engineer → Senior Engineer → Lead Engineer → Principal Engineer / Program Manager"
+  },
+  {
+    "id": "automotive_engineer",
+    "name_cn": "汽车工程师",
+    "name_en": "Automotive Engineer",
+    "category": "② 工程 Engineering",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Automotive Systems",
+      "Engine Design",
+      "Chassis",
+      "Vehicle Dynamics",
+      "Powertrain",
+      "Control Systems"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Physics"
+    ],
+    "interest_tags": [
+      "Engineering",
+      "Technology",
+      "Design"
+    ],
+    "goal_tags": [
+      "Engineering",
+      "Technology",
+      "Business"
+    ],
+    "career_path": "Automotive Engineer → Senior Engineer → Lead Engineer → Engineering Manager"
+  },
+  {
+    "id": "robotics_engineer",
+    "name_cn": "机器人工程师",
+    "name_en": "Robotics Engineer",
+    "category": "② 工程 Engineering",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Robotics",
+      "Control Systems",
+      "Programming",
+      "Sensors",
+      "Actuators",
+      "AI",
+      "Mechatronics"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Physics"
+    ],
+    "interest_tags": [
+      "Engineering",
+      "Technology",
+      "Science"
+    ],
+    "goal_tags": [
+      "Engineering",
+      "Technology",
+      "Research"
+    ],
+    "career_path": "Robotics Engineer → Senior Robotics Engineer → Lead Roboticist → Director of Robotics"
+  },
+  {
+    "id": "materials_engineer",
+    "name_cn": "材料工程师",
+    "name_en": "Materials Engineer",
+    "category": "② 工程 Engineering",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Materials Science",
+      "Metallurgy",
+      "Polymers",
+      "Ceramics",
+      "Composites",
+      "Characterization Techniques"
+    ],
+    "related_subjects": [
+      "Chemistry",
+      "Physics"
+    ],
+    "interest_tags": [
+      "Science",
+      "Engineering",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Engineering",
+      "Research",
+      "Technology"
+    ],
+    "career_path": "Materials Engineer → Senior Engineer → Lead Scientist → Director of Materials"
+  },
+  {
+    "id": "statistician",
+    "name_cn": "统计学家",
+    "name_en": "Statistician",
+    "category": "数据与数学 Data & Mathematics",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Statistics",
+      "Probability",
+      "Regression",
+      "Experimental Design",
+      "Data Analysis",
+      "Mathematical Modeling"
+    ],
+    "related_subjects": [
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Data",
+      "Science",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Research",
+      "Science",
+      "Finance"
+    ],
+    "career_path": "Statistician → Senior Statistician → Lead Statistician → Data Science Director"
+  },
+  {
+    "id": "data_analyst",
+    "name_cn": "数据分析师",
+    "name_en": "Data Analyst",
+    "category": "数据与数学 Data & Mathematics",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Learning Agility",
+      "Business Thinking"
+    ],
+    "preferred_knowledge": [
+      "SQL",
+      "Data Visualization",
+      "Statistics",
+      "Excel",
+      "Business Intelligence",
+      "Data Cleaning"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Economics"
+    ],
+    "interest_tags": [
+      "Data",
+      "Business",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Business",
+      "Technology",
+      "Finance"
+    ],
+    "career_path": "Data Analyst → Senior Data Analyst → Business Analyst → Analytics Manager"
+  },
+  {
+    "id": "operations_research_analyst",
+    "name_cn": "运筹分析师",
+    "name_en": "Operations Research Analyst",
+    "category": "数据与数学 Data & Mathematics",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Learning Agility",
+      "Business Thinking"
+    ],
+    "preferred_knowledge": [
+      "Optimization",
+      "Simulation",
+      "Linear Programming",
+      "Statistics",
+      "Operations Management",
+      "Data Analysis"
+    ],
+    "related_subjects": [
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Data",
+      "Business",
+      "Engineering"
+    ],
+    "goal_tags": [
+      "Business",
+      "Engineering",
+      "Technology"
+    ],
+    "career_path": "Operations Analyst → Senior Analyst → Operations Research Manager → Director of Operations"
+  },
+  {
+    "id": "actuary",
+    "name_cn": "精算师",
+    "name_en": "Actuary",
+    "category": "数据与数学 Data & Mathematics",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Learning Agility",
+      "Business Thinking"
+    ],
+    "preferred_knowledge": [
+      "Probability",
+      "Statistics",
+      "Financial Mathematics",
+      "Risk Management",
+      "Economics",
+      "Insurance"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Economics"
+    ],
+    "interest_tags": [
+      "Data",
+      "Finance",
+      "Business"
+    ],
+    "goal_tags": [
+      "Finance",
+      "Business",
+      "Research"
+    ],
+    "career_path": "Actuarial Analyst → Actuary → Senior Actuary → Chief Actuary"
+  },
+  {
+    "id": "mathematician",
+    "name_cn": "数学家",
+    "name_en": "Mathematician",
+    "category": "数据与数学 Data & Mathematics",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Pure Mathematics",
+      "Applied Mathematics",
+      "Mathematical Modeling",
+      "Algebra",
+      "Analysis",
+      "Probability"
+    ],
+    "related_subjects": [
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Science",
+      "Data",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Research",
+      "Science",
+      "Technology"
+    ],
+    "career_path": "Mathematician → Research Mathematician → Senior Researcher → Principal Scientist"
+  },
+  {
+    "id": "risk_analyst",
+    "name_cn": "风险分析师",
+    "name_en": "Risk Analyst",
+    "category": "数据与数学 Data & Mathematics",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Business Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Risk Management",
+      "Statistics",
+      "Financial Risk",
+      "Probability",
+      "Economics",
+      "Data Analysis"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Economics"
+    ],
+    "interest_tags": [
+      "Finance",
+      "Business",
+      "Data"
+    ],
+    "goal_tags": [
+      "Finance",
+      "Business",
+      "Public Policy"
+    ],
+    "career_path": "Risk Analyst → Senior Risk Analyst → Risk Manager → Chief Risk Officer"
+  },
+  {
+    "id": "business_data_analyst",
+    "name_cn": "商业数据分析师",
+    "name_en": "Business Data Analyst",
+    "category": "数据与数学 Data & Mathematics",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Business Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "SQL",
+      "Data Visualization",
+      "Business Intelligence",
+      "Statistics",
+      "Marketing Analytics",
+      "Financial Reporting"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Business"
+    ],
+    "interest_tags": [
+      "Business",
+      "Data",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Business",
+      "Finance",
+      "Technology"
+    ],
+    "career_path": "Business Analyst → Senior Business Analyst → Analytics Manager → Director of Business Intelligence"
+  },
+  {
+    "id": "quantitative_analyst",
+    "name_cn": "定量分析师",
+    "name_en": "Quantitative Analyst",
+    "category": "数据与数学 Data & Mathematics",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Financial Mathematics",
+      "Statistics",
+      "Programming",
+      "Derivative Pricing",
+      "Risk Modeling",
+      "Econometrics"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Economics"
+    ],
+    "interest_tags": [
+      "Finance",
+      "Data",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Finance",
+      "Research",
+      "Technology"
+    ],
+    "career_path": "Quantitative Analyst → Senior Quant → Quant Researcher → Head of Quantitative Research"
+  },
+  {
+    "id": "physicist",
+    "name_cn": "物理学家",
+    "name_en": "Physicist",
+    "category": "科学 Research & Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Classical Mechanics",
+      "Electromagnetism",
+      "Quantum Mechanics",
+      "Thermodynamics",
+      "Mathematical Physics"
+    ],
+    "related_subjects": [
+      "Physics",
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Science",
+      "Technology",
+      "Research"
+    ],
+    "goal_tags": [
+      "Research",
+      "Science",
+      "Technology"
+    ],
+    "career_path": "Physicist → Research Scientist → Senior Scientist → Principal Investigator"
+  },
+  {
+    "id": "chemist",
+    "name_cn": "化学家",
+    "name_en": "Chemist",
+    "category": "科学 Research & Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Organic Chemistry",
+      "Inorganic Chemistry",
+      "Analytical Chemistry",
+      "Physical Chemistry",
+      "Spectroscopy"
+    ],
+    "related_subjects": [
+      "Chemistry"
+    ],
+    "interest_tags": [
+      "Science",
+      "Research",
+      "Environment"
+    ],
+    "goal_tags": [
+      "Research",
+      "Science",
+      "Environment"
+    ],
+    "career_path": "Chemist → Research Scientist → Senior Scientist → Laboratory Director"
+  },
+  {
+    "id": "biologist",
+    "name_cn": "生物学家",
+    "name_en": "Biologist",
+    "category": "科学 Research & Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Scientific Thinking",
+      "Learning Agility",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Cell Biology",
+      "Genetics",
+      "Ecology",
+      "Evolution",
+      "Molecular Biology",
+      "Microbiology"
+    ],
+    "related_subjects": [
+      "Biology"
+    ],
+    "interest_tags": [
+      "Science",
+      "Healthcare",
+      "Environment"
+    ],
+    "goal_tags": [
+      "Research",
+      "Healthcare",
+      "Environment"
+    ],
+    "career_path": "Biologist → Research Scientist → Senior Scientist → Principal Investigator"
+  },
+  {
+    "id": "astronomer",
+    "name_cn": "天文学家",
+    "name_en": "Astronomer",
+    "category": "科学 Research & Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Astrophysics",
+      "Observational Astronomy",
+      "Cosmology",
+      "Data Analysis",
+      "Physics",
+      "Mathematics"
+    ],
+    "related_subjects": [
+      "Physics",
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Science",
+      "Technology",
+      "Research"
+    ],
+    "goal_tags": [
+      "Research",
+      "Science",
+      "Technology"
+    ],
+    "career_path": "Astronomer → Research Scientist → Senior Scientist → Observatory Director"
+  },
+  {
+    "id": "earth_scientist",
+    "name_cn": "地球科学家",
+    "name_en": "Earth Scientist",
+    "category": "科学 Research & Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Geology",
+      "Geophysics",
+      "Oceanography",
+      "Atmospheric Science",
+      "Environmental Science"
+    ],
+    "related_subjects": [
+      "Physics",
+      "Chemistry"
+    ],
+    "interest_tags": [
+      "Science",
+      "Environment",
+      "Research"
+    ],
+    "goal_tags": [
+      "Environment",
+      "Research",
+      "Science"
+    ],
+    "career_path": "Earth Scientist → Research Scientist → Senior Scientist → Environmental Consultant"
+  },
+  {
+    "id": "environmental_scientist",
+    "name_cn": "环境科学家",
+    "name_en": "Environmental Scientist",
+    "category": "科学 Research & Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Scientific Thinking",
+      "Learning Agility",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Environmental Chemistry",
+      "Ecology",
+      "Pollution Control",
+      "Risk Assessment",
+      "Environmental Policy"
+    ],
+    "related_subjects": [
+      "Biology",
+      "Chemistry"
+    ],
+    "interest_tags": [
+      "Environment",
+      "Science",
+      "Healthcare"
+    ],
+    "goal_tags": [
+      "Environment",
+      "Public Policy",
+      "Research"
+    ],
+    "career_path": "Environmental Scientist → Senior Scientist → Project Manager → Environmental Director"
+  },
+  {
+    "id": "marine_scientist",
+    "name_cn": "海洋科学家",
+    "name_en": "Marine Scientist",
+    "category": "科学 Research & Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Scientific Thinking",
+      "Learning Agility",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Marine Biology",
+      "Oceanography",
+      "Ecology",
+      "Chemistry",
+      "Geology",
+      "Data Analysis"
+    ],
+    "related_subjects": [
+      "Biology",
+      "Chemistry"
+    ],
+    "interest_tags": [
+      "Science",
+      "Environment",
+      "Research"
+    ],
+    "goal_tags": [
+      "Environment",
+      "Research",
+      "Science"
+    ],
+    "career_path": "Marine Scientist → Research Scientist → Senior Scientist → Marine Research Lead"
+  },
+  {
+    "id": "materials_scientist",
+    "name_cn": "材料科学家",
+    "name_en": "Materials Scientist",
+    "category": "科学 Research & Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Materials Chemistry",
+      "Solid State Physics",
+      "Characterization",
+      "Nanomaterials",
+      "Polymers"
+    ],
+    "related_subjects": [
+      "Chemistry",
+      "Physics"
+    ],
+    "interest_tags": [
+      "Science",
+      "Technology",
+      "Engineering"
+    ],
+    "goal_tags": [
+      "Research",
+      "Technology",
+      "Engineering"
+    ],
+    "career_path": "Materials Scientist → Research Scientist → Senior Scientist → Principal Scientist"
+  },
+  {
+    "id": "food_scientist",
+    "name_cn": "食品科学家",
+    "name_en": "Food Scientist",
+    "category": "科学 Research & Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Scientific Thinking",
+      "Learning Agility",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Food Chemistry",
+      "Microbiology",
+      "Food Processing",
+      "Nutrition",
+      "Sensory Science"
+    ],
+    "related_subjects": [
+      "Chemistry",
+      "Biology"
+    ],
+    "interest_tags": [
+      "Science",
+      "Healthcare",
+      "Business"
+    ],
+    "goal_tags": [
+      "Research",
+      "Healthcare",
+      "Business"
+    ],
+    "career_path": "Food Scientist → Senior Food Scientist → R&D Manager → Director of Food Science"
+  },
+  {
+    "id": "research_scientist",
+    "name_cn": "科研人员",
+    "name_en": "Research Scientist",
+    "category": "科学 Research & Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Scientific Thinking",
+      "Learning Agility",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Research Methodology",
+      "Data Analysis",
+      "Domain-specific Knowledge (Physics/Chem/Bio/Math)",
+      "Experimentation",
+      "Scientific Writing"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Physics",
+      "Chemistry",
+      "Biology"
+    ],
+    "interest_tags": [
+      "Science",
+      "Research",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Research",
+      "Science",
+      "Technology"
+    ],
+    "career_path": "Research Scientist → Senior Scientist → Principal Scientist → Head of Research"
+  },
+  {
+    "id": "biomedical_scientist",
+    "name_cn": "生物医学科学家",
+    "name_en": "Biomedical Scientist",
+    "category": "医疗与生命科学 Healthcare & Life Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Scientific Thinking",
+      "Learning Agility",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Molecular Biology",
+      "Biochemistry",
+      "Cell Biology",
+      "Immunology",
+      "Genetics",
+      "Laboratory Techniques"
+    ],
+    "related_subjects": [
+      "Biology",
+      "Chemistry"
+    ],
+    "interest_tags": [
+      "Healthcare",
+      "Science",
+      "Research"
+    ],
+    "goal_tags": [
+      "Healthcare",
+      "Research",
+      "Science"
+    ],
+    "career_path": "Biomedical Scientist → Senior Scientist → Lead Scientist → Head of Biomedical Research"
+  },
+  {
+    "id": "biotechnologist",
+    "name_cn": "生物技术专家",
+    "name_en": "Biotechnologist",
+    "category": "医疗与生命科学 Healthcare & Life Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Scientific Thinking",
+      "Learning Agility",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Biotechnology",
+      "Genetic Engineering",
+      "Microbiology",
+      "Biochemistry",
+      "Bioprocessing",
+      "Bioinformatics"
+    ],
+    "related_subjects": [
+      "Biology",
+      "Chemistry"
+    ],
+    "interest_tags": [
+      "Healthcare",
+      "Science",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Healthcare",
+      "Research",
+      "Technology"
+    ],
+    "career_path": "Biotechnologist → Senior Biotechnologist → R&D Manager → Director of Biotechnology"
+  },
+  {
+    "id": "pharmacologist",
+    "name_cn": "药理学家",
+    "name_en": "Pharmacologist",
+    "category": "医疗与生命科学 Healthcare & Life Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Scientific Thinking",
+      "Learning Agility",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Pharmacology",
+      "Biochemistry",
+      "Drug Development",
+      "Toxicology",
+      "Pharmacokinetics",
+      "Physiology"
+    ],
+    "related_subjects": [
+      "Chemistry",
+      "Biology"
+    ],
+    "interest_tags": [
+      "Healthcare",
+      "Science",
+      "Research"
+    ],
+    "goal_tags": [
+      "Healthcare",
+      "Research",
+      "Science"
+    ],
+    "career_path": "Pharmacologist → Senior Pharmacologist → Lead Pharmacologist → Head of Pharmacology"
+  },
+  {
+    "id": "doctor",
+    "name_cn": "医生",
+    "name_en": "Doctor",
+    "category": "医疗与生命科学 Healthcare & Life Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Scientific Thinking",
+      "Learning Agility",
+      "Business Thinking"
+    ],
+    "preferred_knowledge": [
+      "Anatomy",
+      "Physiology",
+      "Pathology",
+      "Pharmacology",
+      "Clinical Diagnosis",
+      "Medical Ethics"
+    ],
+    "related_subjects": [
+      "Biology",
+      "Chemistry"
+    ],
+    "interest_tags": [
+      "Healthcare",
+      "Science",
+      "Social"
+    ],
+    "goal_tags": [
+      "Healthcare",
+      "Research",
+      "Public Policy"
+    ],
+    "career_path": "Resident → Attending Physician → Senior Attending → Chief of Medicine / Medical Director"
+  },
+  {
+    "id": "pharmacist",
+    "name_cn": "药剂师",
+    "name_en": "Pharmacist",
+    "category": "医疗与生命科学 Healthcare & Life Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Scientific Thinking",
+      "Learning Agility",
+      "Business Thinking"
+    ],
+    "preferred_knowledge": [
+      "Pharmaceuticals",
+      "Pharmacology",
+      "Chemistry",
+      "Drug Interactions",
+      "Clinical Pharmacy",
+      "Healthcare Systems"
+    ],
+    "related_subjects": [
+      "Chemistry",
+      "Biology"
+    ],
+    "interest_tags": [
+      "Healthcare",
+      "Science",
+      "Business"
+    ],
+    "goal_tags": [
+      "Healthcare",
+      "Business",
+      "Public Policy"
+    ],
+    "career_path": "Pharmacist → Clinical Pharmacist → Pharmacy Manager → Director of Pharmacy"
+  },
+  {
+    "id": "dentist",
+    "name_cn": "牙医",
+    "name_en": "Dentist",
+    "category": "医疗与生命科学 Healthcare & Life Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Scientific Thinking",
+      "Learning Agility",
+      "Business Thinking"
+    ],
+    "preferred_knowledge": [
+      "Dental Anatomy",
+      "Oral Pathology",
+      "Restorative Dentistry",
+      "Orthodontics",
+      "Periodontics",
+      "Radiography"
+    ],
+    "related_subjects": [
+      "Biology",
+      "Chemistry"
+    ],
+    "interest_tags": [
+      "Healthcare",
+      "Science",
+      "Social"
+    ],
+    "goal_tags": [
+      "Healthcare",
+      "Business",
+      "Research"
+    ],
+    "career_path": "General Dentist → Specialist (Orthodontist, etc.) → Dental Practice Owner → Dental Director"
+  },
+  {
+    "id": "medical_laboratory_scientist",
+    "name_cn": "医学检验师",
+    "name_en": "Medical Laboratory Scientist",
+    "category": "医疗与生命科学 Healthcare & Life Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Scientific Thinking",
+      "Learning Agility",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Clinical Chemistry",
+      "Hematology",
+      "Microbiology",
+      "Immunology",
+      "Laboratory Management",
+      "Quality Control"
+    ],
+    "related_subjects": [
+      "Biology",
+      "Chemistry"
+    ],
+    "interest_tags": [
+      "Healthcare",
+      "Science",
+      "Data"
+    ],
+    "goal_tags": [
+      "Healthcare",
+      "Research",
+      "Science"
+    ],
+    "career_path": "Medical Lab Scientist → Senior Lab Scientist → Lab Supervisor → Laboratory Director"
+  },
+  {
+    "id": "geneticist",
+    "name_cn": "遗传学家",
+    "name_en": "Geneticist",
+    "category": "医疗与生命科学 Healthcare & Life Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Scientific Thinking",
+      "Learning Agility",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Genetics",
+      "Genomics",
+      "Molecular Biology",
+      "Bioinformatics",
+      "Population Genetics",
+      "Genetic Counseling"
+    ],
+    "related_subjects": [
+      "Biology"
+    ],
+    "interest_tags": [
+      "Healthcare",
+      "Science",
+      "Research"
+    ],
+    "goal_tags": [
+      "Healthcare",
+      "Research",
+      "Science"
+    ],
+    "career_path": "Geneticist → Senior Geneticist → Lead Geneticist → Director of Genetics"
+  },
+  {
+    "id": "neuroscientist",
+    "name_cn": "神经科学家",
+    "name_en": "Neuroscientist",
+    "category": "医疗与生命科学 Healthcare & Life Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Scientific Thinking",
+      "Learning Agility",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Neuroscience",
+      "Neuroanatomy",
+      "Neurophysiology",
+      "Psychology",
+      "Molecular Biology",
+      "Data Analysis"
+    ],
+    "related_subjects": [
+      "Biology"
+    ],
+    "interest_tags": [
+      "Healthcare",
+      "Science",
+      "Research"
+    ],
+    "goal_tags": [
+      "Healthcare",
+      "Research",
+      "Science"
+    ],
+    "career_path": "Neuroscientist → Senior Scientist → Principal Investigator → Head of Neuroscience"
+  },
+  {
+    "id": "epidemiologist",
+    "name_cn": "流行病学家",
+    "name_en": "Epidemiologist",
+    "category": "医疗与生命科学 Healthcare & Life Science",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Epidemiology",
+      "Biostatistics",
+      "Public Health",
+      "Disease Surveillance",
+      "Research Methodology",
+      "Infectious Diseases"
+    ],
+    "related_subjects": [
+      "Biology",
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Healthcare",
+      "Science",
+      "Public Policy"
+    ],
+    "goal_tags": [
+      "Healthcare",
+      "Public Policy",
+      "Research"
+    ],
+    "career_path": "Epidemiologist → Senior Epidemiologist → Lead Epidemiologist → Public Health Director"
+  },
+  {
+    "id": "business_consultant",
+    "name_cn": "商业顾问",
+    "name_en": "Business Consultant",
+    "category": "商业与管理 Business",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Business Thinking",
+      "Learning Agility",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Business Strategy",
+      "Operations",
+      "Finance",
+      "Marketing",
+      "Organizational Behavior",
+      "Data Analysis"
+    ],
+    "related_subjects": [
+      "Business",
+      "Economics"
+    ],
+    "interest_tags": [
+      "Business",
+      "Finance",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Business",
+      "Finance",
+      "Technology"
+    ],
+    "career_path": "Consultant → Senior Consultant → Engagement Manager → Partner"
+  },
+  {
+    "id": "entrepreneur",
+    "name_cn": "企业家",
+    "name_en": "Entrepreneur",
+    "category": "商业与管理 Business",
+    "required_skills": [
+      "Business Thinking",
+      "Problem Solving",
+      "Learning Agility",
+      "Analytical Reasoning",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Business Planning",
+      "Finance",
+      "Marketing",
+      "Leadership",
+      "Product Development",
+      "Risk Management"
+    ],
+    "related_subjects": [
+      "Business",
+      "Economics"
+    ],
+    "interest_tags": [
+      "Business",
+      "Creative",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Business",
+      "Technology",
+      "Design"
+    ],
+    "career_path": "Founder → CEO → Serial Entrepreneur → Investor/Board Member"
+  },
+  {
+    "id": "marketing_manager",
+    "name_cn": "市场营销经理",
+    "name_en": "Marketing Manager",
+    "category": "商业与管理 Business",
+    "required_skills": [
+      "Business Thinking",
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Marketing Strategy",
+      "Consumer Behavior",
+      "Digital Marketing",
+      "Branding",
+      "Data Analytics",
+      "Advertising"
+    ],
+    "related_subjects": [
+      "Business"
+    ],
+    "interest_tags": [
+      "Business",
+      "Creative",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Business",
+      "Creative",
+      "Technology"
+    ],
+    "career_path": "Marketing Specialist → Marketing Manager → Senior Marketing Manager → Director of Marketing"
+  },
+  {
+    "id": "product_manager",
+    "name_cn": "产品经理",
+    "name_en": "Product Manager",
+    "category": "商业与管理 Business",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Business Thinking",
+      "Learning Agility",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Product Lifecycle",
+      "Market Research",
+      "UX Design",
+      "Agile Development",
+      "Data Analysis",
+      "Strategy"
+    ],
+    "related_subjects": [
+      "Business",
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Business",
+      "Technology",
+      "Design"
+    ],
+    "goal_tags": [
+      "Business",
+      "Technology",
+      "Design"
+    ],
+    "career_path": "Associate Product Manager → Product Manager → Senior PM → Director of Product"
+  },
+  {
+    "id": "project_manager",
+    "name_cn": "项目经理",
+    "name_en": "Project Manager",
+    "category": "商业与管理 Business",
+    "required_skills": [
+      "Business Thinking",
+      "Problem Solving",
+      "Learning Agility",
+      "Analytical Reasoning",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Project Management",
+      "Agile/Scrum",
+      "Risk Management",
+      "Budgeting",
+      "Leadership",
+      "Communication"
+    ],
+    "related_subjects": [
+      "Business"
+    ],
+    "interest_tags": [
+      "Business",
+      "Engineering",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Business",
+      "Engineering",
+      "Technology"
+    ],
+    "career_path": "Project Coordinator → Project Manager → Senior PM → Program Manager → PMO Director"
+  },
+  {
+    "id": "hr_manager",
+    "name_cn": "人力资源经理",
+    "name_en": "HR Manager",
+    "category": "商业与管理 Business",
+    "required_skills": [
+      "Business Thinking",
+      "Problem Solving",
+      "Learning Agility",
+      "Analytical Reasoning",
+      "Social Intelligence"
+    ],
+    "preferred_knowledge": [
+      "Human Resources",
+      "Recruitment",
+      "Employee Relations",
+      "Compensation",
+      "Labor Law",
+      "Organizational Development"
+    ],
+    "related_subjects": [
+      "Business"
+    ],
+    "interest_tags": [
+      "Business",
+      "Social",
+      "Education"
+    ],
+    "goal_tags": [
+      "Business",
+      "Social",
+      "Public Policy"
+    ],
+    "career_path": "HR Specialist → HR Manager → Senior HR Manager → Director of HR"
+  },
+  {
+    "id": "operations_manager",
+    "name_cn": "运营经理",
+    "name_en": "Operations Manager",
+    "category": "商业与管理 Business",
+    "required_skills": [
+      "Business Thinking",
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Operations Management",
+      "Supply Chain",
+      "Logistics",
+      "Process Improvement",
+      "Data Analysis",
+      "Quality Control"
+    ],
+    "related_subjects": [
+      "Business",
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Business",
+      "Engineering",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Business",
+      "Engineering",
+      "Finance"
+    ],
+    "career_path": "Operations Analyst → Operations Manager → Senior Operations Manager → Director of Operations"
+  },
+  {
+    "id": "management_analyst",
+    "name_cn": "管理分析师",
+    "name_en": "Management Analyst",
+    "category": "商业与管理 Business",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Business Thinking",
+      "Quantitative Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Management Consulting",
+      "Data Analysis",
+      "Business Strategy",
+      "Financial Analysis",
+      "Process Mapping"
+    ],
+    "related_subjects": [
+      "Business",
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Business",
+      "Data",
+      "Finance"
+    ],
+    "goal_tags": [
+      "Business",
+      "Finance",
+      "Technology"
+    ],
+    "career_path": "Management Analyst → Senior Analyst → Consultant → Partner"
+  },
+  {
+    "id": "sales_manager",
+    "name_cn": "销售经理",
+    "name_en": "Sales Manager",
+    "category": "商业与管理 Business",
+    "required_skills": [
+      "Business Thinking",
+      "Problem Solving",
+      "Learning Agility",
+      "Analytical Reasoning",
+      "Social Intelligence"
+    ],
+    "preferred_knowledge": [
+      "Sales Strategy",
+      "Customer Relationship",
+      "Negotiation",
+      "Marketing",
+      "Data Analysis",
+      "Forecasting"
+    ],
+    "related_subjects": [
+      "Business"
+    ],
+    "interest_tags": [
+      "Business",
+      "Creative",
+      "Social"
+    ],
+    "goal_tags": [
+      "Business",
+      "Finance",
+      "Technology"
+    ],
+    "career_path": "Sales Representative → Sales Manager → Senior Sales Manager → Director of Sales"
+  },
+  {
+    "id": "supply_chain_manager",
+    "name_cn": "供应链经理",
+    "name_en": "Supply Chain Manager",
+    "category": "商业与管理 Business",
+    "required_skills": [
+      "Business Thinking",
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Supply Chain Management",
+      "Logistics",
+      "Procurement",
+      "Inventory Management",
+      "Data Analysis",
+      "Risk Management"
+    ],
+    "related_subjects": [
+      "Business",
+      "Economics"
+    ],
+    "interest_tags": [
+      "Business",
+      "Engineering",
+      "Environment"
+    ],
+    "goal_tags": [
+      "Business",
+      "Engineering",
+      "Environment"
+    ],
+    "career_path": "Supply Chain Analyst → Supply Chain Manager → Senior Manager → Director of Supply Chain"
+  },
+  {
+    "id": "accountant",
+    "name_cn": "会计师",
+    "name_en": "Accountant",
+    "category": "会计与金融 Accounting & Finance",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Business Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Accounting Principles",
+      "Financial Reporting",
+      "Taxation",
+      "Auditing",
+      "Financial Statements",
+      "Regulatory Compliance"
+    ],
+    "related_subjects": [
+      "Accounting",
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Business",
+      "Finance",
+      "Data"
+    ],
+    "goal_tags": [
+      "Business",
+      "Finance",
+      "Public Policy"
+    ],
+    "career_path": "Junior Accountant → Accountant → Senior Accountant → Accounting Manager → CFO"
+  },
+  {
+    "id": "financial_analyst",
+    "name_cn": "金融分析师",
+    "name_en": "Financial Analyst",
+    "category": "会计与金融 Accounting & Finance",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Business Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Financial Analysis",
+      "Corporate Finance",
+      "Valuation",
+      "Financial Modeling",
+      "Accounting",
+      "Economics"
+    ],
+    "related_subjects": [
+      "Economics",
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Finance",
+      "Business",
+      "Data"
+    ],
+    "goal_tags": [
+      "Finance",
+      "Business",
+      "Technology"
+    ],
+    "career_path": "Financial Analyst → Senior Analyst → Associate → VP of Finance"
+  },
+  {
+    "id": "economist",
+    "name_cn": "经济学家",
+    "name_en": "Economist",
+    "category": "会计与金融 Accounting & Finance",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Macroeconomics",
+      "Microeconomics",
+      "Econometrics",
+      "Economic Theory",
+      "Data Analysis",
+      "Policy"
+    ],
+    "related_subjects": [
+      "Economics",
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Business",
+      "Finance",
+      "Public Policy"
+    ],
+    "goal_tags": [
+      "Public Policy",
+      "Finance",
+      "Research"
+    ],
+    "career_path": "Economist → Senior Economist → Lead Economist → Chief Economist"
+  },
+  {
+    "id": "investment_analyst",
+    "name_cn": "投资分析师",
+    "name_en": "Investment Analyst",
+    "category": "会计与金融 Accounting & Finance",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Business Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Investment Analysis",
+      "Portfolio Management",
+      "Financial Markets",
+      "Valuation",
+      "Risk Management",
+      "Economics"
+    ],
+    "related_subjects": [
+      "Economics",
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Finance",
+      "Business",
+      "Data"
+    ],
+    "goal_tags": [
+      "Finance",
+      "Business",
+      "Technology"
+    ],
+    "career_path": "Investment Analyst → Associate → Portfolio Manager → Managing Director"
+  },
+  {
+    "id": "banker",
+    "name_cn": "银行家",
+    "name_en": "Banker",
+    "category": "会计与金融 Accounting & Finance",
+    "required_skills": [
+      "Business Thinking",
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Banking Products",
+      "Financial Services",
+      "Risk Management",
+      "Regulatory Compliance",
+      "Economics",
+      "Sales"
+    ],
+    "related_subjects": [
+      "Economics",
+      "Accounting"
+    ],
+    "interest_tags": [
+      "Finance",
+      "Business",
+      "Social"
+    ],
+    "goal_tags": [
+      "Finance",
+      "Business",
+      "Public Policy"
+    ],
+    "career_path": "Bank Teller → Branch Manager → Regional Manager → Bank Executive"
+  },
+  {
+    "id": "auditor",
+    "name_cn": "审计师",
+    "name_en": "Auditor",
+    "category": "会计与金融 Accounting & Finance",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Business Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Auditing",
+      "Accounting",
+      "Internal Controls",
+      "Risk Assessment",
+      "Compliance",
+      "Financial Reporting"
+    ],
+    "related_subjects": [
+      "Accounting"
+    ],
+    "interest_tags": [
+      "Business",
+      "Finance",
+      "Data"
+    ],
+    "goal_tags": [
+      "Business",
+      "Finance",
+      "Public Policy"
+    ],
+    "career_path": "Audit Associate → Senior Auditor → Audit Manager → Audit Partner"
+  },
+  {
+    "id": "tax_consultant",
+    "name_cn": "税务顾问",
+    "name_en": "Tax Consultant",
+    "category": "会计与金融 Accounting & Finance",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Business Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Tax Law",
+      "Taxation",
+      "Corporate Tax",
+      "International Tax",
+      "Accounting",
+      "Compliance"
+    ],
+    "related_subjects": [
+      "Accounting",
+      "Economics"
+    ],
+    "interest_tags": [
+      "Business",
+      "Finance",
+      "Law"
+    ],
+    "goal_tags": [
+      "Business",
+      "Finance",
+      "Law"
+    ],
+    "career_path": "Tax Associate → Tax Consultant → Senior Tax Consultant → Tax Partner"
+  },
+  {
+    "id": "financial_manager",
+    "name_cn": "财务经理",
+    "name_en": "Financial Manager",
+    "category": "会计与金融 Accounting & Finance",
+    "required_skills": [
+      "Business Thinking",
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Financial Management",
+      "Budgeting",
+      "Forecasting",
+      "Cash Flow",
+      "Financial Analysis",
+      "Strategic Planning"
+    ],
+    "related_subjects": [
+      "Accounting",
+      "Economics"
+    ],
+    "interest_tags": [
+      "Business",
+      "Finance",
+      "Data"
+    ],
+    "goal_tags": [
+      "Business",
+      "Finance",
+      "Technology"
+    ],
+    "career_path": "Financial Analyst → Finance Manager → Senior Finance Manager → Director of Finance → CFO"
+  },
+  {
+    "id": "portfolio_manager",
+    "name_cn": "投资组合经理",
+    "name_en": "Portfolio Manager",
+    "category": "会计与金融 Accounting & Finance",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Business Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Portfolio Theory",
+      "Asset Allocation",
+      "Securities Analysis",
+      "Risk Management",
+      "Financial Markets"
+    ],
+    "related_subjects": [
+      "Economics",
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Finance",
+      "Business",
+      "Data"
+    ],
+    "goal_tags": [
+      "Finance",
+      "Business",
+      "Research"
+    ],
+    "career_path": "Analyst → Portfolio Manager → Senior Portfolio Manager → Chief Investment Officer"
+  },
+  {
+    "id": "credit_analyst",
+    "name_cn": "信贷分析师",
+    "name_en": "Credit Analyst",
+    "category": "会计与金融 Accounting & Finance",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Business Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Credit Analysis",
+      "Financial Statements",
+      "Risk Assessment",
+      "Accounting",
+      "Economic Indicators"
+    ],
+    "related_subjects": [
+      "Economics",
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Finance",
+      "Business",
+      "Data"
+    ],
+    "goal_tags": [
+      "Finance",
+      "Business",
+      "Technology"
+    ],
+    "career_path": "Credit Analyst → Senior Credit Analyst → Credit Manager → Head of Credit"
+  },
+  {
+    "id": "architect",
+    "name_cn": "建筑师",
+    "name_en": "Architect",
+    "category": "⑧ 建筑、设计与创意 Design & Creative",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Architectural Design",
+      "Building Construction",
+      "Structural Systems",
+      "CAD",
+      "Environmental Design",
+      "History"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Physics"
+    ],
+    "interest_tags": [
+      "Design",
+      "Engineering",
+      "Creative"
+    ],
+    "goal_tags": [
+      "Design",
+      "Engineering",
+      "Environment"
+    ],
+    "career_path": "Intern Architect → Architect → Senior Architect → Project Architect → Firm Partner"
+  },
+  {
+    "id": "interior_designer",
+    "name_cn": "室内设计师",
+    "name_en": "Interior Designer",
+    "category": "⑧ 建筑、设计与创意 Design & Creative",
+    "required_skills": [
+      "Creative Thinking",
+      "Problem Solving",
+      "Business Thinking",
+      "Learning Agility",
+      "Analytical Reasoning"
+    ],
+    "preferred_knowledge": [
+      "Interior Design",
+      "Space Planning",
+      "Materials",
+      "Color Theory",
+      "Lighting",
+      "Building Codes"
+    ],
+    "related_subjects": [
+      "Business"
+    ],
+    "interest_tags": [
+      "Creative",
+      "Design",
+      "Business"
+    ],
+    "goal_tags": [
+      "Design",
+      "Business",
+      "Creative"
+    ],
+    "career_path": "Junior Designer → Interior Designer → Senior Designer → Design Director"
+  },
+  {
+    "id": "industrial_designer",
+    "name_cn": "工业设计师",
+    "name_en": "Industrial Designer",
+    "category": "⑧ 建筑、设计与创意 Design & Creative",
+    "required_skills": [
+      "Creative Thinking",
+      "Problem Solving",
+      "Analytical Reasoning",
+      "Quantitative Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Product Design",
+      "Ergonomics",
+      "Materials",
+      "Manufacturing Processes",
+      "3D Modeling",
+      "Prototyping"
+    ],
+    "related_subjects": [
+      "Physics",
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Design",
+      "Engineering",
+      "Creative"
+    ],
+    "goal_tags": [
+      "Design",
+      "Engineering",
+      "Technology"
+    ],
+    "career_path": "Industrial Designer → Senior Designer → Lead Designer → Design Manager"
+  },
+  {
+    "id": "ux/ui_designer",
+    "name_cn": "UX/UI设计师",
+    "name_en": "UX/UI Designer",
+    "category": "⑧ 建筑、设计与创意 Design & Creative",
+    "required_skills": [
+      "Creative Thinking",
+      "Problem Solving",
+      "Analytical Reasoning",
+      "Learning Agility",
+      "Business Thinking"
+    ],
+    "preferred_knowledge": [
+      "User Research",
+      "Interaction Design",
+      "Prototyping",
+      "Visual Design",
+      "Usability Testing",
+      "Frontend Basics"
+    ],
+    "related_subjects": [
+      "Business",
+      "Creative"
+    ],
+    "interest_tags": [
+      "Design",
+      "Technology",
+      "Creative"
+    ],
+    "goal_tags": [
+      "Design",
+      "Technology",
+      "Business"
+    ],
+    "career_path": "Junior UX/UI Designer → UX/UI Designer → Senior Designer → UX Lead → Design Director"
+  },
+  {
+    "id": "graphic_designer",
+    "name_cn": "平面设计师",
+    "name_en": "Graphic Designer",
+    "category": "⑧ 建筑、设计与创意 Design & Creative",
+    "required_skills": [
+      "Creative Thinking",
+      "Problem Solving",
+      "Learning Agility",
+      "Business Thinking",
+      "Visual Communication"
+    ],
+    "preferred_knowledge": [
+      "Typography",
+      "Layout",
+      "Color",
+      "Branding",
+      "Adobe Creative Suite",
+      "Digital Media"
+    ],
+    "related_subjects": [
+      "Creative"
+    ],
+    "interest_tags": [
+      "Creative",
+      "Design",
+      "Business"
+    ],
+    "goal_tags": [
+      "Creative",
+      "Design",
+      "Business"
+    ],
+    "career_path": "Junior Graphic Designer → Graphic Designer → Senior Designer → Art Director"
+  },
+  {
+    "id": "product_designer",
+    "name_cn": "产品设计师",
+    "name_en": "Product Designer",
+    "category": "⑧ 建筑、设计与创意 Design & Creative",
+    "required_skills": [
+      "Creative Thinking",
+      "Problem Solving",
+      "Analytical Reasoning",
+      "Business Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Product Design",
+      "UX/UI",
+      "Prototyping",
+      "Materials",
+      "Manufacturing",
+      "Market Research"
+    ],
+    "related_subjects": [
+      "Business",
+      "Creative"
+    ],
+    "interest_tags": [
+      "Design",
+      "Business",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Design",
+      "Business",
+      "Technology"
+    ],
+    "career_path": "Product Designer → Senior Product Designer → Lead Product Designer → Director of Product Design"
+  },
+  {
+    "id": "urban_planner",
+    "name_cn": "城市规划师",
+    "name_en": "Urban Planner",
+    "category": "⑧ 建筑、设计与创意 Design & Creative",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Business Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Urban Planning",
+      "Geography",
+      "Environmental Science",
+      "Policy",
+      "Transportation",
+      "Data Analysis"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Business"
+    ],
+    "interest_tags": [
+      "Environment",
+      "Design",
+      "Public Policy"
+    ],
+    "goal_tags": [
+      "Environment",
+      "Public Policy",
+      "Design"
+    ],
+    "career_path": "Urban Planner → Senior Planner → Lead Planner → Director of Planning"
+  },
+  {
+    "id": "landscape_designer",
+    "name_cn": "景观设计师",
+    "name_en": "Landscape Designer",
+    "category": "⑧ 建筑、设计与创意 Design & Creative",
+    "required_skills": [
+      "Creative Thinking",
+      "Problem Solving",
+      "Analytical Reasoning",
+      "Learning Agility",
+      "Scientific Thinking"
+    ],
+    "preferred_knowledge": [
+      "Landscape Architecture",
+      "Botany",
+      "Ecology",
+      "Design",
+      "Construction",
+      "Environmental Impact"
+    ],
+    "related_subjects": [
+      "Biology",
+      "Creative"
+    ],
+    "interest_tags": [
+      "Environment",
+      "Design",
+      "Creative"
+    ],
+    "goal_tags": [
+      "Environment",
+      "Design",
+      "Science"
+    ],
+    "career_path": "Landscape Designer → Senior Designer → Project Manager → Principal Landscape Architect"
+  },
+  {
+    "id": "lawyer",
+    "name_cn": "律师",
+    "name_en": "Lawyer",
+    "category": "法律、社会与公共领域 Law, Society & Public",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Business Thinking",
+      "Learning Agility",
+      "Social Intelligence"
+    ],
+    "preferred_knowledge": [
+      "Law (specific fields)",
+      "Legal Research",
+      "Writing",
+      "Advocacy",
+      "Ethics",
+      "Negotiation"
+    ],
+    "related_subjects": [
+      "Business"
+    ],
+    "interest_tags": [
+      "Law",
+      "Social",
+      "Business"
+    ],
+    "goal_tags": [
+      "Law",
+      "Public Policy",
+      "Business"
+    ],
+    "career_path": "Associate → Lawyer → Senior Associate → Partner / Judge"
+  },
+  {
+    "id": "legal_consultant",
+    "name_cn": "法律顾问",
+    "name_en": "Legal Consultant",
+    "category": "法律、社会与公共领域 Law, Society & Public",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Business Thinking",
+      "Learning Agility",
+      "Social Intelligence"
+    ],
+    "preferred_knowledge": [
+      "Corporate Law",
+      "Regulatory Compliance",
+      "Contract Law",
+      "Legal Research",
+      "Risk Management"
+    ],
+    "related_subjects": [
+      "Business"
+    ],
+    "interest_tags": [
+      "Law",
+      "Business",
+      "Finance"
+    ],
+    "goal_tags": [
+      "Law",
+      "Business",
+      "Public Policy"
+    ],
+    "career_path": "Legal Advisor → Legal Consultant → Senior Consultant → Head of Legal"
+  },
+  {
+    "id": "policy_analyst",
+    "name_cn": "政策分析师",
+    "name_en": "Policy Analyst",
+    "category": "法律、社会与公共领域 Law, Society & Public",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Business Thinking",
+      "Learning Agility",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Public Policy",
+      "Economics",
+      "Political Science",
+      "Data Analysis",
+      "Research Methodology",
+      "Regulation"
+    ],
+    "related_subjects": [
+      "Economics",
+      "Business"
+    ],
+    "interest_tags": [
+      "Public Policy",
+      "Social",
+      "Business"
+    ],
+    "goal_tags": [
+      "Public Policy",
+      "Research",
+      "Social"
+    ],
+    "career_path": "Policy Analyst → Senior Policy Analyst → Policy Advisor → Director of Policy"
+  },
+  {
+    "id": "diplomat",
+    "name_cn": "外交官",
+    "name_en": "Diplomat",
+    "category": "法律、社会与公共领域 Law, Society & Public",
+    "required_skills": [
+      "Social Intelligence",
+      "Business Thinking",
+      "Problem Solving",
+      "Learning Agility",
+      "Analytical Reasoning"
+    ],
+    "preferred_knowledge": [
+      "International Relations",
+      "Diplomacy",
+      "Law",
+      "Economics",
+      "Language",
+      "Cultural Studies"
+    ],
+    "related_subjects": [
+      "Business",
+      "Economics"
+    ],
+    "interest_tags": [
+      "Social",
+      "Public Policy",
+      "Business"
+    ],
+    "goal_tags": [
+      "Public Policy",
+      "Social",
+      "Business"
+    ],
+    "career_path": "Diplomat → Senior Diplomat → Ambassador → Undersecretary of State"
+  },
+  {
+    "id": "public_administrator",
+    "name_cn": "公共管理人员",
+    "name_en": "Public Administrator",
+    "category": "法律、社会与公共领域 Law, Society & Public",
+    "required_skills": [
+      "Business Thinking",
+      "Problem Solving",
+      "Analytical Reasoning",
+      "Learning Agility",
+      "Social Intelligence"
+    ],
+    "preferred_knowledge": [
+      "Public Administration",
+      "Policy",
+      "Budgeting",
+      "Human Resources",
+      "Ethics",
+      "Government Operations"
+    ],
+    "related_subjects": [
+      "Business"
+    ],
+    "interest_tags": [
+      "Public Policy",
+      "Social",
+      "Business"
+    ],
+    "goal_tags": [
+      "Public Policy",
+      "Social",
+      "Business"
+    ],
+    "career_path": "Public Administrator → Senior Administrator → Agency Director → Government Official"
+  },
+  {
+    "id": "social_researcher",
+    "name_cn": "社会研究员",
+    "name_en": "Social Researcher",
+    "category": "法律、社会与公共领域 Law, Society & Public",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Social Science Research Methods",
+      "Statistics",
+      "Sociology",
+      "Survey Design",
+      "Data Analysis"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Business"
+    ],
+    "interest_tags": [
+      "Social",
+      "Science",
+      "Data"
+    ],
+    "goal_tags": [
+      "Research",
+      "Social",
+      "Public Policy"
+    ],
+    "career_path": "Social Researcher → Senior Researcher → Research Lead → Director of Social Research"
+  },
+  {
+    "id": "international_relations_analyst",
+    "name_cn": "国际关系分析师",
+    "name_en": "International Relations Analyst",
+    "category": "法律、社会与公共领域 Law, Society & Public",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Business Thinking",
+      "Learning Agility",
+      "Social Intelligence"
+    ],
+    "preferred_knowledge": [
+      "International Relations",
+      "Political Science",
+      "Economics",
+      "Diplomacy",
+      "Conflict Resolution",
+      "Data Analysis"
+    ],
+    "related_subjects": [
+      "Economics",
+      "Business"
+    ],
+    "interest_tags": [
+      "Social",
+      "Public Policy",
+      "Business"
+    ],
+    "goal_tags": [
+      "Public Policy",
+      "Research",
+      "Business"
+    ],
+    "career_path": "Junior Analyst → International Relations Analyst → Senior Analyst → Director of Global Affairs"
+  },
+  {
+    "id": "urban_development_planner",
+    "name_cn": "城市发展规划师",
+    "name_en": "Urban Development Planner",
+    "category": "法律、社会与公共领域 Law, Society & Public",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Business Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Urban Development",
+      "Planning",
+      "Economics",
+      "Real Estate",
+      "Sustainability",
+      "Policy"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Business"
+    ],
+    "interest_tags": [
+      "Environment",
+      "Design",
+      "Public Policy"
+    ],
+    "goal_tags": [
+      "Environment",
+      "Public Policy",
+      "Business"
+    ],
+    "career_path": "Urban Planner → Senior Planner → Development Manager → Director of Urban Development"
+  },
+  {
+    "id": "mathematics_teacher",
+    "name_cn": "数学教师",
+    "name_en": "Mathematics Teacher",
+    "category": "教育、媒体与其他专业 Education, Media & Others",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Learning Agility",
+      "Quantitative Thinking",
+      "Social Intelligence"
+    ],
+    "preferred_knowledge": [
+      "Mathematics (various topics)",
+      "Pedagogy",
+      "Curriculum Design",
+      "Assessment",
+      "Communication"
+    ],
+    "related_subjects": [
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Education",
+      "Science",
+      "Social"
+    ],
+    "goal_tags": [
+      "Education",
+      "Research",
+      "Social"
+    ],
+    "career_path": "Math Teacher → Senior Teacher → Head of Department → Principal / Educational Consultant"
+  },
+  {
+    "id": "science_teacher",
+    "name_cn": "科学教师",
+    "name_en": "Science Teacher",
+    "category": "教育、媒体与其他专业 Education, Media & Others",
+    "required_skills": [
+      "Scientific Thinking",
+      "Problem Solving",
+      "Learning Agility",
+      "Analytical Reasoning",
+      "Social Intelligence"
+    ],
+    "preferred_knowledge": [
+      "Physics/Chem/Bio",
+      "Pedagogy",
+      "Lab Safety",
+      "Curriculum Design",
+      "Communication"
+    ],
+    "related_subjects": [
+      "Physics",
+      "Chemistry",
+      "Biology"
+    ],
+    "interest_tags": [
+      "Education",
+      "Science",
+      "Social"
+    ],
+    "goal_tags": [
+      "Education",
+      "Research",
+      "Science"
+    ],
+    "career_path": "Science Teacher → Senior Teacher → Head of Science → Principal / Curriculum Specialist"
+  },
+  {
+    "id": "computer_science_teacher",
+    "name_cn": "计算机科学教师",
+    "name_en": "Computer Science Teacher",
+    "category": "教育、媒体与其他专业 Education, Media & Others",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Learning Agility",
+      "Social Intelligence"
+    ],
+    "preferred_knowledge": [
+      "Computer Science",
+      "Programming",
+      "Pedagogy",
+      "Curriculum Design",
+      "Communication",
+      "Technology"
+    ],
+    "related_subjects": [
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Education",
+      "Technology",
+      "Data"
+    ],
+    "goal_tags": [
+      "Education",
+      "Technology",
+      "Research"
+    ],
+    "career_path": "CS Teacher → Senior Teacher → Head of CS → EdTech Consultant"
+  },
+  {
+    "id": "university_researcher",
+    "name_cn": "大学研究员",
+    "name_en": "University Researcher",
+    "category": "教育、媒体与其他专业 Education, Media & Others",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Scientific Thinking",
+      "Learning Agility",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Research Methodology",
+      "Domain-specific Knowledge",
+      "Data Analysis",
+      "Scientific Writing",
+      "Grant Management"
+    ],
+    "related_subjects": [
+      "(Varies by domain)"
+    ],
+    "interest_tags": [
+      "Research",
+      "Science",
+      "Education"
+    ],
+    "goal_tags": [
+      "Research",
+      "Science",
+      "Education"
+    ],
+    "career_path": "Postdoc → University Researcher → Senior Researcher → Professor / Research Director"
+  },
+  {
+    "id": "science_communicator",
+    "name_cn": "科学传播者",
+    "name_en": "Science Communicator",
+    "category": "教育、媒体与其他专业 Education, Media & Others",
+    "required_skills": [
+      "Learning Agility",
+      "Problem Solving",
+      "Social Intelligence",
+      "Scientific Thinking",
+      "Creative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Science",
+      "Communication",
+      "Journalism",
+      "Social Media",
+      "Writing",
+      "Public Speaking"
+    ],
+    "related_subjects": [
+      "Science"
+    ],
+    "interest_tags": [
+      "Science",
+      "Creative",
+      "Education"
+    ],
+    "goal_tags": [
+      "Education",
+      "Public Policy",
+      "Science"
+    ],
+    "career_path": "Science Writer → Science Communicator → Senior Communicator → Director of Public Engagement"
+  },
+  {
+    "id": "technical_writer",
+    "name_cn": "技术写作者",
+    "name_en": "Technical Writer",
+    "category": "教育、媒体与其他专业 Education, Media & Others",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Learning Agility",
+      "Business Thinking",
+      "Communication"
+    ],
+    "preferred_knowledge": [
+      "Technical Writing",
+      "Documentation",
+      "Software/Tools",
+      "User Assistance",
+      "Communication",
+      "Information Design"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Science"
+    ],
+    "interest_tags": [
+      "Technology",
+      "Creative",
+      "Business"
+    ],
+    "goal_tags": [
+      "Technology",
+      "Business",
+      "Design"
+    ],
+    "career_path": "Technical Writer → Senior Technical Writer → Lead Technical Writer → Documentation Manager"
+  },
+  {
+    "id": "data_journalist",
+    "name_cn": "新闻数据记者",
+    "name_en": "Data Journalist",
+    "category": "教育、媒体与其他专业 Education, Media & Others",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Learning Agility",
+      "Creative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Data Analysis",
+      "Journalism",
+      "Data Visualization",
+      "Writing",
+      "Statistics",
+      "Storytelling"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Business"
+    ],
+    "interest_tags": [
+      "Data",
+      "Creative",
+      "Social"
+    ],
+    "goal_tags": [
+      "Social",
+      "Business",
+      "Technology"
+    ],
+    "career_path": "Data Journalist → Senior Data Journalist → Editor → Director of Data Journalism"
+  },
+  {
+    "id": "technology_journalist",
+    "name_cn": "科技记者",
+    "name_en": "Technology Journalist",
+    "category": "教育、媒体与其他专业 Education, Media & Others",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Learning Agility",
+      "Scientific Thinking",
+      "Creative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Technology",
+      "Journalism",
+      "Writing",
+      "Research",
+      "Communication",
+      "Trends Analysis"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Science"
+    ],
+    "interest_tags": [
+      "Technology",
+      "Creative",
+      "Social"
+    ],
+    "goal_tags": [
+      "Technology",
+      "Social",
+      "Business"
+    ],
+    "career_path": "Tech Journalist → Senior Tech Journalist → Editor → Media Director"
+  },
+  {
+    "id": "business_journalist",
+    "name_cn": "商业记者",
+    "name_en": "Business Journalist",
+    "category": "教育、媒体与其他专业 Education, Media & Others",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Business Thinking",
+      "Learning Agility",
+      "Creative Thinking"
+    ],
+    "preferred_knowledge": [
+      "Business",
+      "Economics",
+      "Journalism",
+      "Writing",
+      "Research",
+      "Communication"
+    ],
+    "related_subjects": [
+      "Business",
+      "Economics"
+    ],
+    "interest_tags": [
+      "Business",
+      "Creative",
+      "Social"
+    ],
+    "goal_tags": [
+      "Business",
+      "Social",
+      "Finance"
+    ],
+    "career_path": "Business Journalist → Senior Business Journalist → Editor → Media Director"
+  },
+  {
+    "id": "content_strategist",
+    "name_cn": "内容策略师",
+    "name_en": "Content Strategist",
+    "category": "教育、媒体与其他专业 Education, Media & Others",
+    "required_skills": [
+      "Creative Thinking",
+      "Business Thinking",
+      "Problem Solving",
+      "Learning Agility",
+      "Analytical Reasoning"
+    ],
+    "preferred_knowledge": [
+      "Content Strategy",
+      "Marketing",
+      "Writing",
+      "Branding",
+      "User Experience",
+      "SEO"
+    ],
+    "related_subjects": [
+      "Business"
+    ],
+    "interest_tags": [
+      "Business",
+      "Creative",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Business",
+      "Design",
+      "Technology"
+    ],
+    "career_path": "Content Strategist → Senior Strategist → Content Director → VP of Content"
+  },
+  {
+    "id": "ai_product_manager",
+    "name_cn": "AI产品经理",
+    "name_en": "AI Product Manager",
+    "category": "⑪ 新兴科技与跨学科职业 Emerging & Interdisciplinary",
+    "required_skills": [
+      "Business Thinking",
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Learning Agility",
+      "Quantitative Thinking"
+    ],
+    "preferred_knowledge": [
+      "AI/ML",
+      "Product Management",
+      "Data Analysis",
+      "Software Development",
+      "Market Strategy",
+      "UX"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Business"
+    ],
+    "interest_tags": [
+      "Technology",
+      "Business",
+      "Data"
+    ],
+    "goal_tags": [
+      "Technology",
+      "Business",
+      "Research"
+    ],
+    "career_path": "Associate PM → AI Product Manager → Senior PM → Director of AI Products"
+  },
+  {
+    "id": "ai_research_scientist",
+    "name_cn": "AI研究员",
+    "name_en": "AI Research Scientist",
+    "category": "⑪ 新兴科技与跨学科职业 Emerging & Interdisciplinary",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Machine Learning",
+      "Deep Learning",
+      "Statistics",
+      "Mathematics",
+      "Programming",
+      "Research Methodology"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Physics"
+    ],
+    "interest_tags": [
+      "Technology",
+      "Science",
+      "Research"
+    ],
+    "goal_tags": [
+      "Research",
+      "Technology",
+      "Science"
+    ],
+    "career_path": "AI Research Scientist → Senior Research Scientist → Principal Scientist → Head of AI Research"
+  },
+  {
+    "id": "fintech_engineer",
+    "name_cn": "金融科技工程师",
+    "name_en": "FinTech Engineer",
+    "category": "⑪ 新兴科技与跨学科职业 Emerging & Interdisciplinary",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Business Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Financial Systems",
+      "Programming",
+      "Distributed Systems",
+      "Blockchain",
+      "Algorithmic Trading",
+      "Data Engineering"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Economics"
+    ],
+    "interest_tags": [
+      "Finance",
+      "Technology",
+      "Data"
+    ],
+    "goal_tags": [
+      "Finance",
+      "Technology",
+      "Business"
+    ],
+    "career_path": "FinTech Engineer → Senior Engineer → Lead Engineer → CTO / Head of FinTech"
+  },
+  {
+    "id": "bioinformatics_scientist",
+    "name_cn": "生物信息学家",
+    "name_en": "Bioinformatics Scientist",
+    "category": "⑪ 新兴科技与跨学科职业 Emerging & Interdisciplinary",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Bioinformatics",
+      "Computational Biology",
+      "Programming",
+      "Statistics",
+      "Genomics",
+      "Data Mining"
+    ],
+    "related_subjects": [
+      "Biology",
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Science",
+      "Healthcare",
+      "Data"
+    ],
+    "goal_tags": [
+      "Healthcare",
+      "Research",
+      "Technology"
+    ],
+    "career_path": "Bioinformatics Scientist → Senior Scientist → Lead Scientist → Director of Bioinformatics"
+  },
+  {
+    "id": "healthcare_data_scientist",
+    "name_cn": "医疗数据科学家",
+    "name_en": "Healthcare Data Scientist",
+    "category": "⑪ 新兴科技与跨学科职业 Emerging & Interdisciplinary",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Healthcare Data",
+      "Statistics",
+      "Machine Learning",
+      "Programming",
+      "Clinical Informatics",
+      "Epidemiology"
+    ],
+    "related_subjects": [
+      "Biology",
+      "Mathematics"
+    ],
+    "interest_tags": [
+      "Healthcare",
+      "Data",
+      "Technology"
+    ],
+    "goal_tags": [
+      "Healthcare",
+      "Research",
+      "Technology"
+    ],
+    "career_path": "Healthcare Data Scientist → Senior Data Scientist → Lead Scientist → Chief Data Officer"
+  },
+  {
+    "id": "climate_data_scientist",
+    "name_cn": "气候数据科学家",
+    "name_en": "Climate Data Scientist",
+    "category": "⑪ 新兴科技与跨学科职业 Emerging & Interdisciplinary",
+    "required_skills": [
+      "Analytical Reasoning",
+      "Problem Solving",
+      "Quantitative Thinking",
+      "Scientific Thinking",
+      "Learning Agility"
+    ],
+    "preferred_knowledge": [
+      "Climate Science",
+      "Data Analysis",
+      "Statistics",
+      "Programming",
+      "Earth Science",
+      "Environmental Modeling"
+    ],
+    "related_subjects": [
+      "Mathematics",
+      "Physics",
+      "Chemistry"
+    ],
+    "interest_tags": [
+      "Environment",
+      "Science",
+      "Data"
+    ],
+    "goal_tags": [
+      "Environment",
+      "Research",
+      "Technology"
+    ],
+    "career_path": "Climate Data Scientist → Senior Scientist → Lead Scientist → Director of Climate Analytics"
+  }
+]

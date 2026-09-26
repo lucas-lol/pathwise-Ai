@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => void }) {
   const [step, setStep] = useState(1);
@@ -6,6 +6,15 @@ export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => voi
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [mathScore, setMathScore] = useState(50);
   const [selectedCareer, setSelectedCareer] = useState('');
+  const [careers, setCareers] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+
+useEffect(() => {
+  fetch('http://localhost:8000/api/careers')
+    .then(res => res.json())
+    .then(data => setCareers(data))
+    .catch(err => console.error('获取职业失败', err));
+}, []);
 
   // 测试职业数据 (稍后替换为 Excel 数据)
   const CAREERS = [
@@ -108,27 +117,57 @@ export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => voi
           </div>
         )}
 
-        {/* Step 4: 职业选择 (新增!) */}
-        {step === 4 && (
-          <div className="space-y-8 animate-[slideUpFade_0.5s_ease-out_forwards]">
-            <h2 className="text-3xl font-serif-cn font-bold text-white text-center">你想成为什么样的人？</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {CAREERS.map((career) => (
-                <button key={career.id} onClick={() => setSelectedCareer(career.id)}
-                  className={`p-6 rounded-xl border text-left transition-all ${selectedCareer === career.id ? 'bg-indigo-600/20 border-indigo-500 text-white' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'}`}>
-                  <div className="text-sm text-indigo-400 mb-1">{career.id.replace('_', ' ').toUpperCase()}</div>
-                  <div className="text-lg font-medium">{career.name}</div>
-                </button>
-              ))}
+        {/* Step 4: 职业选择 (动态加载 + 搜索) */}
+{step === 4 && (
+  <div className="space-y-6 animate-[slideUpFade_0.5s_ease-out_forwards]">
+    <h2 className="text-3xl font-serif-cn font-bold text-white text-center">你想成为什么样的人？</h2>
+    
+    {/* 搜索框 */}
+    <input 
+      type="text" 
+      placeholder="搜索职业名称或领域..." 
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+    />
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+      {careers
+        .filter(c => 
+          c.name_cn.includes(searchTerm) || 
+          c.name_en.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          c.category.includes(searchTerm)
+        )
+        .map((career) => (
+          <button 
+            key={career.id} 
+            onClick={() => setSelectedCareer(career.id)}
+            className={`p-4 rounded-xl border text-left transition-all ${
+              selectedCareer === career.id 
+                ? 'bg-indigo-600/20 border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.2)]' 
+                : 'bg-white/5 border-white/10 hover:bg-white/10'
+            }`}
+          >
+            <div className="flex justify-between items-start mb-1">
+              <span className="text-lg font-medium text-white">{career.name_cn}</span>
+              <span className="text-xs text-indigo-400 bg-indigo-900/30 px-2 py-1 rounded">{career.category}</span>
             </div>
-            <div className="flex justify-center">
-              <button onClick={handleFinalSubmit} disabled={!selectedCareer}
-                className="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)]">
-                生成我的学习路径
-              </button>
-            </div>
-          </div>
-        )}
+            <div className="text-sm text-slate-400">{career.name_en}</div>
+          </button>
+        ))}
+    </div>
+
+    <div className="flex justify-center pt-4">
+      <button 
+        onClick={handleFinalSubmit} 
+        disabled={!selectedCareer}
+        className="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)]"
+      >
+        生成我的学习路径
+      </button>
+    </div>
+  </div>
+)}
 
       </div>
     </div>

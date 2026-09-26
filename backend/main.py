@@ -9,7 +9,9 @@ from api import knowledge
 
 
 
+
 app = FastAPI(title="PathWise AI")
+app.include_router(careers_router, prefix="/api", tags=["careers"])
 app.include_router(knowledge.router)
 app.add_middleware(
     CORSMiddleware,
