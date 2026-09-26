@@ -1,5 +1,4 @@
 import { API_BASE_URL } from './config';
-import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import ProfileForm from './components/ProfileForm';
 import Assessment from './pages/Assessment';
@@ -15,6 +14,11 @@ function App() {
     if (!studentId) {
       studentId = String(Math.floor(100000 + Math.random() * 900000));
       localStorage.setItem('pw_student_id', studentId);
+    }
+
+    // 👇 新增：统一保存用户选择的年级，供 Assessment 兜底逻辑使用
+    if (data.grade) {
+      localStorage.setItem('pw_grade', data.grade);
     }
 
     try {
