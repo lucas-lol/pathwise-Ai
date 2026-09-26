@@ -1,30 +1,48 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AILoading from '../components/AILoading'; // 引入 AI 思考组件
 
 export default function RoutePage() {
   const [routeData, setRouteData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showAiThink, setShowAiThink] = useState(true); // 控制 AI 思考动画
   const navigate = useNavigate();
   const studentId = localStorage.getItem('pw_student_id');
 
   useEffect(() => {
     if (!studentId) { navigate('/'); return; }
     
-    fetch(`http://localhost:8000/api/students/${studentId}/route`)
-      .then(res => res.json())
-      .then(data => {
-        setRouteData(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
-      });
+    // 👇 降维打击核心：强制展示 AI 思考动画 2.5 秒，营造“正在疯狂计算”的压迫感
+    const timer = setTimeout(() => {
+      fetch(`http://localhost:8000/api/students/${studentId}/route`)
+        .then(res => res.json())
+        .then(data => {
+          setRouteData(data);
+          setLoading(false);
+          setShowAiThink(false); // 2.5 秒后关闭动画，展示路线
+        })
+        .catch(err => {
+          console.error(err);
+          setLoading(false);
+          setShowAiThink(false);
+        });
+    }, 2500);
+
+    return () => clearTimeout(timer); // 组件卸载时清理定时器
   }, [studentId, navigate]);
 
+  // 1. 如果正在“AI 思考”，直接全屏展示炫酷动画
+  if (showAiThink) {
+    return <AILoading />;
+  }
+
+  // 2. 常规加载状态
   if (loading) return <div className="min-h-screen flex items-center justify-center text-slate-400 animate-pulse">正在规划专属路线...</div>;
+  
+  // 3. 错误状态
   if (!routeData) return <div className="min-h-screen flex items-center justify-center text-red-400">加载路线失败</div>;
 
+  // 4. 正式展示路线
   return (
     <>
       <div className="aurora-background" />
@@ -73,7 +91,7 @@ export default function RoutePage() {
                     >
                       <div className="flex items-center gap-4">
                         <span className={`text-2xl ${task.status === 'ready' ? 'grayscale-0' : 'grayscale opacity-50'}`}>
-                          {task.type === 'quiz' ? '📝' : task.type === 'video' ? '🎬' : task.type === 'article' ? '📖' : '💻'}
+                          {task.type === 'quiz' ? '📝' : task.type === 'video' ? '' : task.type === 'article' ? '' : '💻'}
                         </span>
                         <div>
                           <div className={`font-medium ${task.status === 'ready' ? 'text-white' : 'text-slate-500'}`}>

@@ -5,6 +5,7 @@ from sqlalchemy import Column, String, Integer, JSON, ForeignKey
 from sqlalchemy.orm import relationship
 from .base import Base
 from models.base import Base
+from typing import Optional
 
 
 def utcnow() -> datetime:
@@ -32,6 +33,7 @@ class StudentProfile(Base):
     no_grade: Mapped[bool] = mapped_column(Boolean, default=False)
     profile_complete: Mapped[bool] = mapped_column(Boolean, default=False)
     assessment_complete: Mapped[bool] = mapped_column(Boolean, default=False)
+    selected_career: Mapped[Optional[str]] = mapped_column(default=None)
     career_selected: Mapped[bool] = mapped_column(Boolean, default=False)
     route_ready: Mapped[bool] = mapped_column(Boolean, default=False)
 
