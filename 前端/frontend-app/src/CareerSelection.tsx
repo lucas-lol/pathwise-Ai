@@ -1,5 +1,5 @@
 import { API_BASE_URL } from './config';
-import { useState, useEffect } from 'react';
+import { useState } from 'react'; 
 import { useNavigate } from 'react-router-dom';
 
 // 模拟 100 个职业数据 (稍后我们会替换成从后端读取 Excel)

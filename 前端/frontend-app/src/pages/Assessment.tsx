@@ -51,7 +51,7 @@ export default function Assessment() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(''); // 👈 修复：补充缺失的 error 状态
   
-  const navigate = useNavigate();
+  
   const studentId = localStorage.getItem('pw_student_id');
 
   useEffect(() => {
@@ -122,7 +122,13 @@ export default function Assessment() {
   };
 
   const progress = ((Object.keys(answers).length) / questions.length) * 100;
-
+if (loading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center text-slate-400 animate-pulse">
+      正在加载评估题目...
+    </div>
+  );
+}
   return (
     <>
       {/* 极光背景 */}
