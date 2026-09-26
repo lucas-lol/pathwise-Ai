@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import MagneticButton from './MagneticButton';
+import { API_BASE_URL } from '../config';
 
 export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => void }) {
   const [step, setStep] = useState(1);
@@ -10,49 +11,46 @@ export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => voi
   const [mathScore, setMathScore] = useState(50); 
   const [selectedCareer, setSelectedCareer] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // 职业数据状态
   const [careers, setCareers] = useState<any[]>([]);
   const [loadingCareers, setLoadingCareers] = useState(true);
+  const [error, setError] = useState(''); // 👈 新增：用于显示连接错误
 
-    // 获取职业数据 (带强制超时和兜底机制)
-  useEffect(() => {
+  // 👇 提取出来的加载函数，支持局部重试，不会丢失已填的表单数据
+  const loadCareers = async () => {
     console.log("🚀 开始获取职业数据...");
     setLoadingCareers(true);
+    setError(''); // 清空之前的错误
 
-    // 兜底数据：如果网络请求失败，至少能展示这些，保证演示不崩
-    const fallbackCareers = [
-      { id: "software_engineer", name_cn: "软件工程师", name_en: "Software Engineer", category: "Technology" },
-      { id: "data_scientist", name_cn: "数据科学家", name_en: "Data Scientist", category: "Data" },
-      { id: "financial_analyst", name_cn: "金融分析师", name_en: "Financial Analyst", category: "Business" },
-      { id: "ai_researcher", name_cn: "AI 研究员", name_en: "AI Researcher", category: "Science" },
-    ];
+    try {
+      // 👇 关键修改 1：将超时时间延长到 60 秒，给 Render 足够的冷启动时间
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("服务器启动较慢，请重试")), 60000)
+      );
 
-    const fetchCareers = async () => {
-      try {
-        // 创建一个 3 秒超时的 Promise
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error("请求超时")), 3000)
-        );
+      const response = await Promise.race([
+        fetch(`${API_BASE_URL}/api/careers`),
+        timeoutPromise
+      ]) as Response;
 
-        //  race：谁先完成就用谁的结果
-        const response = await Promise.race([
-          fetch('http://127.0.0.1:8000/api/careers'), // 使用 127.0.0.1 避免 localhost 解析问题
-          timeoutPromise
-        ]) as Response;
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      const data = await response.json();
+      console.log("✅ 成功获取职业数据:", data.length, "个");
+      setCareers(data);
+    } catch (err: any) {
+      console.warn("⚠️ 获取职业数据失败:", err);
+      // 👇 关键修改 2：绝对不使用假数据兜底，而是诚实告诉用户
+      setError('服务器正在云端启动中，请等待 30 秒后点击下方按钮重试');
+    } finally {
+      setLoadingCareers(false);
+    }
+  };
 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
-        const data = await response.json();
-        console.log("✅ 成功获取职业数据:", data.length, "个");
-        setCareers(data);
-      } catch (error) {
-        console.warn("⚠️ 网络请求失败或超时，启用兜底数据:", error);
-        setCareers(fallbackCareers); // 启用兜底数据
-      } finally {
-        setLoadingCareers(false); // 无论如何，3秒后必须关闭 loading
-      }
-    };
-
-    fetchCareers();
+  // 组件挂载时自动加载一次
+  useEffect(() => {
+    loadCareers();
   }, []);
 
   const handleNext = () => setStep(prev => prev + 1);
@@ -120,7 +118,6 @@ export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => voi
                   key={g}
                   onClick={() => {
                     setGrade(g);
-                    // 选中后延迟 250ms 自动跳转，让高亮动画播放完，体验更丝滑
                     setTimeout(() => handleNext(), 250);
                   }}
                   className={`p-6 rounded-2xl border-2 transition-all duration-300 group ${
@@ -136,7 +133,6 @@ export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => voi
               ))}
             </div>
             
-            {/* 保留手动下一步按钮作为备用 */}
             <button 
               onClick={handleNext} 
               disabled={!grade} 
@@ -245,7 +241,7 @@ export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => voi
           <div className="space-y-8 animate-[slideUpFade_0.5s_ease-out_forwards]">
             <div className="text-center space-y-2">
               <h2 className="text-4xl font-serif-cn font-bold text-white tracking-tight">你想成为什么样的人？</h2>
-              <p className="text-slate-400 text-lg">从 100 个职业中选择你的目标</p>
+              <p className="text-slate-400 text-lg">从云端数据库获取真实职业目标</p>
             </div>
             
             <input 
@@ -256,14 +252,25 @@ export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => voi
               className="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors text-lg"
             />
 
+            {/* 👇 关键修改 3：优雅处理 Loading 和 Error 状态 */}
             {loadingCareers ? (
-              <div className="text-center py-16 text-slate-400">
+              <div className="text-center py-16 text-slate-300">
                 <div className="animate-spin w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-                <p className="text-lg">正在连接职业数据库...</p>
+                <p className="text-lg animate-pulse">正在连接云端职业数据库，请稍候...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-16">
+                <p className="text-amber-400 text-lg mb-6">{error}</p>
+                <button 
+                  onClick={loadCareers} // 👈 局部重试，不会白屏，也不会丢失已填数据！
+                  className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)]"
+                >
+                  🔄 重新连接服务器
+                </button>
               </div>
             ) : careers.length === 0 ? (
               <div className="text-center py-16 text-red-400">
-                <p className="text-lg">⚠️ 无法获取职业数据，请检查后端</p>
+                <p className="text-lg">⚠️ 数据库为空，请联系管理员</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
@@ -301,16 +308,16 @@ export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => voi
               <button onClick={handleBack} className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-all">
                 上一步
               </button>
-                 <div className="flex-1">
-     <MagneticButton 
-       onClick={handleFinalSubmit} 
-       disabled={!selectedCareer}
-       className={`w-full py-4 text-lg ${!selectedCareer ? 'bg-slate-800 text-slate-500' : 'bg-gradient-to-r from-indigo-600 to-cyan-600 text-white'}`}
-       strength={0.2}
-     >
-       生成我的学习路径 ✨
-     </MagneticButton>
-   </div>
+              <div className="flex-1">
+                <MagneticButton 
+                  onClick={handleFinalSubmit} 
+                  disabled={!selectedCareer}
+                  className={`w-full py-4 text-lg ${!selectedCareer ? 'bg-slate-800 text-slate-500' : 'bg-gradient-to-r from-indigo-600 to-cyan-600 text-white'}`}
+                  strength={0.2}
+                >
+                  生成我的学习路径 ✨
+                </MagneticButton>
+              </div>
             </div>
           </div>
         )}
