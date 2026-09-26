@@ -8,8 +8,14 @@ import RoutePage from './pages/Route';
 function App() {
   // 处理画像（包含职业）提交的核心逻辑
   const handleProfileSubmit = async (data: any) => {
+    
+    //  必须移到这里面！这样 code 才能认识 data
+    console.log("🔥 App.tsx 收到的完整 data 对象:", data);
+    console.log("🔥🔥 data.grade 的值是:", data.grade);
+
     let studentId = localStorage.getItem('pw_student_id');
     alert('2. App.tsx 收到数据！年级是：' + data.grade);
+    
     // 👇 修复：如果没有 ID，生成一个 6 位数的纯数字 ID (例如: 839201)
     if (!studentId) {
       studentId = String(Math.floor(100000 + Math.random() * 900000));
