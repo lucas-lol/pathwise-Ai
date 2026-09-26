@@ -20,8 +20,17 @@ export default function CareerSelection() {
   const navigate = useNavigate();
   const studentId = localStorage.getItem('pw_student_id');
 
-  const handleSubmit = async () => {
-    if (!selectedCareer || !studentId) return;
+
+    const handleSubmit = async () => {
+    // 👇 修复 1：明确告诉用户为什么不能提交，不再静默退出
+    if (!studentId) {
+      alert('⚠️ 未找到学号，请返回首页重新填写画像。');
+      return;
+    }
+    if (!selectedCareer) {
+      alert('⚠️ 请先在列表中点击选择一个目标职业，然后再点击生成。');
+      return;
+    }
 
     try {
       // 发送给后端保存职业选择
@@ -34,10 +43,13 @@ export default function CareerSelection() {
       if (res.ok) {
         navigate('/assessment'); // 选完职业，去评估页
       } else {
-        alert('保存职业失败');
+        // 👇 修复 2：提供更具体的错误信息，帮助用户判断
+        alert(`⚠️ 保存职业失败 (状态码: ${res.status})。\n可能是服务器正在启动，请稍等 30 秒后重试。`);
       }
     } catch (e) {
-      alert('网络异常');
+      // 👇 修复 3：明确告知是网络或后端问题
+      console.error('提交职业时网络异常:', e);
+      alert('⚠️ 网络异常或服务器未响应。\n请检查网络，或等待 1 分钟后刷新页面重试。');
     }
   };
 
