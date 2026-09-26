@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Request
+from fastapi.responses import Response
 
 app = FastAPI(title="PathWise AI")
 
@@ -43,12 +45,12 @@ except Exception as e:
     print(f"⚠️ 警告: 无法加载 assessment 路由 ({e})")
 
 # 基础接口
+# 基础接口
 @app.get("/")
 def read_root():
     return {"message": "PathWise AI Backend is running!"}
 
-@app.api_route("/health", methods=["GET", "HEAD"])
-def health(request: Request):
-    if request.method == "HEAD":
-        return Response(status_code=200) # 免费监控工具的最爱
+# 👇 保持最简单！FastAPI 会自动处理 UptimeRobot 的 HEAD 请求并返回 200 OK
+@app.get("/health")
+def health():
     return {"ok": True}
