@@ -1,106 +1,164 @@
+/* ==========================================
+   1. Tailwind 核心指令 (必须有！)
+   ========================================== */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* 1. 强制字体与背景 */
+/* ==========================================
+   2. 基础样式重置
+   ========================================== */
 body {
-  background-color: #020617 !important;
-  color: #f8fafc !important;
-  font-family: 'Noto Sans SC', 'Inter', sans-serif !important;
   margin: 0;
-  padding: 0;
-  overflow-x: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #020617; /* 防止白屏闪烁 */
+  color: #e2e8f0;
 }
 
-/* 2. 强制玻璃拟态卡片 (核心！) */
-.glass-card {
-  background: rgba(30, 41, 59, 0.6) !important; /* 半透明深蓝 */
-  backdrop-filter: blur(20px) !important; /* 强模糊 */
-  -webkit-backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important; /* 微光边框 */
-  border-radius: 24px !important; /* 大圆角 */
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8) !important; /* 深阴影 */
-  padding: 40px !important; /* 强制内边距，解决拥挤 */
-  margin-bottom: 32px !important; /* 强制外边距，解决拥挤 */
-  transition: all 0.3s ease;
+/* 自定义字体类 (如果有) */
+.font-serif-cn {
+  font-family: 'Noto Serif SC', serif; /* 确保你引入了这个字体，或者用系统默认 */
 }
 
-.glass-card:hover {
-  border-color: rgba(99, 102, 241, 0.3) !important; /* 悬停变蓝 */
-  box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.15) !important;
-}
+/* ==========================================
+   3. 高级动态深空引擎 (最终优化版)
+   ========================================== */
 
-/* 3. 极光背景 (直接用 CSS 画，不依赖 DOM) */
-.aurora-background {
-  position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
-  z-index: -1;
-  background: 
-    radial-gradient(circle at 15% 50%, rgba(79, 70, 229, 0.15) 0%, transparent 50%),
-    radial-gradient(circle at 85% 30%, rgba(14, 165, 233, 0.15) 0%, transparent 50%);
-  animation: pulseAurora 10s infinite alternate;
-}
-
-@keyframes pulseAurora {
-  0% { opacity: 0.5; transform: scale(1); }
-  100% { opacity: 1; transform: scale(1.1); }
-}
-
-/* 4. 标题字体 */
-.font-title {
-  font-family: 'Noto Serif SC', serif !important;
-  font-weight: 700;
-}
-
-/* 5. 进度条容器 */
-.progress-track {
-  width: 100%;
-  height: 8px;
-  background: rgba(30, 41, 59, 0.8);
-  border-radius: 999px;
+/* 基础背景 */
+.aurora-bg {
+  background-color: #020617;
+  position: relative;
   overflow: hidden;
-  margin-top: 8px;
+  min-height: 100vh;
 }
 
-/* 6. 进度条填充 (渐变) */
-.progress-fill {
-  height: 100%;
-  border-radius: 999px;
-  transition: width 1s ease-out;
-  box-shadow: 0 0 10px currentColor;
+/* 旋转背景光轮 (深邃色调) */
+/* 旋转背景光轮 (纯粹深蓝色调) */
+.bg-rotate-wheel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120vw;
+  height: 120vw;
+  transform: translate(-50%, -50%);
+  /* 使用纯粹的蓝色渐变 */
+  background: conic-gradient(from 0deg at 50% 50%, #0f172a 0deg, #1e3a8a 120deg, #1e40af 240deg, #0f172a 360deg);
+  filter: blur(120px);
+  opacity: 0.5;
+  animation: rotateWheel 40s linear infinite;
+  z-index: 0;
+  pointer-events: none;
 }
 
-/* 添加在 index.css 最末尾 */
-@layer utilities {
-  .card-shine {
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .card-shine::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(
-      to right,
-      transparent 0%,
-      rgba(255, 255, 255, 0.05) 50%,
-      transparent 100%
-    );
-    transform: skewX(-25deg);
-    transition: none;
-  }
+.bg-rotate-wheel-reverse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 100vw;
+  transform: translate(-50%, -50%);
+  /* 使用更深的蓝色渐变 */
+  background: conic-gradient(from 180deg at 50% 50%, #020617 0deg, #172554 120deg, #1e3a8a 240deg, #020617 360deg);
+  filter: blur(150px);
+  opacity: 0.4;
+  animation: rotateWheelReverse 50s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+}
 
-  .card-shine:hover::before {
-    animation: shine 0.75s;
-  }
+@keyframes rotateWheel {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
 
-  @keyframes shine {
-    100% {
-      left: 125%;
-    }
-  }
+@keyframes rotateWheelReverse {
+  from { transform: translate(-50%, -50%) rotate(360deg); }
+  to { transform: translate(-50%, -50%) rotate(0deg); }
+}
+
+/* 强鼠标光晕 */
+.mouse-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+}
+
+/* 干净的 3D 卡片 (使用 CSS 变量) */
+.card-glow-border {
+  position: relative;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.5rem;
+  overflow: hidden;
+  z-index: 10;
+  transform: perspective(1200px) rotateX(var(--rotate-x, 0deg)) rotateY(var(--rotate-y, 0deg));
+  transition: transform 0.1s ease-out, border-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+  will-change: transform;
+}
+
+.card-glow-border:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.7);
+}
+
+/* 入场动画 */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+
+/* 脉冲按钮 */
+@keyframes pulse-glow-strong {
+  0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.6); }
+  50% { box-shadow: 0 0 50px rgba(99, 102, 241, 1); }
+}
+
+.btn-pulse-strong {
+  animation: pulse-glow-strong 1.5s infinite;
+}
+
+/* 进度条流光 */
+.progress-glow {
+  background: linear-gradient(180deg, #4f46e5 0%, #8b5cf6 50%, #ec4899 100%);
+  background-size: 100% 200%;
+  animation: flowDown 3s linear infinite;
+}
+
+@keyframes flowDown {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 0% 200%; }
+}
+
+/* 玻璃拟态卡片 (备用) */
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
 }

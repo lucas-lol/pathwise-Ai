@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import MagneticButton from './MagneticButton';
 
 export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => void }) {
   const [step, setStep] = useState(1);
@@ -300,13 +301,16 @@ export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => voi
               <button onClick={handleBack} className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-all">
                 上一步
               </button>
-              <button 
-                onClick={handleFinalSubmit} 
-                disabled={!selectedCareer}
-                className="flex-1 py-4 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 disabled:from-slate-700 disabled:to-slate-700 text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)] disabled:shadow-none"
-              >
-                生成我的学习路径
-              </button>
+                 <div className="flex-1">
+     <MagneticButton 
+       onClick={handleFinalSubmit} 
+       disabled={!selectedCareer}
+       className={`w-full py-4 text-lg ${!selectedCareer ? 'bg-slate-800 text-slate-500' : 'bg-gradient-to-r from-indigo-600 to-cyan-600 text-white'}`}
+       strength={0.2}
+     >
+       生成我的学习路径 ✨
+     </MagneticButton>
+   </div>
             </div>
           </div>
         )}
