@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AILoading from '../components/AILoading'; // 引入 AI 思考组件
+import { API_BASE_URL } from '../config';
 
 export default function RoutePage() {
   const [routeData, setRouteData] = useState<any>(null);
@@ -14,7 +15,7 @@ export default function RoutePage() {
     
     // 👇 降维打击核心：强制展示 AI 思考动画 2.5 秒，营造“正在疯狂计算”的压迫感
     const timer = setTimeout(() => {
-      fetch(`http://localhost:8000/api/students/${studentId}/route`)
+      fetch(`${API_BASE_URL}/api/students/${studentId}/route`)
         .then(res => res.json())
         .then(data => {
           setRouteData(data);

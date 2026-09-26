@@ -1,3 +1,4 @@
+import { API_BASE_URL } from './config';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -24,7 +25,7 @@ export default function CareerSelection() {
 
     try {
       // 发送给后端保存职业选择
-      const res = await fetch(`http://localhost:8000/api/students/${studentId}/career`, {
+      const res = await fetch(`${API_BASE_URL}/api/students/${studentId}/state`, {
         method: 'PUT', // 或 POST，取决于你的后端接口
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ selected_career: selectedCareer })

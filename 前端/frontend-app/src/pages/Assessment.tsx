@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../config';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -54,7 +55,7 @@ export default function Assessment() {
   const studentId = localStorage.getItem('pw_student_id');
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/assessments/mathematics/questions')
+    fetch(`${API_BASE_URL}/api/students/${studentId}/state`)
       .then(res => res.ok ? res.json() : Promise.reject('No data'))
       .then(data => {
         if (data && data.length > 0) {
@@ -90,7 +91,7 @@ export default function Assessment() {
     setSubmitting(true);
     
     try {
-      const res = await fetch(`http://localhost:8000/api/students/${studentId}/assessment`, {
+      const res = await fetch(`${API_BASE_URL}/api/students/${studentId}/assessment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

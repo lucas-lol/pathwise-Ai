@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
 import MagneticButton from '../components/MagneticButton';
+import { API_BASE_URL } from '../config';
 
 interface StateData {
   funnel: Record<string, boolean>;
@@ -69,11 +70,11 @@ export default function Dashboard() {
     };
     window.addEventListener('mousemove', handleMouseMove);
 
-    fetch(`http://localhost:8000/api/students/${id}/state`)
+    fetch(`${API_BASE_URL}/api/students/${id}/state`)
       .then(res => res.ok ? res.json() : Promise.reject())
       .then(data => {
         setState(data);
-        return fetch(`http://localhost:8000/api/knowledge/points`).catch(() => null);
+        return fetch(`${API_BASE_URL}/api/students/${id}/state`).catch(() => null);
       })
       .then(res => res?.ok ? res.json() : [])
       .then(data => {
