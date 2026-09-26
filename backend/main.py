@@ -47,6 +47,8 @@ except Exception as e:
 def read_root():
     return {"message": "PathWise AI Backend is running!"}
 
-@app.get("/health")
-def health():
+@app.api_route("/health", methods=["GET", "HEAD"])
+def health(request: Request):
+    if request.method == "HEAD":
+        return Response(status_code=200) # 免费监控工具的最爱
     return {"ok": True}
