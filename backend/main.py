@@ -3,10 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="PathWise AI")
 
-# 1. 最宽松的跨域配置 (MVP 演示专用，允许任何来源)
+from fastapi.middleware.cors import CORSMiddleware
+
+# 确保这段代码在 app = FastAPI() 之后
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 必须是星号，允许所有来源
+    allow_origins=["*"],  # <--- 必须是星号，允许所有网站访问
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
