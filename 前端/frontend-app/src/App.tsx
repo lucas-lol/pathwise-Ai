@@ -6,31 +6,44 @@ import Dashboard from './pages/Dashboard';
 
 function App() {
   // 处理画像（包含职业）提交的核心逻辑
-  const handleProfileSubmit = async (data: any) => {
+   const handleProfileSubmit = async (data: any) => {
     let studentId = localStorage.getItem('pw_student_id');
+    
+    // 👇 修复：如果没有 ID，生成一个 6 位数的纯数字 ID (例如: 839201)
+    // 这样后端 user_id: int 就能成功接收并解析了
     if (!studentId) {
-      studentId = 'stu_' + Math.random().toString(36).substring(2, 10);
+      studentId = String(Math.floor(100000 + Math.random() * 900000));
       localStorage.setItem('pw_student_id', studentId);
     }
 
     try {
-      // 发送给后端保存画像和职业选择
       const res = await fetch(`http://localhost:8000/api/students/${studentId}/profile`, {
-        method: 'PUT', // 如果后端是 POST，请改为 'POST'
+        method: 'PUT', 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
 
       if (res.ok) {
-        // 成功后，直接跳转到 Dashboard
         window.location.href = '/dashboard';
       } else {
+        // 👇 修复：更智能地解析后端错误信息，不再显示 [object Object]
         const errorData = await res.json();
-        alert(`保存失败: ${errorData.detail || '未知错误'}`);
+        let errorMsg = '未知错误';
+        
+        // 处理 FastAPI 常见的 422 验证错误格式
+        if (errorData.detail && Array.isArray(errorData.detail)) {
+          errorMsg = errorData.detail.map((d: any) => d.msg).join(', ');
+        } else if (errorData.detail) {
+          errorMsg = errorData.detail;
+        } else {
+          errorMsg = JSON.stringify(errorData);
+        }
+        
+        alert(`保存失败: ${errorMsg}`);
       }
     } catch (error) {
       console.error('后端连接失败:', error);
-      alert('网络异常：无法连接到后端。\n\n请确保：\n1. 后端服务 (uvicorn) 正在运行\n2. 端口为 8000');
+      alert('网络异常：无法连接到后端。\n请确保后端服务 (uvicorn) 正在运行且端口为 8000');
     }
   };
 

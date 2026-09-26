@@ -9,7 +9,7 @@ interface StateData {
 
 const FUNNEL_STEPS = [
   { key: 'profile_complete', label: '画像完成', symbol: '👤' },
-  { key: 'assessment_complete', label: '评估完成', symbol: '' },
+  { key: 'assessment_complete', label: '评估完成', symbol: '📝' },
   { key: 'career_selected', label: '职业选择', symbol: '💼' },
   { key: 'route_ready', label: '路线就绪', symbol: '🚀' },
 ];
@@ -36,7 +36,7 @@ export default function Dashboard() {
       .then(data => {
         setState(data);
         
-        // 2. 状态获取成功后，获取知识点 (MVP 极速版：直接读取 JSON)
+        // 2. 状态获取成功后，获取知识点
         const currentGrade = data?.profile?.grade || '初一';
         return fetch(`http://localhost:8000/api/knowledge/points`);
       })
@@ -49,7 +49,6 @@ export default function Dashboard() {
       })
       .catch(e => {
         console.error(e);
-        // 如果知识点获取失败，不阻塞主界面，只记录错误
         setKnowledgeLoading(false);
         if (!state) setError('加载状态失败：' + e.message);
       });
@@ -93,7 +92,6 @@ export default function Dashboard() {
           onMouseLeave={() => setIsHovering(false)}
           className="relative overflow-hidden glass-card p-10 min-h-[200px] flex items-center justify-between group cursor-default"
         >
-          {/* 鼠标跟踪光晕层 */}
           <div 
             className="absolute pointer-events-none transition-all duration-500 ease-out"
             style={{
@@ -115,47 +113,55 @@ export default function Dashboard() {
             <p className="text-slate-400 font-light max-w-md">你的学习路径将围绕此方向展开，AI 会为你定制专属内容。</p>
           </div>
 
-          {/* 纯 CSS 图标容器 */}
           <div className="relative z-10 hidden md:flex items-center justify-center w-20 h-20 rounded-2xl bg-white/5 border border-white/10">
              <span className={`text-4xl transition-all duration-500 ${isHovering ? 'scale-110 drop-shadow-[0_0_10px_rgba(99,102,241,0.8)]' : 'grayscale opacity-50'}`}>
-               
+               💼
              </span>
           </div>
         </div>
 
-        {/* 2. 漏斗状态：垂直互动时间轴 */}
+        {/* 2. 漏斗状态：垂直互动时间轴 (已修复括号并加入“开始评估”按钮) */}
         <div className="glass-card p-8">
           <h3 className="text-xl font-serif-cn font-medium text-white mb-8">学习路径进度</h3>
           <div className="relative space-y-8 pl-4">
-            {/* 背景连线 */}
             <div className="absolute left-[19px] top-2 bottom-2 w-0.5 bg-slate-800" />
             
-            {FUNNEL_STEPS.map((step, index) => {
+            {FUNNEL_STEPS.map((step) => {
               const isDone = funnel?.[step.key];
               return (
                 <div key={step.key} className="relative flex items-center group">
-                  {/* 节点 */}
                   <div className={`relative z-10 flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 ${
                     isDone 
                       ? 'bg-indigo-600 border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]' 
-                      : 'bg-slate-900 border-slate-700 group-hover:border-slate-500'
+                      : 'bg-slate-900 border-slate-700'
                   }`}>
                     {isDone ? (
                       <span className="text-white text-lg font-bold">✓</span>
                     ) : (
-                      <span className="text-slate-500 text-lg group-hover:text-slate-300">○</span>
+                      <span className="text-slate-500 text-lg">○</span>
                     )}
                   </div>
                   
-                  {/* 内容 */}
-                  <div className="ml-6 flex-1">
-                    <div className={`text-lg font-medium transition-colors flex items-center gap-3 ${isDone ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'}`}>
-                      <span className="text-xl">{step.symbol}</span>
-                      {step.label}
+                  <div className="ml-6 flex-1 flex items-center justify-between">
+                    <div>
+                      <div className={`text-lg font-medium transition-colors flex items-center gap-3 ${isDone ? 'text-white' : 'text-slate-400'}`}>
+                        <span className="text-xl">{step.symbol}</span>
+                        {step.label}
+                      </div>
+                      <div className="text-sm text-slate-500 ml-9">
+                        {isDone ? '已完成' : '待解锁'}
+                      </div>
                     </div>
-                    <div className="text-sm text-slate-500 ml-9">
-                      {isDone ? '已完成' : '待解锁'}
-                    </div>
+
+                    {/* 👇 关键修复：如果是“评估完成”且未完成，显示按钮 */}
+                    {step.key === 'assessment_complete' && !isDone && (
+                      <button 
+                        onClick={() => window.location.href = '/assessment'}
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-all shadow-lg mr-4"
+                      >
+                        开始评估 →
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -187,17 +193,16 @@ export default function Dashboard() {
               </h2>
             </div>
             
-            {/* 按 domain (领域) 分组展示 */}
             {Object.entries(
               knowledgeList
                 .filter(item => item.grade === currentGrade)
-                .reduce((acc, item) => {
+                .reduce((acc: any, item: any) => {
                   const domain = item.domain || '其他';
                   if (!acc[domain]) acc[domain] = [];
                   acc[domain].push(item);
                   return acc;
-                }, {} as Record<string, any[]>)
-            ).map(([domain, items]) => (
+                }, {})
+            ).map(([domain, items]: [string, any[]]) => (
               <div key={domain} className="space-y-4">
                 <h3 className="text-lg font-medium text-indigo-400 border-b border-white/5 pb-2">
                   {domain}
@@ -213,7 +218,6 @@ export default function Dashboard() {
                           [{item.chapter}] {item.name}
                         </span>
                         <div className="flex gap-1">
-                          {/* 重要度星星 */}
                           {Array.from({ length: item.importance }).map((_, i) => (
                             <span key={`imp-${i}`} className="text-amber-400 text-xs">★</span>
                           ))}
