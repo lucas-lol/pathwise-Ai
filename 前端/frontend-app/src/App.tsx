@@ -9,7 +9,7 @@ function App() {
   // 处理画像（包含职业）提交的核心逻辑
   const handleProfileSubmit = async (data: any) => {
     let studentId = localStorage.getItem('pw_student_id');
-    alert('1. 按钮被点击！当前 grade 是：' + data.grade); 
+    alert('2. App.tsx 收到数据！年级是：' + data.grade);
     // 👇 修复：如果没有 ID，生成一个 6 位数的纯数字 ID (例如: 839201)
     if (!studentId) {
       studentId = String(Math.floor(100000 + Math.random() * 900000));
