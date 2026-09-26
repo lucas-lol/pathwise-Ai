@@ -50,7 +50,7 @@ def default_state(user_id: int) -> dict:
 
 
 def get_or_create_state(db: Session, user_id: int) -> StudentState:
-    row = db.query(StudentState).filter(StudentState.user_id == user_id).one_or_none()
+    row = db.query(StudentState).filter(StudentState.user_id == user_id).first()
     if row:
         return row
     payload = default_state(user_id)
@@ -58,6 +58,10 @@ def get_or_create_state(db: Session, user_id: int) -> StudentState:
     db.add(row)
     db.commit()
     db.refresh(row)
+    # 下面保持你原来的逻辑不变...
+    if not row:
+        # 创建新记录的逻辑...
+        pass
     return row
 
 
