@@ -57,6 +57,8 @@ export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => voi
   const handleBack = () => setStep(prev => prev - 1);
 
   const handleFinalSubmit = () => {
+    console.log("🔍 准备提交，当前的 grade 是:", grade); 
+    localStorage.setItem('pw_grade', grade); 
     onSubmit({
       grade,
       interests,
