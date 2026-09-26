@@ -1,6 +1,6 @@
 import { API_BASE_URL } from '../config';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 
 type Question = {
   id: string;
