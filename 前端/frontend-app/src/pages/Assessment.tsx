@@ -73,6 +73,7 @@ export default function Assessment() {
           throw new Error('No questions in backend');
         }
       } catch (err) {
+        console.error("❌ 后端 API 请求失败:", err);
         console.warn("⚠️ 后端获取题目失败,启用智能分级兜底数据", err);
         
         // 👇 智能兜底逻辑：按优先级获取年级

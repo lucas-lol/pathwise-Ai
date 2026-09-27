@@ -8,13 +8,6 @@ import RoutePage from './pages/Route';
 function App() {
   // 处理画像（包含职业）提交的核心逻辑
   const handleProfileSubmit = async (data: any) => {
-    localStorage.setItem('pw_grade', '初三'); 
-    
-    console.log("🔍 强制存入了 pw_grade: 初三");
-    //  必须移到这里面！这样 code 才能认识 data
-    console.log("🔥 App.tsx 收到的完整 data 对象:", data);
-    console.log("🔥🔥 data.grade 的值是:", data.grade);
-
     let studentId = localStorage.getItem('pw_student_id');
     alert('2. App.tsx 收到数据！年级是：' + data.grade);
     
@@ -57,7 +50,7 @@ function App() {
       }
 
       const result = await response.json();
-      console.log('提交成功:', result);
+      console.info('提交成功:', result);
       
       // 提交成功后跳转到 Dashboard
       window.location.href = '/dashboard';
