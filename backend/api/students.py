@@ -121,53 +121,101 @@ def submit_assessment(user_id: int, body: dict, db: Session = Depends(get_db)):
 @router.get("/{user_id}/route")
 def get_student_route(user_id: int, db: Session = Depends(get_db)):
     """
-    测试版：硬编码所有数据，确保 content 字段存在
+    根据用户的年级和职业目标，动态生成个性化的学习路线（包含具体题目内容）。
     """
-    # 获取用户信息（简化版）
-    user = db.get(User, user_id) if db else None
-    grade = user.grade if user and user.grade else "高三"
-    career_name = "Ai Engineer"
+    # 1. 安全获取用户数据
+    user = None
+    profile = None
+    grade = "高一"  # 默认值
+    career_id = "software_engineer" # 默认值
     
-    #  硬编码题目内容，绝对不会再丢！
-    test_content = {
-        "questions": [{
-            "question": f"【测试版】这是给 {grade} 年级的专属测试题目：两点之间什么最短？",
-            "options": [
-                {"id": "A", "text": "直线"},
-                {"id": "B", "text": "线段"},
-                {"id": "C", "text": "射线"},
-                {"id": "D", "text": "曲线"}
-            ],
-            "correctAnswer": "B"
-        }]
-    }
-    
+    try:
+        user = db.get(User, user_id)
+        if user:
+            profile = db.query(StudentProfile).filter(StudentProfile.user_id == user_id).first()
+            if user.grade:
+                grade = user.grade
+            if profile and profile.selected_career:
+                career_id = profile.selected_career
+    except Exception as e:
+        print(f"⚠️ 数据库查询异常，使用默认数据: {e}")
+
+    career_name = career_id.replace('_', ' ').title()
+
+    # 2. 动态题库 (核心：根据年级返回不同的具体题目)
+    quiz_content = {}
+    if grade in ["初一", "初二"]:
+        phase1_desc = f"针对 {grade} 核心概念，通过趣味题目建立学科兴趣与自信。"
+        phase1_task1 = "完成【基础代数与几何】趣味闯关"
+        quiz_content = {
+            "questions": [{
+                "question": "几何基础：两点之间，什么最短？",
+                "options": [{"id": "A", "text": "直线"}, {"id": "B", "text": "线段"}, {"id": "C", "text": "射线"}, {"id": "D", "text": "曲线"}],
+                "correctAnswer": "B"
+            }]
+        }
+    elif grade in ["初三", "高一"]:
+        phase1_desc = f"针对 {grade} 入门难点，建立严密的逻辑推导与抽象思维能力。"
+        phase1_task1 = "完成【函数与集合】专项突破测验"
+        quiz_content = {
+            "questions": [{
+                "question": "集合运算：已知集合 A = {x | x² - 3x + 2 = 0}, B = {1, 2, 3}, 则 A ∩ B = ?",
+                "options": [{"id": "A", "text": "{1}"}, {"id": "B", "text": "{2}"}, {"id": "C", "text": "{1, 2}"}, {"id": "D", "text": "{1, 2, 3}"}],
+                "correctAnswer": "C"
+            }]
+        }
+    else: # 高二、高三或其他
+        phase1_desc = f"针对 {grade} 高考/竞赛压轴题型，进行高强度思维训练。"
+        phase1_task1 = "完成【导数与圆锥曲线】高阶挑战"
+        quiz_content = {
+            "questions": [{
+                "question": "微积分基础：极限 lim(x→0) sin(x)/x 的值是？",
+                "options": [{"id": "A", "text": "0"}, {"id": "B", "text": "1"}, {"id": "C", "text": "∞"}, {"id": "D", "text": "不存在"}],
+                "correctAnswer": "B"
+            }]
+        }
+
+    # 3. 动态生成阶段二：职业启蒙
+    if "engineer" in career_id or "data" in career_id or "ai" in career_id:
+        phase2_task2 = "动手：用 Python 编写一个简单的数据分析脚本"
+    elif "business" in career_id or "finance" in career_id or "analyst" in career_id:
+        phase2_task2 = "分析：解读某知名科技公司近三年财报核心指标"
+    elif "design" in career_id or "art" in career_id:
+        phase2_task2 = "创作：使用设计工具完成一张主题海报"
+    else:
+        phase2_task2 = "调研：撰写一份关于该职业发展前景的微型报告"
+
+    # 4. 组装最终返回数据 (👇 重点：把 quiz_content 注入到 tasks 里)
     return {
-        "student_name": user.name if user else "测试学生",
+        "student_name": user.name if user else "探索者",
         "grade": grade,
         "target_career": career_name,
         "phases": [
             {
                 "id": 1,
                 "name": "阶段一：夯实学科基础",
-                "description": f"针对 {grade} 的测试版本",
+                "description": phase1_desc,
                 "tasks": [
-                    {
-                        "id": "t1",
-                        "title": f"【测试版】{grade} 数学基础测验",
-                        "type": "quiz",
-                        "status": "ready",
-                        "desc": "测试题目，预计5分钟",
-                        "content": test_content  # 👈 这里硬编码了 content！
-                    },
-                    {
-                        "id": "t2",
-                        "title": "观看：测试视频",
-                        "type": "video",
-                        "status": "locked",
-                        "desc": "测试视频，10分钟",
-                        "content": {"videoUrl": "https://example.com/test.mp4"}
-                    }
+                    # 👇 这里注入了 content！
+                    {"id": "t1", "title": phase1_task1, "type": "quiz", "status": "ready", "desc": "15道精选题目，预计20分钟", "content": quiz_content},
+                    {"id": "t2", "title": "观看：知识点本质解析视频", "type": "video", "status": "locked", "desc": "名师视频课，30分钟", "content": {"videoUrl": "https://example.com/demo.mp4"}}
+                ]
+            },
+            {
+                "id": 2,
+                "name": "阶段二：职业启蒙与探索",
+                "description": f"初步了解 {career_name} 的工作日常与核心技能要求。",
+                "tasks": [
+                    {"id": "t3", "title": "阅读：行业专家的一天", "type": "article", "status": "locked", "desc": "行业前沿文章阅读", "content": {"text": "<h3>初级阶段</h3><p>掌握基础工具...</p>"}},
+                    {"id": "t4", "title": phase2_task2, "type": "project", "status": "locked", "desc": "基础实践项目", "content": {"projectBrief": "完成一个小型实战项目。", "requirements": ["需求分析", "代码实现"]}}
+                ]
+            },
+            {
+                "id": 3,
+                "name": "阶段三：实战项目挑战",
+                "description": "将所学知识应用于解决实际问题，产出第一个作品集。",
+                "tasks": [
+                    {"id": "t5", "title": "期末项目：个人综合研究报告", "type": "project", "status": "locked", "desc": "综合运用所学知识，生成 PDF 报告", "content": {"projectBrief": "撰写一份综合报告。", "requirements": ["文献调研", "数据分析", "结论总结"]}}
                 ]
             }
         ]
