@@ -38,11 +38,11 @@ except Exception as e:
     print(f"️ 警告: 无法加载 students 路由 ({e})")
 
 try:
-    from api.assessment import router as assessment_router
-    app.include_router(assessment_router, prefix="/api", tags=["assessment"])
-    print("✅ 成功加载 assessment 路由")
+    from api.simulator import router as simulator_router
+    app.include_router(simulator_router, prefix="/api", tags=["simulator"])
+    print("✅ 成功加载 simulator 路由 (LLM)")
 except Exception as e:
-    print(f"⚠️ 警告: 无法加载 assessment 路由 ({e})")
+    print(f"⚠️ 警告: 无法加载 simulator 路由 ({e})")
 
 # 基础接口
 # 基础接口
