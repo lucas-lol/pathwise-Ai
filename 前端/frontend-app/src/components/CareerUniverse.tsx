@@ -8,10 +8,13 @@ import gsap from 'gsap';
 import { motion, AnimatePresence } from 'framer-motion';
 import CareerDetailPanel from './CareerDetailPanel';
 import CareerProfile from './CareerProfile';
-import LearningDashboard from './LearningDashboard'; // 👈 新增
+import LearningDashboard from './LearningDashboard';
 import AIMentorChat from './AIMentorChat';
+import IntroSequence from './IntroSequence';
 
-//  1. 斐波那契球面分布算法
+type Persona = 'student' | 'career-changer' | 'lifelong-learner';
+
+// 1. 斐波那契球面分布算法
 function getFibonacciSpherePoints(samples: number, radius: number) {
   const points: THREE.Vector3[] = [];
   const phi = Math.PI * (3. - Math.sqrt(5.));
@@ -26,7 +29,7 @@ function getFibonacciSpherePoints(samples: number, radius: number) {
   return points;
 }
 
-// 🎨 2. 生成 100 个职业数据 & 5 个未来节点
+// 2. 生成 100 个职业数据 & 5 个未来节点
 const CAREER_COUNT = 100;
 const CAREER_NAMES = [
   "AI 算法工程师", "数据科学家", "全栈开发者", "产品经理", "UX 设计师", 
@@ -40,7 +43,7 @@ const CATEGORY_COLORS = ["#4f46e5", "#06b6d4", "#eab308", "#d946ef", "#22c55e"];
 const CATEGORY_NAMES = ["AI 与数据", "量化与金融", "全栈与云", "产品与设计", "前沿科技"];
 const FUTURE_TITLES = ["首席 AI 架构师", "数据科学总监", "全栈技术专家", "产品副总裁", "设计总监"];
 
-//  3. 终极合成配方表
+// 3. 终极合成配方表
 const CRAFTING_RECIPES: Record<string, number> = {
   "0-1": 5, "0-2": 6, "1-2": 7, "5-6": 15,
   "20-21": 25, "20-22": 26, "25-26": 35,
@@ -129,7 +132,7 @@ function generateUniverseData() {
   return { careers, futureNodes };
 }
 
-// 🔗 4. 高性能连线系统
+// 4. 高性能连线系统
 function Connections({ careers, userSkills }: { careers: CareerData[]; userSkills: Set<number> }) {
   const { strongGeometries, weakGeometry, masteredGeometry } = useMemo(() => {
     const strongGeometriesArr: number[][] = [[], [], [], [], []];
@@ -190,14 +193,13 @@ function Connections({ careers, userSkills }: { careers: CareerData[]; userSkill
   );
 }
 
-//  5. 命运轨迹系统
+// 5. 命运轨迹系统
 function DestinyPaths({ careers, userSkills, futureNodes, unlockedPaths }: { careers: CareerData[]; userSkills: Set<number>; futureNodes: FutureNodeData[]; unlockedPaths: Set<number> }) {
   const allLines = useMemo(() => {
     const lines: THREE.Vector3[][] = []; 
     unlockedPaths.forEach((categoryId: number) => {
       const futureNode = futureNodes[categoryId];
       const masteredCareersInCategory = careers.filter(c => c.category === categoryId && userSkills.has(c.id));
-      
       masteredCareersInCategory.forEach(career => {
         lines.push([career.position, futureNode.position]);
       });
@@ -208,21 +210,13 @@ function DestinyPaths({ careers, userSkills, futureNodes, unlockedPaths }: { car
   return (
     <>
       {allLines.map((points, idx) => (
-        <Line 
-          key={idx}
-          points={points}
-          color="#ffffff"
-          lineWidth={3} 
-          transparent
-          opacity={1.0}
-          toneMapped={false}
-        />
+        <Line key={idx} points={points} color="#ffffff" lineWidth={3} transparent opacity={1.0} toneMapped={false} />
       ))}
     </>
   );
 }
 
-// 🪐 6. 未来节点 (超新星)
+// 6. 未来节点 (超新星)
 function FutureNode({ data, isUnlocked }: { data: FutureNodeData; isUnlocked: boolean }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Mesh>(null);
@@ -232,7 +226,6 @@ function FutureNode({ data, isUnlocked }: { data: FutureNodeData; isUnlocked: bo
       const targetScale = isUnlocked ? 1 : 0;
       meshRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.05);
       glowRef.current.scale.lerp(new THREE.Vector3(targetScale * 3, targetScale * 3, targetScale * 3), 0.05);
-      
       if (isUnlocked) {
         meshRef.current.rotation.y += delta * 0.2;
         glowRef.current.rotation.y -= delta * 0.1;
@@ -261,8 +254,8 @@ function FutureNode({ data, isUnlocked }: { data: FutureNodeData; isUnlocked: bo
   );
 }
 
-//  7. 程序化星球组件 (悬停预览前置需求)
-function ProceduralPlanet({ data, isActive, onClick, onHover, isMastered, isLocked, isSelected, isUnderAttack, prereqNames }: any) {
+// 7. 程序化星球组件 (包含第一束光逻辑)
+function ProceduralPlanet({ data, isActive, onClick, onHover, isMastered, isLocked, isSelected, isUnderAttack, prereqNames, isStartNode }: any) {
   const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
   
@@ -279,10 +272,12 @@ function ProceduralPlanet({ data, isActive, onClick, onHover, isMastered, isLock
     }
   });
 
+  const isStartGlow = isStartNode && !isMastered;
   const lockedColor = new THREE.Color("#333333");
   const attackColor = new THREE.Color("#ff0000");
-  const displayColor = isLocked ? lockedColor : (isUnderAttack ? attackColor : (isMastered ? "#ffffff" : data.color));
-  const displayEmissive = isLocked ? "#111111" : (isUnderAttack ? "#ff0000" : (isMastered ? "#ffd700" : data.color));
+
+  const displayColor = isLocked ? lockedColor : (isUnderAttack ? attackColor : (isStartGlow ? "#ffffff" : (isMastered ? "#ffffff" : data.color)));
+  const displayEmissive = isLocked ? "#111111" : (isUnderAttack ? "#ff0000" : (isStartGlow ? "#ffffff" : (isMastered ? "#ffd700" : data.color)));
 
   return (
     <group position={data.position} frustumCulled={false}>
@@ -298,7 +293,7 @@ function ProceduralPlanet({ data, isActive, onClick, onHover, isMastered, isLock
             metalness={0.8} 
             roughness={0.1}
             emissive={displayEmissive}
-            emissiveIntensity={isActive ? 3.0 : (isMastered ? 2.5 : (isLocked ? 0.1 : (hovered || isSelected ? 1.5 : 0.3)))}
+            emissiveIntensity={isActive ? 3.0 : (isStartGlow ? 2.0 : (isMastered ? 2.5 : (isLocked ? 0.1 : (hovered || isSelected ? 1.5 : 0.3))))}
             wireframe={dynamicComplexity < 0.5}
             toneMapped={false}
           />
@@ -310,7 +305,6 @@ function ProceduralPlanet({ data, isActive, onClick, onHover, isMastered, isLock
           </Html>
         )}
 
-        {/* 悬停时显示前置需求 */}
         {isLocked && hovered && prereqNames && prereqNames.length > 0 && (
           <Html position={[0, 2.5, 0]} center distanceFactor={8} className="pointer-events-none">
             <div className="bg-red-500/90 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-lg border border-red-400/50 whitespace-nowrap">
@@ -331,6 +325,14 @@ function ProceduralPlanet({ data, isActive, onClick, onHover, isMastered, isLock
           </Html>
         )}
 
+        {isStartGlow && (
+          <Html position={[0, 2.5, 0]} center distanceFactor={10} className="pointer-events-none">
+            <div className="bg-white/10 border border-white/50 text-white px-3 py-1 rounded-full text-xs font-bold shadow-[0_0_15px_rgba(255,255,255,0.5)] whitespace-nowrap animate-pulse">
+              ✨ START HERE
+            </div>
+          </Html>
+        )}
+
         {!isLocked && rings.map((_, idx) => (
           <mesh key={idx} rotation={[Math.random() * Math.PI, Math.random() * Math.PI, 0]}>
             <torusGeometry args={[1.0 + idx * 0.3, 0.03, 16, 64]} />
@@ -344,7 +346,7 @@ function ProceduralPlanet({ data, isActive, onClick, onHover, isMastered, isLock
   );
 }
 
-// 🎥 8. 相机控制器
+// 8. 相机控制器
 function CameraController({ targetPosition, isActive, controlsRef, onAnimStart, onAnimEnd, trigger }: { 
   targetPosition: THREE.Vector3 | null; 
   isActive: boolean; 
@@ -384,28 +386,14 @@ function CameraController({ targetPosition, isActive, controlsRef, onAnimStart, 
       const camTargetPos = targetPosition.clone().add(direction.multiplyScalar(6));
 
       const tl = gsap.timeline({ onComplete: finishAnimation });
-
-      tl.to(camera.position, { 
-        x: camTargetPos.x, y: camTargetPos.y, z: camTargetPos.z, 
-        duration: 1.8, ease: "power4.inOut",
-        onUpdate: () => camera.lookAt(animatedTarget.current)
-      }, 0);
-
-      tl.to(animatedTarget.current, { 
-        x: targetPosition.x, y: targetPosition.y, z: targetPosition.z, 
-        duration: 1.8, ease: "power4.inOut",
-        onUpdate: () => camera.lookAt(animatedTarget.current)
-      }, 0);
-
+      tl.to(camera.position, { x: camTargetPos.x, y: camTargetPos.y, z: camTargetPos.z, duration: 1.8, ease: "power4.inOut", onUpdate: () => camera.lookAt(animatedTarget.current) }, 0);
+      tl.to(animatedTarget.current, { x: targetPosition.x, y: targetPosition.y, z: targetPosition.z, duration: 1.8, ease: "power4.inOut", onUpdate: () => camera.lookAt(animatedTarget.current) }, 0);
       tl.to(camera, { fov: 45, duration: 0.9, ease: "power2.in", onUpdate: () => camera.updateProjectionMatrix() }, 0);
       tl.to(camera, { fov: 60, duration: 0.9, ease: "power2.out", onUpdate: () => camera.updateProjectionMatrix() }, 0.9);
-
     } else {
       const tl = gsap.timeline({ onComplete: finishAnimation });
-
       tl.to(camera.position, { x: 0, y: 0, z: 50, duration: 1.8, ease: "power4.inOut", onUpdate: () => camera.lookAt(animatedTarget.current) }, 0);
       tl.to(animatedTarget.current, { x: 0, y: 0, z: 0, duration: 1.8, ease: "power4.inOut", onUpdate: () => camera.lookAt(animatedTarget.current) }, 0);
-      
       tl.to(camera, { fov: 70, duration: 0.9, ease: "power2.in", onUpdate: () => camera.updateProjectionMatrix() }, 0);
       tl.to(camera, { fov: 60, duration: 0.9, ease: "power2.out", onUpdate: () => camera.updateProjectionMatrix() }, 0.9);
     }
@@ -416,7 +404,7 @@ function CameraController({ targetPosition, isActive, controlsRef, onAnimStart, 
   return null;
 }
 
-// 📖 9. 合成图鉴组件 (智能状态显示)
+// 9. 合成图鉴组件
 function CraftingCodex({ careers, recipes, isOpen, onClose, onLocate, userSkills }: { 
   careers: CareerData[]; 
   recipes: Record<string, number>; 
@@ -434,29 +422,16 @@ function CraftingCodex({ careers, recipes, isOpen, onClose, onLocate, userSkills
     const catA = careers[idA].category;
     const catB = careers[idB].category;
     const entry = { key, a: careers[idA], b: careers[idB], result: careers[resultId] };
-    
-    if (catA === catB) {
-      groupedRecipes[catA].push(entry);
-    } else {
-      groupedRecipes.cross.push(entry);
-    }
+    if (catA === catB) groupedRecipes[catA].push(entry);
+    else groupedRecipes.cross.push(entry);
   });
 
   return (
-    <motion.div 
-      initial={{ x: -320, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      exit={{ x: -320, opacity: 0 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="absolute top-24 left-6 z-40 w-80 bg-black/90 border border-cyan-500/30 rounded-xl p-6 backdrop-blur-xl shadow-2xl max-h-[80vh] flex flex-col"
-    >
+    <motion.div initial={{ x: -320, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -320, opacity: 0 }} transition={{ type: "spring", stiffness: 300, damping: 30 }} className="absolute top-24 left-6 z-40 w-80 bg-black/90 border border-cyan-500/30 rounded-xl p-6 backdrop-blur-xl shadow-2xl max-h-[80vh] flex flex-col">
       <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3 flex-shrink-0">
-        <h3 className="text-cyan-400 font-bold text-lg flex items-center gap-2">
-          <span className="text-2xl">🧪</span> 合成图鉴
-        </h3>
+        <h3 className="text-cyan-400 font-bold text-lg flex items-center gap-2"><span className="text-2xl">🧪</span> 合成图鉴</h3>
         <button onClick={onClose} className="text-white/50 hover:text-white transition-colors text-xl">✕</button>
       </div>
-      
       <div className="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-1">
         {[0, 1, 2, 3, 4].map(catId => (
           groupedRecipes[catId].length > 0 && (
@@ -469,33 +444,15 @@ function CraftingCodex({ careers, recipes, isOpen, onClose, onLocate, userSkills
                 const hasA = userSkills.has(r.a.id);
                 const hasB = userSkills.has(r.b.id);
                 const hasResult = userSkills.has(r.result.id);
+                let statusClass = "bg-white/5 border-white/10", statusText = "", statusColor = "text-white/40";
 
-                let statusClass = "bg-white/5 border-white/10";
-                let statusText = "";
-                let statusColor = "text-white/40";
-
-                if (hasResult) {
-                  statusClass = "bg-white/5 border-white/5 opacity-40 cursor-not-allowed";
-                  statusText = "✅ 已解锁";
-                } else if (hasA && hasB) {
-                  statusClass = "bg-green-500/10 border-green-500/50 hover:bg-green-500/20";
-                  statusText = "✨ 可合成";
-                  statusColor = "text-green-400";
-                } else if (hasA || hasB) {
-                  statusClass = "bg-yellow-500/5 border-yellow-500/30 opacity-70";
-                  statusText = `⏳ 缺${hasA ? r.b.name : r.a.name}`;
-                  statusColor = "text-yellow-400";
-                } else {
-                  statusClass = "bg-white/5 border-white/5 opacity-30";
-                  statusText = "🔒 未解锁";
-                }
+                if (hasResult) { statusClass = "bg-white/5 border-white/5 opacity-40 cursor-not-allowed"; statusText = "✅ 已解锁"; }
+                else if (hasA && hasB) { statusClass = "bg-green-500/10 border-green-500/50 hover:bg-green-500/20"; statusText = "✨ 可合成"; statusColor = "text-green-400"; }
+                else if (hasA || hasB) { statusClass = "bg-yellow-500/5 border-yellow-500/30 opacity-70"; statusText = `⏳ 缺${hasA ? r.b.name : r.a.name}`; statusColor = "text-yellow-400"; }
+                else { statusClass = "bg-white/5 border-white/5 opacity-30"; statusText = "🔒 未解锁"; }
 
                 return (
-                  <div 
-                    key={idx} 
-                    onClick={() => !hasResult && onLocate(r.a.id, r.b.id)}
-                    className={`border rounded-lg p-2 flex items-center justify-between text-xs transition-all ${statusClass} ${!hasResult ? 'cursor-pointer group' : ''}`}
-                  >
+                  <div key={idx} onClick={() => !hasResult && onLocate(r.a.id, r.b.id)} className={`border rounded-lg p-2 flex items-center justify-between text-xs transition-all ${statusClass} ${!hasResult ? 'cursor-pointer group' : ''}`}>
                     <div className="flex items-center gap-1 flex-1">
                       <span className="px-1.5 py-0.5 rounded bg-white/10 text-white/80 truncate max-w-[70px]">{r.a.name}</span>
                       <span className="text-cyan-400 font-bold">+</span>
@@ -503,9 +460,7 @@ function CraftingCodex({ careers, recipes, isOpen, onClose, onLocate, userSkills
                     </div>
                     <div className="flex flex-col items-end ml-1">
                       <span className={`text-[10px] ${statusColor} mb-0.5`}>{statusText}</span>
-                      <div className="text-yellow-400 font-bold flex items-center gap-1 whitespace-nowrap">
-                        <span className="text-white/40">→</span> {r.result.name}
-                      </div>
+                      <div className="text-yellow-400 font-bold flex items-center gap-1 whitespace-nowrap"><span className="text-white/40">→</span> {r.result.name}</div>
                     </div>
                   </div>
                 );
@@ -513,43 +468,18 @@ function CraftingCodex({ careers, recipes, isOpen, onClose, onLocate, userSkills
             </div>
           )
         ))}
-
         {groupedRecipes.cross.length > 0 && (
           <div className="space-y-2 pt-2 border-t border-white/10">
-            <div className="text-xs font-bold text-purple-400 uppercase tracking-wider flex items-center gap-2">
-              <span className="text-lg">✨</span> 隐藏跨领域配方
-            </div>
+            <div className="text-xs font-bold text-purple-400 uppercase tracking-wider flex items-center gap-2"><span className="text-lg">✨</span> 隐藏跨领域配方</div>
             {groupedRecipes.cross.map((r, idx) => {
-               const hasA = userSkills.has(r.a.id);
-               const hasB = userSkills.has(r.b.id);
-               const hasResult = userSkills.has(r.result.id);
-               
-               let statusClass = "bg-white/5 border-white/10";
-               let statusText = "";
-               let statusColor = "text-white/40";
-
-               if (hasResult) {
-                 statusClass = "bg-white/5 border-white/5 opacity-40 cursor-not-allowed";
-                 statusText = "✅ 已解锁";
-               } else if (hasA && hasB) {
-                 statusClass = "bg-green-500/10 border-green-500/50 hover:bg-green-500/20";
-                 statusText = "✨ 可合成";
-                 statusColor = "text-green-400";
-               } else if (hasA || hasB) {
-                 statusClass = "bg-yellow-500/5 border-yellow-500/30 opacity-70";
-                 statusText = `⏳ 缺${hasA ? r.b.name : r.a.name}`;
-                 statusColor = "text-yellow-400";
-               } else {
-                 statusClass = "bg-white/5 border-white/5 opacity-30";
-                 statusText = "🔒 未解锁";
-               }
-
+               const hasA = userSkills.has(r.a.id), hasB = userSkills.has(r.b.id), hasResult = userSkills.has(r.result.id);
+               let statusClass = "bg-white/5 border-white/10", statusText = "", statusColor = "text-white/40";
+               if (hasResult) { statusClass = "bg-white/5 border-white/5 opacity-40 cursor-not-allowed"; statusText = "✅ 已解锁"; }
+               else if (hasA && hasB) { statusClass = "bg-green-500/10 border-green-500/50 hover:bg-green-500/20"; statusText = "✨ 可合成"; statusColor = "text-green-400"; }
+               else if (hasA || hasB) { statusClass = "bg-yellow-500/5 border-yellow-500/30 opacity-70"; statusText = `⏳ 缺${hasA ? r.b.name : r.a.name}`; statusColor = "text-yellow-400"; }
+               else { statusClass = "bg-white/5 border-white/5 opacity-30"; statusText = " 未解锁"; }
                return (
-                <div 
-                  key={idx} 
-                  onClick={() => !hasResult && onLocate(r.a.id, r.b.id)}
-                  className={`border rounded-lg p-2 flex items-center justify-between text-xs transition-all ${statusClass} ${!hasResult ? 'cursor-pointer group' : ''}`}
-                >
+                <div key={idx} onClick={() => !hasResult && onLocate(r.a.id, r.b.id)} className={`border rounded-lg p-2 flex items-center justify-between text-xs transition-all ${statusClass} ${!hasResult ? 'cursor-pointer group' : ''}`}>
                   <div className="flex items-center gap-1 flex-1">
                     <span className="px-1.5 py-0.5 rounded bg-white/10 text-white/80 truncate max-w-[70px]">{r.a.name}</span>
                     <span className="text-purple-400 font-bold">+</span>
@@ -557,9 +487,7 @@ function CraftingCodex({ careers, recipes, isOpen, onClose, onLocate, userSkills
                   </div>
                   <div className="flex flex-col items-end ml-1">
                     <span className={`text-[10px] ${statusColor} mb-0.5`}>{statusText}</span>
-                    <div className="text-yellow-400 font-bold flex items-center gap-1 whitespace-nowrap">
-                      <span className="text-white/40">→</span> {r.result.name}
-                    </div>
+                    <div className="text-yellow-400 font-bold flex items-center gap-1 whitespace-nowrap"><span className="text-white/40">→</span> {r.result.name}</div>
                   </div>
                 </div>
                );
@@ -567,15 +495,12 @@ function CraftingCodex({ careers, recipes, isOpen, onClose, onLocate, userSkills
           </div>
         )}
       </div>
-      
-      <div className="mt-4 pt-3 border-t border-white/10 text-xs text-white/40 text-center flex-shrink-0">
-        💡 点击配方自动定位星球
-      </div>
+      <div className="mt-4 pt-3 border-t border-white/10 text-xs text-white/40 text-center flex-shrink-0"> 点击配方自动定位星球</div>
     </motion.div>
   );
 }
 
-// 🌌 10. 主场景
+// 10. 主场景
 export default function CareerUniverse() {
   const [activeId, setActiveId] = useState<number | null>(null);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
@@ -583,32 +508,21 @@ export default function CareerUniverse() {
   const controlsRef = useRef<any>(null);
   const [isCameraMoving, setIsCameraMoving] = useState(false);
   
-   // 从零开始：空的技能集合
   const [userSkills, setUserSkills] = useState<Set<number>>(new Set());
-  
-  // 从零开始：空的路径集合
   const [unlockedPaths, setUnlockedPaths] = useState<Set<number>>(new Set());
   
   const [selectedForCraft, setSelectedForCraft] = useState<number | null>(null);
   const [showCodex, setShowCodex] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const [showLearningHub, setShowLearningHub] = useState(false); // 👈 新增
+  const [showLearningHub, setShowLearningHub] = useState(false);
   const [showMentorChat, setShowMentorChat] = useState(false);
-  const [careersWithAttack, setCareersWithAttack] = useState<Set<number>>(new Set());
-  
+  const [showIntro, setShowIntro] = useState(true);
+  const [showPersonaSelector, setShowPersonaSelector] = useState(false);
+const [userPersona, setUserPersona] = useState<Persona | null>(null);  const [careersWithAttack, setCareersWithAttack] = useState<Set<number>>(new Set());
   const [toast, setToast] = useState<{ msg: string, visible: boolean, type: 'error' | 'success' | 'warning' }>({ msg: "", visible: false, type: 'warning' });
-  
   const [cameraTrigger, setCameraTrigger] = useState(0);
 
-  // 从零开始：全 0 的能力数值
-  const [abilityScores, setAbilityScores] = useState({ 
-    technical: 0, 
-    logic: 0, 
-    communication: 0, 
-    stress: 0, 
-    innovation: 0, 
-    leadership: 0 
-  });
+  const [abilityScores, setAbilityScores] = useState({ technical: 0, logic: 0, communication: 0, stress: 0, innovation: 0, leadership: 0 });
   
   const { careers, futureNodes } = useMemo(() => generateUniverseData(), []);
 
@@ -622,6 +536,38 @@ export default function CareerUniverse() {
     setCameraTrigger(prev => prev + 1);
   };
 
+  // 身份选择处理函数
+  // 把 (persona: Persona) 改成 (persona: string)
+const handlePersonaSelect = (persona: Persona) => {
+  setUserPersona(persona);
+  setShowPersonaSelector(false);
+  forceFlyTo(0);
+};
+
+  // 根据 persona 获取目标职业名称
+  const getGoalTitle = () => {
+  if (!userPersona) return '未知';
+  const goals: Record<string, string> = { // 改这里
+    'student': 'AI 架构师',
+    'career-changer': '技术专家',
+    'lifelong-learner': '全栈大师',
+  };
+  return goals[userPersona] || '未知';
+};
+
+  // 根据 persona 获取叙事化进度文案
+  const getProgressNarrative = () => {
+    const total = 100;
+    const mastered = userSkills.size;
+    const percentage = Math.floor((mastered / total) * 100);
+    
+    if (mastered === 0) return '旅程尚未开始';
+    if (percentage < 10) return `已踏上 ${getGoalTitle()} 之路 (${percentage}%)`;
+    if (percentage < 30) return `${getGoalTitle()} 之路进展顺利 (${percentage}%)`;
+    if (percentage < 60) return `已成为 ${getGoalTitle()} 的有力竞争者 (${percentage}%)`;
+    return `距离 ${getGoalTitle()} 仅一步之遥 (${percentage}%)`;
+  };
+
   useEffect(() => {
     const interval = setInterval(() => {
       if (userSkills.size > 0) {
@@ -631,21 +577,18 @@ export default function CareerUniverse() {
         showToast("⚠️ 行业危机来袭！点击被攻击的星球修复！", 'error');
       }
     }, 30000);
-    
     return () => clearInterval(interval);
   }, [userSkills]);
 
   const handleLocateRecipe = (idA: number, idB: number) => {
     setShowCodex(false);
-    const skillA = careers[idA];
-    const skillB = careers[idB];
-    
+    const skillA = careers[idA], skillB = careers[idB];
     if (userSkills.has(idA) && userSkills.has(idB)) {
       const key = `${Math.min(idA, idB)}-${Math.max(idA, idB)}`;
       const resultId = CRAFTING_RECIPES[key];
       if (resultId && !userSkills.has(resultId)) {
         setUserSkills(prev => new Set(prev).add(resultId));
-        showToast(` 自动合成成功！解锁：${careers[resultId].name}`, 'success');
+        showToast(`🎉 自动合成成功！解锁：${careers[resultId].name}`, 'success');
         forceFlyTo(resultId);
       } else {
         showToast("⚠️ 该技能已解锁或配方无效。", 'warning');
@@ -653,21 +596,10 @@ export default function CareerUniverse() {
       }
       return;
     }
-
-    let targetId = idA;
-    let message = "";
-
-    if (userSkills.has(idA) && !userSkills.has(idB)) {
-      targetId = idB;
-      message = `原料 ${skillA.name} 已就绪！请飞向 ${skillB.name} 完成模拟解锁它！`;
-    } else if (!userSkills.has(idA) && userSkills.has(idB)) {
-      targetId = idA;
-      message = `原料 ${skillB.name} 已就绪！请飞向 ${skillA.name} 完成模拟解锁它！`;
-    } else {
-      targetId = idA;
-      message = `需要先点亮 ${skillA.name} 和 ${skillB.name}。请先完成 ${skillA.name} 的模拟！`;
-    }
-
+    let targetId = idA, message = "";
+    if (userSkills.has(idA) && !userSkills.has(idB)) { targetId = idB; message = `原料 ${skillA.name} 已就绪！请飞向 ${skillB.name} 完成模拟解锁它！`; }
+    else if (!userSkills.has(idA) && userSkills.has(idB)) { targetId = idA; message = `原料 ${skillB.name} 已就绪！请飞向 ${skillA.name} 完成模拟解锁它！`; }
+    else { targetId = idA; message = `需要先点亮 ${skillA.name} 和 ${skillB.name}。请先完成 ${skillA.name} 的模拟！`; }
     setSelectedForCraft(null);
     forceFlyTo(targetId);
     showToast(`🧭 ${message}`, 'warning');
@@ -675,54 +607,28 @@ export default function CareerUniverse() {
 
   const handlePlanetClick = (career: CareerData) => {
     const isLocked = career.prerequisites.length > 0 && !career.prerequisites.every(prereqId => userSkills.has(prereqId));
-    
     if (isLocked) {
       forceFlyTo(career.id);
-      const prereqNames = career.prerequisites.map(id => careers[id].name).join(", ");
-      showToast(` 前置技能未满足！需要先点亮：${prereqNames}`, 'error');
+      showToast(`🔒 前置技能未满足！需要先点亮：${career.prerequisites.map(id => careers[id].name).join(", ")}`, 'error');
       return;
     }
-
     if (careersWithAttack.has(career.id)) {
-      setCareersWithAttack(prev => {
-        const next = new Set(prev);
-        next.delete(career.id);
-        return next;
-      });
+      setCareersWithAttack(prev => { const next = new Set(prev); next.delete(career.id); return next; });
       showToast("✅ 危机已解除！技能恢复正常。", 'success');
       return;
     }
-
     if (selectedForCraft !== null && selectedForCraft !== career.id) {
-      const idA = Math.min(selectedForCraft, career.id);
-      const idB = Math.max(selectedForCraft, career.id);
-      const key = `${idA}-${idB}`;
-      const resultId = CRAFTING_RECIPES[key];
-      
+      const idA = Math.min(selectedForCraft, career.id), idB = Math.max(selectedForCraft, career.id);
+      const resultId = CRAFTING_RECIPES[`${idA}-${idB}`];
       if (resultId !== undefined) {
-        if (!userSkills.has(resultId)) {
-          setUserSkills(prev => new Set(prev).add(resultId));
-          showToast(`🎉 合成成功！解锁：${careers[resultId].name}`, 'success');
-          forceFlyTo(resultId);
-        } else {
-          showToast("⚠️ 该技能已解锁。", 'warning');
-        }
-      } else {
-        showToast("❌ 合成失败！配方不正确。", 'error');
-      }
+        if (!userSkills.has(resultId)) { setUserSkills(prev => new Set(prev).add(resultId)); showToast(`🎉 合成成功！解锁：${careers[resultId].name}`, 'success'); forceFlyTo(resultId); }
+        else showToast("⚠️ 该技能已解锁。", 'warning');
+      } else showToast("❌ 合成失败！配方不正确。", 'error');
       setSelectedForCraft(null);
-    } 
-    else if (userSkills.has(career.id)) {
-      if (selectedForCraft === career.id) {
-        setSelectedForCraft(null);
-        showToast("已取消合成选中。", 'warning');
-      } else {
-        setSelectedForCraft(career.id);
-        forceFlyTo(career.id);
-        showToast("🔧 已选中。点击另一个已点亮技能进行合成。", 'warning');
-      }
-    } 
-    else {
+    } else if (userSkills.has(career.id)) {
+      if (selectedForCraft === career.id) { setSelectedForCraft(null); showToast("已取消合成选中。", 'warning'); }
+      else { setSelectedForCraft(career.id); forceFlyTo(career.id); showToast("🔧 已选中。点击另一个已点亮技能进行合成。", 'warning'); }
+    } else {
       forceFlyTo(career.id);
       setSelectedCareer(career);
     }
@@ -733,21 +639,14 @@ export default function CareerUniverse() {
       setUserSkills(prev => {
         const newSkills = new Set(prev);
         newSkills.add(careerId);
-        
         const currentCareer = careers.find(c => c.id === careerId);
         if (currentCareer) {
-          const masteredCount = Array.from(newSkills).filter(id => careers[id].category === currentCareer.category).length;
-          if (masteredCount >= 5) {
-            setUnlockedPaths(prevPaths => {
-              const newPaths = new Set(prevPaths);
-              newPaths.add(currentCareer.category);
-              return newPaths;
-            });
+          if (Array.from(newSkills).filter(id => careers[id].category === currentCareer.category).length >= 5) {
+            setUnlockedPaths(prevPaths => { const newPaths = new Set(prevPaths); newPaths.add(currentCareer.category); return newPaths; });
           }
         }
         return newSkills;
       });
-
       if (abilityChanges) {
         setAbilityScores(prev => ({
           technical: prev.technical + (abilityChanges.technical || 0),
@@ -767,137 +666,104 @@ export default function CareerUniverse() {
 
   const displayLabelId = activeId !== null ? activeId : hoveredId;
   const labelCareer = careers.find(c => c.id === displayLabelId);
-
   const toastColor = toast.type === 'error' ? 'bg-red-500/90 border-red-400/50' : (toast.type === 'success' ? 'bg-green-500/90 border-green-400/50' : 'bg-yellow-500/90 border-yellow-400/50');
 
-if (showMentorChat) {
-  return (
-    <AIMentorChat 
-      onBack={() => setShowMentorChat(false)}
-      userSkills={userSkills}
-      careers={careers}
-      abilityScores={[
-        abilityScores.technical,
-        abilityScores.logic,
-        abilityScores.communication,
-        abilityScores.stress,
-        abilityScores.innovation,
-        abilityScores.leadership
-      ]}
-    />
-  );
-}
-
-    // 👇 新增：如果点击了学习中心，显示学习面板
-  if (showLearningHub) {
-    return (
-      <LearningDashboard 
-        onBack={() => setShowLearningHub(false)}
-        userSkills={userSkills}   // 👈 加上这个
-        careers={careers} 
-        abilityScores={[
-          abilityScores.technical,
-          abilityScores.logic,
-          abilityScores.communication,
-          abilityScores.stress,
-          abilityScores.innovation,
-          abilityScores.leadership
-        ]}
-      />
-    );
+  // 路由拦截渲染
+  if (showMentorChat) {
+    return <AIMentorChat onBack={() => setShowMentorChat(false)} userSkills={userSkills} careers={careers} abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} userPersona={userPersona} />;
   }
-
+  if (showLearningHub) {
+    return <LearningDashboard onBack={() => setShowLearningHub(false)} userSkills={userSkills} careers={careers} abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} />;
+  }
   if (showProfile) {
-    return (
-      <CareerProfile 
-        userSkills={userSkills} 
-        careers={careers} 
-        onBack={() => setShowProfile(false)}
-        abilityScores={[
-          abilityScores.technical,
-          abilityScores.logic,
-          abilityScores.communication,
-          abilityScores.stress,
-          abilityScores.innovation,
-          abilityScores.leadership
-        ]}
-      />
-    );
+    return <CareerProfile onBack={() => setShowProfile(false)} userSkills={userSkills} careers={careers} abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} />;
   }
 
   return (
     <div className="w-full h-screen bg-black relative overflow-hidden">
-      <div className={`absolute top-20 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ${toast.visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
-        <div className={`${toastColor} text-white px-6 py-3 rounded-full shadow-lg backdrop-blur-md border font-bold text-sm flex items-center gap-2`}>
-          {toast.msg}
-        </div>
-      </div>
-
-                 {/* 右上角按钮组 - 确保包含所有 4 个按钮 */}
-      {!selectedCareer && (
-        <div className="absolute top-6 right-6 z-40 flex items-center gap-3">
-          {/* 1. AI 导师按钮 (新增) */}
-          <button 
-            onClick={() => setShowMentorChat(true)}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm"
-          >
-            💬 AI 导师
-          </button>
-
-          {/* 2. 学习中心按钮 */}
-          <button 
-            onClick={() => setShowLearningHub(true)}
-            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm"
-          >
-            🚀 学习中心
-          </button>
-
-          {/* 3. 职业档案按钮 */}
-          <button 
-            onClick={() => setShowProfile(true)}
-            className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm"
-          >
-            ✨ 查看我的职业档案
-          </button>
-          
-          {/* 4. 合成图鉴按钮 */}
-          <button 
-            onClick={() => setShowCodex(!showCodex)}
-            className="bg-black/80 border border-cyan-500/30 text-cyan-400 px-4 py-2 rounded-full backdrop-blur-md shadow-lg hover:bg-cyan-500/20 transition-all flex items-center gap-2 font-bold text-sm"
-          >
-            <span>🧪</span> 合成图鉴
-          </button>
-        </div>
+      {/* 开场动画 */}
+      {showIntro && (
+        <IntroSequence 
+          onComplete={() => {
+            setShowIntro(false);
+            setShowPersonaSelector(true);
+          }} 
+        />
       )}
 
-      <AnimatePresence>
-        {showCodex && (
-          <CraftingCodex 
-            careers={careers} 
-            recipes={CRAFTING_RECIPES} 
-            isOpen={showCodex} 
-            onClose={() => setShowCodex(false)} 
-            onLocate={handleLocateRecipe}
-            userSkills={userSkills}
-          />
-        )}
-      </AnimatePresence>
+            {/* 身份选择界面 (直接内联，确保生效) */}
+      {showPersonaSelector && (
+        <div className="fixed inset-0 z-[90] bg-black/95 backdrop-blur-xl flex items-center justify-center">
+          <div className="text-center max-w-5xl mx-auto px-8">
+            <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 mb-4">
+              你是谁？
+            </h2>
+            <p className="text-white/60 text-lg mb-16">
+              选择你的身份，我们将为你定制专属的探索之旅
+            </p>
 
-      {selectedForCraft !== null && (
-        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-40 bg-black/80 border border-cyan-500/50 px-6 py-3 rounded-full backdrop-blur-md shadow-2xl">
-          <div className="text-cyan-400 font-bold text-sm">
-            🔧 合成台：已选中 <span className="text-white">{careers[selectedForCraft].name}</span> · 点击另一个已点亮技能
+            <div className="grid grid-cols-3 gap-8">
+              {[
+                { id: 'student', icon: '🎓', title: '迷茫的大学生', desc: '想探索职业方向，找到适合自己的路', goal: 'AI 架构师', color: 'from-blue-500 to-cyan-500' },
+                { id: 'career-changer', icon: '💼', title: '想转行的职场人', desc: '有明确目标，但需要补齐技能差距', goal: '技术专家', color: 'from-purple-500 to-pink-500' },
+                { id: 'lifelong-learner', icon: '', title: '终身学习者', desc: '想持续成长，不断拓展能力边界', goal: '全栈大师', color: 'from-orange-500 to-red-500' },
+              ].map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => handlePersonaSelect(p.id as Persona)}
+                  className="group relative p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 transition-all duration-300 hover:scale-105 text-left"
+                >
+                  <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${p.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
+                  <div className="relative z-10">
+                    <div className="text-7xl mb-6">{p.icon}</div>
+                    <h3 className="text-2xl font-bold text-white mb-3">{p.title}</h3>
+                    <p className="text-white/60 text-base leading-relaxed">{p.desc}</p>
+                    <div className="mt-6 pt-6 border-t border-white/10">
+                      <div className="text-xs text-white/40 uppercase tracking-wider mb-1">目标职业</div>
+                      <div className="text-cyan-400 font-bold text-lg">{p.goal}</div>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      <div className="absolute top-6 left-6 z-10 pointer-events-none">
-        <div className="text-cyan-400 font-mono text-xs tracking-widest mb-1">SYSTEM STATUS</div>
-        <div className="text-white font-mono text-2xl font-bold">
-          SKILLS MASTERED: <span className="text-yellow-400">{userSkills.size}</span> / 100
+      <div className={`absolute top-20 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ${toast.visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
+        <div className={`${toastColor} text-white px-6 py-3 rounded-full shadow-lg backdrop-blur-md border font-bold text-sm flex items-center gap-2`}>{toast.msg}</div>
+      </div>
+
+      {!selectedCareer && (
+        <div className="absolute top-6 right-6 z-40 flex items-center gap-3">
+          <button onClick={() => setShowMentorChat(true)} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm">💬 AI 导师</button>
+          <button onClick={() => setShowLearningHub(true)} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm">🚀 学习中心</button>
+          <button onClick={() => setShowProfile(true)} className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm">✨ 查看我的职业档案</button>
+          <button onClick={() => setShowCodex(!showCodex)} className="bg-black/80 border border-cyan-500/30 text-cyan-400 px-4 py-2 rounded-full backdrop-blur-md shadow-lg hover:bg-cyan-500/20 transition-all flex items-center gap-2 font-bold text-sm"><span>🧪</span> 合成图鉴</button>
         </div>
-        <div className="text-yellow-400 font-mono text-sm mt-2">
-          DESTINY PATHS UNLOCKED: <span className="text-white">{unlockedPaths.size}</span> / 5
+      )}
+
+      <AnimatePresence>
+        {showCodex && <CraftingCodex careers={careers} recipes={CRAFTING_RECIPES} isOpen={showCodex} onClose={() => setShowCodex(false)} onLocate={handleLocateRecipe} userSkills={userSkills} />}
+      </AnimatePresence>
+
+      {selectedForCraft !== null && (
+        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-40 bg-black/80 border border-cyan-500/50 px-6 py-3 rounded-full backdrop-blur-md shadow-2xl">
+          <div className="text-cyan-400 font-bold text-sm">🔧 合成台：已选中 <span className="text-white">{careers[selectedForCraft].name}</span> · 点击另一个已点亮技能</div>
+        </div>
+      )}
+
+      {/* 左上角叙事化进度显示 */}
+      <div className="absolute top-6 left-6 z-10 pointer-events-none">
+        <div className="text-cyan-400 font-mono text-xs tracking-widest mb-1">
+          {userPersona ? `JOURNEY TO ${getGoalTitle().toUpperCase()}` : 'SYSTEM STATUS'}
+        </div>
+        <div className="text-white font-mono text-xl font-bold">
+          {getProgressNarrative()}
+        </div>
+        <div className="text-yellow-400 font-mono text-xs mt-2">
+          已掌握 <span className="text-white">{userSkills.size}</span> / 100 技能 · 
+          命运路径 <span className="text-white">{unlockedPaths.size}</span> / 5
         </div>
       </div>
 
@@ -908,26 +774,47 @@ if (showMentorChat) {
           <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
           <Environment preset="night" />
 
+          {/* 中心太阳 */}
           <mesh frustumCulled={false}>
             <sphereGeometry args={[1.5, 32, 32]} />
             <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={3} toneMapped={false} />
           </mesh>
 
+          {/* 目标星球 - 根据身份显示 */}
+          {userPersona && (
+            <group position={[0, 0, 0]} frustumCulled={false}>
+              <mesh>
+                <sphereGeometry args={[2.5, 32, 32]} />
+                <meshStandardMaterial 
+                  color="#ffd700" 
+                  emissive="#ffd700" 
+                  emissiveIntensity={2} 
+                  transparent 
+                  opacity={0.3}
+                  toneMapped={false} 
+                />
+              </mesh>
+              <Html position={[0, 4, 0]} center distanceFactor={20} className="pointer-events-none">
+                <div className="bg-black/80 border border-yellow-500/50 text-yellow-400 px-6 py-3 rounded-xl text-base font-bold backdrop-blur-md shadow-[0_0_30px_rgba(255,215,0,0.5)] whitespace-nowrap">
+                  🎯 目标：{getGoalTitle()}
+                  <div className="text-[10px] text-white/60 mt-1 text-center">
+                    距离目标还有 {100 - userSkills.size} 个技能
+                  </div>
+                </div>
+              </Html>
+            </group>
+          )}
+
           <Connections careers={careers} userSkills={userSkills} />
-          
-          <DestinyPaths 
-            careers={careers} 
-            userSkills={userSkills} 
-            futureNodes={futureNodes} 
-            unlockedPaths={unlockedPaths} 
-          />
+          <DestinyPaths careers={careers} userSkills={userSkills} futureNodes={futureNodes} unlockedPaths={unlockedPaths} />
 
           {careers.map((career) => {
             const isLocked = career.prerequisites.length > 0 && !career.prerequisites.every(prereqId => userSkills.has(prereqId));
             const isUnderAttack = careersWithAttack.has(career.id);
             const isSelected = selectedForCraft === career.id;
             const prereqNames = isLocked ? career.prerequisites.map(id => careers[id].name) : [];
-            
+            const isStartNode = career.id === 0 && userSkills.size === 0;
+
             return (
               <ProceduralPlanet
                 key={career.id}
@@ -938,6 +825,7 @@ if (showMentorChat) {
                 isUnderAttack={isUnderAttack}
                 isSelected={isSelected}
                 prereqNames={prereqNames}
+                isStartNode={isStartNode}
                 onHover={setHoveredId}
                 onClick={() => handlePlanetClick(career)}
               />
@@ -945,24 +833,14 @@ if (showMentorChat) {
           })}
 
           {futureNodes.map(node => (
-            <FutureNode 
-              key={node.id} 
-              data={node} 
-              isUnlocked={unlockedPaths.has(node.category)} 
-            />
+            <FutureNode key={node.id} data={node} isUnlocked={unlockedPaths.has(node.category)} />
           ))}
 
           {!isCameraMoving && !selectedCareer && labelCareer && (() => {
             const isLocked = labelCareer.prerequisites.length > 0 && !labelCareer.prerequisites.every(prereqId => userSkills.has(prereqId));
             return !isLocked && (userSkills.has(labelCareer.id) || activeId === labelCareer.id || hoveredId === labelCareer.id);
           })() && (
-            <Html 
-              position={[labelCareer.position.x, labelCareer.position.y + 1.8, labelCareer.position.z]} 
-              center 
-              distanceFactor={15} 
-              className="pointer-events-none"
-              style={{ transition: 'opacity 0.3s ease-in-out' }}
-            >
+            <Html position={[labelCareer.position.x, labelCareer.position.y + 1.8, labelCareer.position.z]} center distanceFactor={15} className="pointer-events-none" style={{ transition: 'opacity 0.3s ease-in-out' }}>
               <div className={`px-3 py-1.5 rounded-lg text-xs font-bold backdrop-blur-md shadow-[0_0_15px_rgba(255,255,255,0.5)] whitespace-nowrap border ${activeId === labelCareer.id ? 'bg-white/20 border-white/50 text-white' : 'bg-black/90 border-white/20 text-white'}`}>
                 {labelCareer.name}
                 <div className="text-[10px] text-white/70 mt-0.5 text-center">匹配度 {labelCareer.match}%</div>
@@ -970,25 +848,8 @@ if (showMentorChat) {
             </Html>
           )}
 
-          <OrbitControls 
-            ref={controlsRef}
-            enablePan={false} 
-            enableZoom={true} 
-            minDistance={10} 
-            maxDistance={80}
-            enableDamping 
-            dampingFactor={0.05}
-          />
-
-          <CameraController 
-            trigger={cameraTrigger}
-            targetPosition={activeId !== null ? careers.find(c => c.id === activeId)?.position || null : null} 
-            isActive={activeId !== null} 
-            controlsRef={controlsRef} 
-            onAnimStart={() => setIsCameraMoving(true)}
-            onAnimEnd={() => setIsCameraMoving(false)}
-          />
-
+          <OrbitControls ref={controlsRef} enablePan={false} enableZoom={true} minDistance={10} maxDistance={80} enableDamping dampingFactor={0.05} />
+          <CameraController trigger={cameraTrigger} targetPosition={activeId !== null ? careers.find(c => c.id === activeId)?.position || null : null} isActive={activeId !== null} controlsRef={controlsRef} onAnimStart={() => setIsCameraMoving(true)} onAnimEnd={() => setIsCameraMoving(false)} />
           <EffectComposer>
             <Bloom luminanceThreshold={0.1} luminanceSmoothing={0.9} intensity={1.5} /> 
             <Vignette eskil={false} offset={0.1} darkness={0.6} />
@@ -997,11 +858,7 @@ if (showMentorChat) {
       </Canvas>
 
       {selectedCareer && (
-        <CareerDetailPanel 
-          career={selectedCareer}
-          onSimulationComplete={handleSimulationComplete}
-          onClose={() => { setActiveId(null); setSelectedCareer(null); }} 
-        />
+        <CareerDetailPanel career={selectedCareer} onSimulationComplete={handleSimulationComplete} onClose={() => { setActiveId(null); setSelectedCareer(null); }} />
       )}
     </div>
   );
