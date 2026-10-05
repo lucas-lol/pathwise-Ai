@@ -24,7 +24,7 @@ function HolographicRadar({ skills }: { skills: { name: string; level: number }[
   ];
   
   return (
-<div className="col-span-2 bg-white/5 border border-white/10 rounded-xl p-5 flex flex-col items-center relative">      {/* 背景光效 */}
+<div className="col-span-2 bg-white/5 border border-white/10 rounded-xl p-6 flex flex-col items-center relative">      {/* 背景光效 */}
       <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent pointer-events-none"></div>
       
       <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-2 w-full text-left z-10">能力雷达图 (Holographic Radar)</h3>
@@ -69,7 +69,7 @@ function HolographicRadar({ skills }: { skills: { name: string; level: number }[
         {/* 标签 - 修复版 */}
         {dimensions.map((dim, idx) => {
           const angle = (Math.PI / 3) * idx - Math.PI / 2;
-          const r = 110; // 半径控制在 85% 范围内，防止越界
+          const r = 95; // 半径控制在 85% 范围内，防止越界
           const x = 50 + (r / 2) * Math.cos(angle);
           const y = 50 + (r / 2) * Math.sin(angle);
           
