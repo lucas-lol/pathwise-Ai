@@ -10,6 +10,7 @@ interface CareerDetailPanelProps {
 }
 
 //  1. 定义全息雷达图组件
+// 📊 1. 定义全息雷达图组件
 function HolographicRadar({ skills }: { skills: { name: string; level: number }[] }) {
   const dimensions = ["技术深度", "沟通协作", "抗压能力", "商业嗅觉", "逻辑思维", "领导力"];
   
@@ -17,19 +18,23 @@ function HolographicRadar({ skills }: { skills: { name: string; level: number }[
   const values = [
     skills[0]?.level || 50, 
     skills[1]?.level || 50, 
-    70, // 模拟数据
-    60, // 模拟数据
+    70, 
+    60, 
     skills[2]?.level || 50, 
-    80  // 模拟数据
+    80  
   ];
   
   return (
-<div className="col-span-2 bg-white/5 border border-white/10 rounded-xl p-6 flex flex-col items-center relative">      {/* 背景光效 */}
-      <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent pointer-events-none"></div>
+    // 👉 关键修改 1：去掉 overflow-hidden，增加内边距 p-6
+    <div className="col-span-2 bg-white/5 border border-white/10 rounded-xl p-6 flex flex-col items-center relative">
+      {/* 背景光效 */}
+      <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent pointer-events-none rounded-xl"></div>
       
-      <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-2 w-full text-left z-10">能力雷达图 (Holographic Radar)</h3>
+      <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-2 w-full text-left z-10">能力雷达图</h3>
       
-<div className="relative w-56 h-56 my-4" style={{ perspective: '1000px' }}>        <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d', animation: 'spin3d 15s linear infinite' }}>
+      {/* 👉 关键修改 2：稍微加大容器，给标签留出绝对安全的空间 */}
+      <div className="relative w-56 h-56 my-2" style={{ perspective: '1000px' }}>
+        <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d', animation: 'spin3d 15s linear infinite' }}>
           <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]">
             {/* 背景网格 */}
             {[20, 40, 60, 80].map((r, i) => (
@@ -66,17 +71,17 @@ function HolographicRadar({ skills }: { skills: { name: string; level: number }[
           </svg>
         </div>
 
-        {/* 标签 - 修复版 */}
+        {/* 👉 关键修改 3：半径缩小到 75，确保标签 100% 在容器内部，绝不越界 */}
         {dimensions.map((dim, idx) => {
           const angle = (Math.PI / 3) * idx - Math.PI / 2;
-          const r = 95; // 半径控制在 85% 范围内，防止越界
+          const r = 75; // 75% 的半径，配合容器的 padding，绝对安全
           const x = 50 + (r / 2) * Math.cos(angle);
           const y = 50 + (r / 2) * Math.sin(angle);
           
           return (
             <div 
               key={idx}
-              className="absolute text-xs text-white font-bold z-20 px-2 py-0.5 bg-black/40 rounded backdrop-blur-sm border border-white/10 whitespace-nowrap"
+              className="absolute text-[10px] text-cyan-300 font-bold z-20 px-1.5 py-0.5 bg-black/70 rounded border border-cyan-500/30 whitespace-nowrap shadow-lg"
               style={{ 
                 left: `${x}%`, 
                 top: `${y}%`, 
