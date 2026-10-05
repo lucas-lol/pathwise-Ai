@@ -37,7 +37,7 @@ export interface Task {
   title: string;
   description: string;
   status: TaskStatus;
-  progress: number; // 0 到 100
+  progress: 0; // 0 到 100
   estimatedTime: string;
   content?: TaskContent;
 }
