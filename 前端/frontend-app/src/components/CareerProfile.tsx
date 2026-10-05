@@ -2,7 +2,7 @@
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Stars, Html, OrbitControls, Line } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
-import { useRef, useMemo, useState } from 'react';
+import { useRef, useMemo } from 'react';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
 
@@ -47,7 +47,7 @@ function ProfileConnections({ points }: { points: number[][] }) {
   );
 }
 
-// 🌟 3D 雷达图场景组件 (包含 useFrame，必须在 Canvas 内部)
+// 🌟 3D 雷达图场景组件
 function RadarChartScene({ skills }: { skills: number[] }) {
   const groupRef = useRef<THREE.Group>(null);
   const dimensions = ["技术", "逻辑", "沟通", "抗压", "创新", "领导"];
@@ -93,7 +93,7 @@ function RadarChartScene({ skills }: { skills: number[] }) {
 
   useFrame((state, delta) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.3; // 缓慢旋转
+      groupRef.current.rotation.y += delta * 0.3;
     }
   });
 
@@ -133,12 +133,12 @@ function RadarChartScene({ skills }: { skills: number[] }) {
       
       {dimensions.map((dim, idx) => {
         const angle = (Math.PI / 3) * idx - Math.PI / 2;
-        const r = 2.5;
+        const r = 2.8;
         const x = r * Math.cos(angle);
         const z = r * Math.sin(angle);
         return (
-          <Html key={`label-${idx}`} position={[x, 0, z]} center distanceFactor={5} className="pointer-events-none">
-            <div className="text-xs text-cyan-400 font-bold whitespace-nowrap" style={{ textShadow: '0 0 10px rgba(6, 182, 212, 0.8)' }}>
+          <Html key={`label-${idx}`} position={[x, 0, z]} center distanceFactor={12} className="pointer-events-none">
+            <div className="text-sm text-cyan-400 font-bold whitespace-nowrap" style={{ textShadow: '0 0 8px rgba(6, 182, 212, 0.9)' }}>
               {dim}
             </div>
           </Html>
@@ -148,11 +148,11 @@ function RadarChartScene({ skills }: { skills: number[] }) {
   );
 }
 
-// 🌟 3D 雷达图外层组件 (只负责渲染 Canvas)
+// 🌟 3D 雷达图外层组件
 function RadarChart3D({ skills }: { skills: number[] }) {
   return (
-    <div className="relative w-64 h-64 mx-auto">
-      <Canvas camera={{ position: [0, 3, 4], fov: 50 }}>
+    <div className="relative w-72 h-72 mx-auto">
+      <Canvas camera={{ position: [0, 4.5, 5.5], fov: 45 }}>
         <ambientLight intensity={0.5} />
         <pointLight position={[0, 5, 0]} intensity={1} color="#06b6d4" />
         <RadarChartScene skills={skills} />
@@ -165,7 +165,7 @@ interface CareerProfileProps {
   userSkills: Set<number>;
   careers: any[];
   onBack: () => void;
-  abilityScores?: number[]; // 真实能力数值
+  abilityScores?: number[];
 }
 
 export default function CareerProfile({ userSkills, careers, onBack, abilityScores }: CareerProfileProps) {
@@ -190,16 +190,15 @@ export default function CareerProfile({ userSkills, careers, onBack, abilityScor
     return lines;
   }, [masteredCareers]);
 
- // 只有当能力值总和大于 0 时才使用真实数据，否则使用基于点亮数量的默认值
-const hasRealData = abilityScores && abilityScores.some(score => score > 0);
-const radarSkills = hasRealData ? abilityScores : [
-  Math.min(100, userSkills.size * 5 + 20),
-  Math.min(100, userSkills.size * 4 + 30),
-  Math.min(100, userSkills.size * 3 + 10),
-  Math.min(100, userSkills.size * 6 + 15),
-  Math.min(100, userSkills.size * 5 + 25),
-  Math.min(100, userSkills.size * 2 + 5),
-];
+  const hasRealData = abilityScores && abilityScores.some(score => score > 0);
+  const radarSkills = hasRealData ? abilityScores : [
+    Math.min(100, userSkills.size * 5 + 20),
+    Math.min(100, userSkills.size * 4 + 30),
+    Math.min(100, userSkills.size * 3 + 10),
+    Math.min(100, userSkills.size * 6 + 15),
+    Math.min(100, userSkills.size * 5 + 25),
+    Math.min(100, userSkills.size * 2 + 5),
+  ];
 
   const categoryCount = [0, 0, 0, 0, 0];
   masteredCareers.forEach(c => categoryCount[c.category]++);
