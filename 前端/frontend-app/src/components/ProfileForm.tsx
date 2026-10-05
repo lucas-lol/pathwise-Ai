@@ -19,7 +19,6 @@ export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => voi
 
   // 👇 提取出来的加载函数，支持局部重试，不会丢失已填的表单数据
   const loadCareers = async () => {
-    console.log("🚀 开始获取职业数据...");
     setLoadingCareers(true);
     setError(''); // 清空之前的错误
 
@@ -37,7 +36,6 @@ export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => voi
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       
       const data = await response.json();
-      console.log("✅ 成功获取职业数据:", data.length, "个");
       setCareers(data);
     } catch (err: any) {
       console.warn("⚠️ 获取职业数据失败:", err);
@@ -57,7 +55,6 @@ export default function ProfileForm({ onSubmit }: { onSubmit: (data: any) => voi
   const handleBack = () => setStep(prev => prev - 1);
 
   const handleFinalSubmit = () => {
-    console.log("🔍 准备提交，当前的 grade 是:", grade);
     localStorage.setItem('pw_grade', grade); // 👈 改回 grade 变量
     onSubmit({
       grade,

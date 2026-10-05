@@ -54,7 +54,7 @@ interface LearningDashboardProps {
 }
 
 export default function LearningDashboard({ onBack, userSkills, careers, abilityScores }: LearningDashboardProps) {
-  const [activeNodeId, setActiveNodeId] = useState<number | null>(2);
+  const [, setActiveNodeId] = useState<number | null>(2);
 
   const routeData = useMemo(() => {
     if (!userSkills || userSkills.size === 0 || !careers) {

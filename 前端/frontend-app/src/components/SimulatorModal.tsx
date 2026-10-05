@@ -229,7 +229,7 @@ export default function SimulatorModal({ isOpen, career, onClose, onComplete }: 
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-lg p-4" onClick={onClose}>
-      <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} className={`w-full max-w-3xl bg-[#1a1d21] rounded-xl shadow-2xl overflow-hidden border border-white/10 flex flex-col h-[650px]`} onClick={(e) => e.stopPropagation()}>
+      <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} className={`w-full max-w-3xl bg-[#1a1d21] rounded-xl shadow-2xl overflow-hidden border border-white/10 flex flex-col h-[650px]`} onClick={(e: any) => e.stopPropagation()}>
         <div className="bg-[#222529] p-4 border-b border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-lg bg-${scenario.themeColor}-500/20 flex items-center justify-center text-xl`}>{scenario.bossAvatar}</div>
