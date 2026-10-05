@@ -1,4 +1,4 @@
-// src/App.tsx (临时测试版)
+// src/App.tsx
 import CareerUniverse from './components/CareerUniverse';
 
 function App() {
