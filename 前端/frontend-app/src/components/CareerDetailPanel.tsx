@@ -9,9 +9,10 @@ interface CareerDetailPanelProps {
   onSimulationComplete: (careerId: number, success: boolean) => void;
 }
 
-// 📊 1. 定义全息雷达图组件
+//  1. 定义全息雷达图组件
 function HolographicRadar({ skills }: { skills: { name: string; level: number }[] }) {
   const dimensions = ["技术深度", "沟通协作", "抗压能力", "商业嗅觉", "逻辑思维", "领导力"];
+  
   // 映射技能等级到雷达图的 6 个维度
   const values = [
     skills[0]?.level || 50, 
@@ -66,17 +67,23 @@ function HolographicRadar({ skills }: { skills: { name: string; level: number }[
             })}
           </svg>
         </div>
-        {/* 标签 */}
+
+        {/* 标签 - 修复版 */}
         {dimensions.map((dim, idx) => {
           const angle = (Math.PI / 3) * idx - Math.PI / 2;
-          const r = 110; // 标签稍微往外一点
+          const r = 85; // 半径控制在 85% 范围内，防止越界
           const x = 50 + (r / 2) * Math.cos(angle);
           const y = 50 + (r / 2) * Math.sin(angle);
+          
           return (
             <div 
               key={idx}
-              className="absolute text-[10px] text-cyan-400 font-bold z-10"
-              style={{ left: `${x}%`, top: `${y}%`, transform: 'translate(-50%, -50%)' }}
+              className="absolute text-xs text-white font-bold z-20 px-2 py-0.5 bg-black/40 rounded backdrop-blur-sm border border-white/10 whitespace-nowrap"
+              style={{ 
+                left: `${x}%`, 
+                top: `${y}%`, 
+                transform: 'translate(-50%, -50%)' 
+              }}
             >
               {dim}
             </div>

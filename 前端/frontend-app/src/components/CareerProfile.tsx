@@ -132,18 +132,18 @@ function RadarChartScene({ skills }: { skills: number[] }) {
       ))}
       
       {dimensions.map((dim, idx) => {
-        const angle = (Math.PI / 3) * idx - Math.PI / 2;
-        const r = 2.8;
-        const x = r * Math.cos(angle);
-        const z = r * Math.sin(angle);
-        return (
-          <Html key={`label-${idx}`} position={[x, 0, z]} center distanceFactor={12} className="pointer-events-none">
-            <div className="text-sm text-cyan-400 font-bold whitespace-nowrap" style={{ textShadow: '0 0 8px rgba(6, 182, 212, 0.9)' }}>
-              {dim}
-            </div>
-          </Html>
-        );
-      })}
+  const angle = (Math.PI / 3) * idx - Math.PI / 2;
+  const r = 3.2;  //  增大半径
+  const x = r * Math.cos(angle);
+  const z = r * Math.sin(angle);
+  return (
+    <Html key={`label-${idx}`} position={[x, 0, z]} center distanceFactor={6} className="pointer-events-none" style={{ zIndex: 100 }}>
+      <div className="text-base text-white font-bold whitespace-nowrap px-2 py-1 bg-black/60 rounded" style={{ textShadow: '0 0 10px rgba(6, 182, 212, 1)' }}>
+        {dim}
+      </div>
+    </Html>
+  );
+})}
     </group>
   );
 }
