@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd 前端/frontend-app && npm install framer-motion && npm run build",
+  "outputDirectory": "frontend-app/dist",
+  "installCommand": "cd 前端/frontend-app && npm install"
+}
