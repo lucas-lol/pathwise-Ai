@@ -647,14 +647,18 @@ const handlePersonaSelect = (persona: Persona) => {
         }
         return newSkills;
       });
-      if (abilityChanges) {
+            // 👇 保底：即使没收到 abilityChanges，也给予默认增益，确保雷达图必定响应
+      const changes = abilityChanges || {
+        technical: 15, logic: 12, communication: 8, stress: 8, innovation: 10, leadership: 5,
+      };
+      {
         setAbilityScores(prev => ({
-          technical: prev.technical + (abilityChanges.technical || 0),
-          logic: prev.logic + (abilityChanges.logic || 0),
-          communication: prev.communication + (abilityChanges.communication || 0),
-          stress: prev.stress + (abilityChanges.stress || 0),
-          innovation: prev.innovation + (abilityChanges.innovation || 0),
-          leadership: prev.leadership + (abilityChanges.leadership || 0),
+          technical: prev.technical + (changes.technical || 0),
+          logic: prev.logic + (changes.logic || 0),
+          communication: prev.communication + (changes.communication || 0),
+          stress: prev.stress + (changes.stress || 0),
+          innovation: prev.innovation + (changes.innovation || 0),
+          leadership: prev.leadership + (changes.leadership || 0),
         }));
       }
     } else {

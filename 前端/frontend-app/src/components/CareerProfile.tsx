@@ -190,16 +190,8 @@ export default function CareerProfile({ userSkills, careers, onBack, abilityScor
     return lines;
   }, [masteredCareers]);
 
-  const hasRealData = abilityScores && abilityScores.some(score => score > 0);
-  const radarSkills = hasRealData ? abilityScores : [
-    Math.min(100, userSkills.size * 5 + 20),
-    Math.min(100, userSkills.size * 4 + 30),
-    Math.min(100, userSkills.size * 3 + 10),
-    Math.min(100, userSkills.size * 6 + 15),
-    Math.min(100, userSkills.size * 5 + 25),
-    Math.min(100, userSkills.size * 2 + 5),
-  ];
-
+  const hasRealData = abilityScores ? abilityScores.some(score => score > 0) : false;
+  const radarSkills: number[] = hasRealData && abilityScores ? abilityScores : [12, 12, 12, 12, 12, 12];
   const categoryCount = [0, 0, 0, 0, 0];
   masteredCareers.forEach(c => categoryCount[c.category]++);
   const topCategory = categoryCount.indexOf(Math.max(...categoryCount));
@@ -218,7 +210,7 @@ export default function CareerProfile({ userSkills, careers, onBack, abilityScor
         <Canvas camera={{ position: [0, 0, 30], fov: 60 }}>
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} intensity={1} />
-          <Stars radius={50} depth={30} count={1000} factor={2} saturation={0} fade speed={1} />
+       const radarSkills = hasRealData ? abilityScore   <Stars radius={50} depth={30} count={1000} factor={2} saturation={0} fade speed={1} />
           
           {masteredCareers.map(career => (
             <ProfilePlanet 

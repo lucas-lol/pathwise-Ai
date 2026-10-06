@@ -86,20 +86,33 @@ export default function LearningDashboard({ onBack, userSkills, careers, ability
       .filter(Boolean);
   }, [userSkills, careers]);
 
-  const dailyTasks = useMemo(() => {
-    const activeTopic = routeData.route[routeData.activeIndex]?.name || routeData.route[0].name;
-    const topicShort = activeTopic.split("：")[1] || activeTopic.split(":")[1] || activeTopic;
+    const dailyTasks = useMemo(() => {
+    // 1. 统计用户在当前主攻类别(topCategory)中，到底点亮了几个技能
+    const masteredInTopCategory = userSkills 
+      ? Array.from(userSkills).filter(id => careers?.find(c => c.id === id)?.category === routeData.category).length 
+      : 0;
 
+    // 2. 定义阶段门槛：点亮 1个、3个、6个、10个、15个技能，分别对应完成 5 个课程阶段
+    const milestones = [1, 3, 6, 10, 15];
+    
+    const topicShort = routeData.route[routeData.activeIndex]?.name || "核心基础";
     const taskTypes = ['theory', 'code', 'quiz'] as const;
-    return taskTypes.map((type, i) => ({
-      id: i,
-      type,
-      title: TASK_TEMPLATES[type].replace("{topic}", topicShort),
-      sourceTopic: activeTopic,
-      progress: i === 0 ? 65 : (i === 1 ? 100 : 0),
-      total: 100
-    }));
-  }, [routeData]);
+
+    return taskTypes.map((type, i) => {
+      // 3. 核心联动逻辑：如果你点亮的技能数 >= 当前阶段的门槛，进度就是 100；否则是 0
+      const currentMilestone = milestones[routeData.activeIndex] || 1;
+      const progress = masteredInTopCategory >= currentMilestone ? 100 : 0;
+
+      return {
+        id: i,
+        type,
+        title: TASK_TEMPLATES[type].replace("{topic}", topicShort),
+        sourceTopic: `${categoryNames[routeData.category]} 进阶路径`,
+        progress: progress,
+        total: 100
+      };
+    });
+  }, [routeData, userSkills, careers, categoryNames]); // 👈 确保依赖项完整
 
   const abilityLabels = ["技术", "逻辑", "沟通", "抗压", "创新", "领导"];
   const topAbilityIdx = abilityScores ? abilityScores.indexOf(Math.max(...abilityScores)) : 0;
