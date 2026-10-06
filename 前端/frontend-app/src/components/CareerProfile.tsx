@@ -190,7 +190,7 @@ export default function CareerProfile({ userSkills, careers, onBack, abilityScor
     return lines;
   }, [masteredCareers]);
 
-  const hasRealData = abilityScores ? abilityScores.some(score => score > 0) : false;
+    const hasRealData = abilityScores ? abilityScores.some(score => score > 0) : false;
   const radarSkills: number[] = hasRealData && abilityScores ? abilityScores : [12, 12, 12, 12, 12, 12];
   const categoryCount = [0, 0, 0, 0, 0];
   masteredCareers.forEach(c => categoryCount[c.category]++);
