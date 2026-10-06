@@ -56,6 +56,9 @@ interface LearningDashboardProps {
 export default function LearningDashboard({ onBack, userSkills, careers, abilityScores }: LearningDashboardProps) {
   const [, setActiveNodeId] = useState<number | null>(2);
 
+  // 👈 关键修复：categoryNames 必须在组件最顶部声明，杜绝 TDZ 崩溃
+  const categoryNames = ["AI 与数据", "量化与金融", "全栈与云", "产品与设计", "前沿科技"];
+
   const routeData = useMemo(() => {
     if (!userSkills || userSkills.size === 0 || !careers) {
       return { category: 0, route: ROUTE_DATABASE[0], activeIndex: 0 };
@@ -86,20 +89,17 @@ export default function LearningDashboard({ onBack, userSkills, careers, ability
       .filter(Boolean);
   }, [userSkills, careers]);
 
-    const dailyTasks = useMemo(() => {
-    // 1. 统计用户在当前主攻类别(topCategory)中，到底点亮了几个技能
-    const masteredInTopCategory = userSkills 
-      ? Array.from(userSkills).filter(id => careers?.find(c => c.id === id)?.category === routeData.category).length 
+  // 👈 真实联动：任务进度由"该类别下已点亮技能数"驱动，不再依赖名字匹配
+  const dailyTasks = useMemo(() => {
+    const masteredInTopCategory = userSkills
+      ? Array.from(userSkills).filter(id => careers?.find(c => c.id === id)?.category === routeData.category).length
       : 0;
 
-    // 2. 定义阶段门槛：点亮 1个、3个、6个、10个、15个技能，分别对应完成 5 个课程阶段
     const milestones = [1, 3, 6, 10, 15];
-    
     const topicShort = routeData.route[routeData.activeIndex]?.name || "核心基础";
     const taskTypes = ['theory', 'code', 'quiz'] as const;
 
     return taskTypes.map((type, i) => {
-      // 3. 核心联动逻辑：如果你点亮的技能数 >= 当前阶段的门槛，进度就是 100；否则是 0
       const currentMilestone = milestones[routeData.activeIndex] || 1;
       const progress = masteredInTopCategory >= currentMilestone ? 100 : 0;
 
@@ -112,15 +112,13 @@ export default function LearningDashboard({ onBack, userSkills, careers, ability
         total: 100
       };
     });
-  }, [routeData, userSkills, careers, categoryNames]); // 👈 确保依赖项完整
+  }, [routeData, userSkills, careers, categoryNames]);
 
   const abilityLabels = ["技术", "逻辑", "沟通", "抗压", "创新", "领导"];
   const topAbilityIdx = abilityScores ? abilityScores.indexOf(Math.max(...abilityScores)) : 0;
   const lowAbilityIdx = abilityScores ? abilityScores.indexOf(Math.min(...abilityScores)) : 0;
   const topScore = abilityScores ? abilityScores[topAbilityIdx] : 0;
   const lowScore = abilityScores ? abilityScores[lowAbilityIdx] : 0;
-
-  const categoryNames = ["AI 与数据", "量化与金融", "全栈与云", "产品与设计", "前沿科技"];
 
   return (
     <div className="w-full h-screen bg-[#050810] relative overflow-hidden flex text-white font-sans selection:bg-cyan-500/30">
@@ -205,7 +203,6 @@ export default function LearningDashboard({ onBack, userSkills, careers, ability
 
       {/* 右侧：任务与数据面板 (60%) */}
       <div className="w-[60%] h-full flex flex-col z-10">
-        {/* AI 导师 - 顶部，大幅增大 */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -229,9 +226,7 @@ export default function LearningDashboard({ onBack, userSkills, careers, ability
           </div>
         </motion.div>
 
-        {/* 内容区 - 可滚动 */}
         <div className="flex-1 overflow-y-auto p-10 bg-gradient-to-br from-transparent to-black/40">
-          {/* 标题区 */}
           <div className="mb-8">
             <h1 className="text-4xl font-black mb-3 tracking-tight">EXECUTION HUB</h1>
             <p className="text-white/60 text-base">
@@ -239,7 +234,6 @@ export default function LearningDashboard({ onBack, userSkills, careers, ability
             </p>
           </div>
 
-          {/* 每日任务列表 */}
           <div className="space-y-5">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-2xl font-bold tracking-wide">Daily Missions</h3>
