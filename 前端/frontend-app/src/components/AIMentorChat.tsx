@@ -83,8 +83,7 @@ function buildInsights(s: StateAnalysis, careers: any[], userSkills: Set<number>
   return out;
 }
 
-function respond(input: string, s: StateAnalysis, careers: any[], userSkills: Set<number>, abilityScores: number[], userInterests?: Set<string>): string {
-  const q = input.toLowerCase();
+function respond(input: string, s: StateAnalysis, careers: any[], userSkills: Set<number>, abilityScores: number[], userInterests?: Set<string>, userPersona?: string | null): string {  const q = input.toLowerCase();
   const name = (id: number) => careers[id]?.name || '未知职业';
   const insights = buildInsights(s, careers, userSkills, abilityScores, userInterests);
 
@@ -151,7 +150,7 @@ export default function AIMentorChat({ onBack, userSkills, careers, abilityScore
     setMessages(prev => [...prev, { id: Date.now(), role: 'user', text }]);
     setTyping(true);
     setTimeout(() => {
-      const reply = respond(text, state, careers, userSkills, abilityScores, userInterests);
+      const reply = respond(text, state, careers, userSkills, abilityScores, userInterests, userPersona);
       setMessages(prev => [...prev, { id: Date.now() + 1, role: 'mentor', text: reply }]);
       setTyping(false);
     }, 700);

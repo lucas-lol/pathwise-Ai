@@ -5,11 +5,12 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { useRef, useMemo, useState, useEffect } from 'react';
 import * as THREE from 'three';
 import { motion } from 'framer-motion';
+import { computeBadges, RARITY_STYLE, type GameStats } from '../utils/badges';
 
 // 复用之前的星球组件
 function ProfilePlanet({ data, position }: any) {
   const meshRef = useRef<THREE.Mesh>(null);
-  useFrame((state, delta) => {
+  useFrame((_state, delta) => {
     if (meshRef.current) {
       meshRef.current.rotation.y += delta * 0.2;
     }
@@ -79,7 +80,8 @@ function RadarChartScene({ skills }: { skills: number[] }) {
     return lines;
   }, []);
 
-  useFrame((state, delta) => {
+  // 🛡️ 修复：移除了之前混入的乱码，恢复干净的 useFrame
+  useFrame((_state, delta) => {
     if (groupRef.current) {
       groupRef.current.rotation.y += delta * 0.3;
     }
@@ -149,6 +151,7 @@ interface CareerProfileProps {
   onBack: () => void;
   abilityScores?: number[];
   unlockedPaths?: Set<number>;
+  stats?: GameStats;
 }
 
 // ============ 全息升级包 ============
@@ -194,24 +197,6 @@ function TypewriterText({ text, speed = 28 }: { text: string; speed?: number }) 
   return <span>{text.slice(0, n)}<span className="animate-pulse text-cyan-400">▍</span></span>;
 }
 
-const RARITY_STYLE: Record<string, string> = {
-  common: 'border-slate-500/40 text-slate-300 shadow-[0_0_10px_rgba(148,163,184,0.2)]',
-  rare: 'border-blue-500/50 text-blue-300 shadow-[0_0_14px_rgba(59,130,246,0.35)]',
-  epic: 'border-purple-500/50 text-purple-300 shadow-[0_0_16px_rgba(168,85,247,0.4)]',
-  legendary: 'border-yellow-500/60 text-yellow-300 shadow-[0_0_20px_rgba(234,179,8,0.5)]',
-};
-
-function computeBadges(skills: number, paths: number, scores?: number[]) {
-  const b: { icon: string; name: string; rarity: string; desc: string }[] = [];
-  if (skills >= 1) b.push({ icon: '🌱', name: '初次点亮', rarity: 'common', desc: '点亮首颗职业星球' });
-  if (skills >= 5) b.push({ icon: '⭐', name: '星系开拓者', rarity: 'rare', desc: '掌握 5 项职业技能' });
-  if (skills >= 10) b.push({ icon: '🌌', name: '宇宙漫游者', rarity: 'epic', desc: '掌握 10 项职业技能' });
-  if (paths >= 1) b.push({ icon: '🛤️', name: '命运开启者', rarity: 'rare', desc: '解锁首条命运轨迹' });
-  if (paths >= 3) b.push({ icon: '👑', name: '多轨主宰', rarity: 'legendary', desc: '解锁 3 条命运轨迹' });
-  if (scores && Math.max(...scores) >= 60) b.push({ icon: '💎', name: '卓越专长', rarity: 'epic', desc: '任一能力突破 60' });
-  return b;
-}
-
 function HoloBackdrop() {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -231,9 +216,9 @@ function HoloBackdrop() {
   );
 }
 
-export default function CareerProfile({ userSkills, careers, onBack, abilityScores, unlockedPaths }: CareerProfileProps) {
+export default function CareerProfile({ userSkills, careers, onBack, abilityScores, unlockedPaths, stats }: CareerProfileProps) {
   const masteredCareers = useMemo(() => {
-    return careers.filter(c => userSkills.has(c.id));
+    return careers.filter((c: any) => userSkills.has(c.id));
   }, [careers, userSkills]);
 
   const connectionPoints = useMemo(() => {
@@ -259,7 +244,7 @@ export default function CareerProfile({ userSkills, careers, onBack, abilityScor
   const radarSkills: number[] = hasRealData && abilityScores ? abilityScores : [12, 12, 12, 12, 12, 12];
 
   const categoryCount = [0, 0, 0, 0, 0];
-  masteredCareers.forEach(c => categoryCount[c.category]++);
+  masteredCareers.forEach((c: any) => { categoryCount[c.category]++; });
   const topCategory = categoryCount.indexOf(Math.max(...categoryCount));
   const futureTitles = ["首席 AI 架构师", "数据科学总监", "全栈技术专家", "产品副总裁", "设计总监"];
   const predictedTitle = userSkills.size > 0 ? futureTitles[topCategory] : "未知";
@@ -270,7 +255,8 @@ export default function CareerProfile({ userSkills, careers, onBack, abilityScor
     ? "你已踏上旅程。继续保持好奇心，探索更多可能性。"
     : "你展现了强大的学习能力。你的技能树正在形成独特的形状。";
 
-  const badges = computeBadges(userSkills.size, unlockedPaths?.size ?? 0, abilityScores);
+  // 🌟 P3：接入共享的 computeBadges，传入 stats
+  const badges = computeBadges(userSkills.size, unlockedPaths?.size ?? 0, abilityScores, stats);
 
   return (
     <div className="w-full h-screen bg-slate-900 relative overflow-hidden flex">
@@ -283,7 +269,7 @@ export default function CareerProfile({ userSkills, careers, onBack, abilityScor
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} intensity={1} />
           <Stars radius={50} depth={30} count={1000} factor={2} saturation={0} fade speed={1} />
-          {masteredCareers.map(career => (
+          {masteredCareers.map((career: any) => (
             <ProfilePlanet key={career.id} data={career} position={career.position} />
           ))}
           <ProfileConnections points={connectionPoints} />
