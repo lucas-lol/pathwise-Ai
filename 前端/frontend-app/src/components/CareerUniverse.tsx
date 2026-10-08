@@ -11,8 +11,11 @@ import CareerProfile from './CareerProfile';
 import LearningDashboard from './LearningDashboard';
 import AIMentorChat from './AIMentorChat';
 import IntroSequence from './IntroSequence';
+import AchievementPanel from './AchievementPanel';
+import { type GameStats } from '../utils/badges';
 import { CAREERS, GALAXY_NAMES, type AdaptedCareer, processRawCareers } from '../data/careerAdapter';
 import { playSound } from '../utils/gameFx';
+
 
 type Persona = 'student' | 'career-changer' | 'lifelong-learner';
 type Rating = 'S' | 'A' | 'B' | 'C';
@@ -61,16 +64,6 @@ interface FutureNodeData {
 }
 
 // 🌟 P2 基建：全局游戏统计（P3 成就 / P4 任务链 / P5 连击等级 共用）
-interface GameStats {
-  craftCount: number;
-  crisisFixed: number;
-  simSuccess: number;
-  simFail: number;
-  combo: number;
-  maxCombo: number;
-  xp: number;
-  ratings: Record<number, Rating>;
-}
 
 interface BurstData {
   id: number;
@@ -336,7 +329,7 @@ function ProceduralPlanet({ data, isActive, onClick, onHover, isMastered, isLock
             <div className="text-yellow-300 font-black text-base drop-shadow-[0_0_8px_rgba(250,204,21,0.9)]">{rating}</div>
           </Html>
         )}
-        {!isLocked && rings.map((r: number, idx: number) => (
+        {!isLocked && rings.map((_r: number, idx: number) => (
           <mesh key={idx} rotation={[Math.random() * Math.PI, Math.random() * Math.PI, 0]}>
             <torusGeometry args={[1.0 + idx * 0.3, 0.03, 8, 32]} />
             <meshBasicMaterial color={isMastered ? "#ffd700" : data.color} transparent opacity={0.8} toneMapped={false} />
@@ -578,6 +571,7 @@ export default function CareerUniverse() {
   const [showProfile, setShowProfile] = useState(false);
   const [showLearningHub, setShowLearningHub] = useState(false);
   const [showMentorChat, setShowMentorChat] = useState(false);
+  const [showAchievements, setShowAchievements] = useState(false);
   const [showInterestEditor, setShowInterestEditor] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
   const [showPersonaSelector, setShowPersonaSelector] = useState(false);
@@ -867,7 +861,7 @@ export default function CareerUniverse() {
           <button onClick={() => setShowMentorChat(true)} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm">💬 AI 导师</button>
           <button onClick={() => setShowLearningHub(true)} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm">🚀 学习中心</button>
           <button onClick={() => setShowProfile(true)} className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm">✨ 档案</button>
-          <button onClick={() => setShowAtlas(!showAtlas)} className="bg-black/80 border border-cyan-500/30 text-cyan-400 px-4 py-2 rounded-full backdrop-blur-md shadow-lg hover:bg-cyan-500/20 transition-all flex items-center gap-2 font-bold text-sm"><span>🗺️</span> 星图</button>
+          <button onClick={() => setShowAchievements(true)} className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm">🏆 成就 <span className="bg-white/20 px-1.5 rounded text-[10px]">{Object.keys(stats.ratings).length > 0 ? '🔥' : ''}</span></button>          <button onClick={() => setShowAtlas(!showAtlas)} className="bg-black/80 border border-cyan-500/30 text-cyan-400 px-4 py-2 rounded-full backdrop-blur-md shadow-lg hover:bg-cyan-500/20 transition-all flex items-center gap-2 font-bold text-sm"><span>🗺️</span> 星图</button>
           <button onClick={() => setShowCodex(!showCodex)} className="bg-black/80 border border-cyan-500/30 text-cyan-400 px-4 py-2 rounded-full backdrop-blur-md shadow-lg hover:bg-cyan-500/20 transition-all flex items-center gap-2 font-bold text-sm"><span>🧪</span> 合成</button>
         </div>
       )}
@@ -879,12 +873,23 @@ export default function CareerUniverse() {
 
       <PageOverlay show={showMentorChat} direction="right">
         <AIMentorChat onBack={() => setShowMentorChat(false)} userSkills={userSkills} careers={careers} abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} userPersona={userPersona} recipes={CRAFTING_RECIPES} />
+        userInterests={userInterests}
       </PageOverlay>
       <PageOverlay show={showLearningHub} direction="right">
         <LearningDashboard onBack={() => setShowLearningHub(false)} userSkills={userSkills} careers={careers} abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} />
       </PageOverlay>
       <PageOverlay show={showProfile} direction="bottom">
+                   <PageOverlay show={showAchievements} direction="bottom">
+        <AchievementPanel
+          onBack={() => setShowAchievements(false)}
+          userSkills={userSkills}
+          unlockedPaths={unlockedPaths}
+          abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]}
+          stats={stats}
+        />
+      </PageOverlay>
         <CareerProfile onBack={() => setShowProfile(false)} userSkills={userSkills} careers={careers} abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} unlockedPaths={unlockedPaths} />
+        stats={stats}
       </PageOverlay>
       <AnimatePresence>
         {showInterestEditor && <InterestEditor allInterests={allInterests} currentInterests={userInterests} onSave={(s: Set<string>) => { setUserInterests(s); setShowInterestEditor(false); showToast("🎯 匹配度已重新计算", 'success'); }} onClose={() => setShowInterestEditor(false)} />}
