@@ -1,42 +1,43 @@
 // src/components/LearningDashboard.tsx
 import { motion } from 'framer-motion';
 import { useState, useMemo } from 'react';
+import {GALAXY_NAMES} from '../data/careerAdapter'// 👈 新增这一行
 
 const ROUTE_DATABASE: Record<number, { name: string; xp: number; description: string }[]> = {
-  0: [
-    { name: "监督学习：回归与分类", xp: 120, description: "掌握线性回归、逻辑回归、决策树" },
-    { name: "无监督学习：聚类与降维", xp: 180, description: "K-Means、PCA、t-SNE 实战" },
-    { name: "深度学习基础：CNN 与 RNN", xp: 250, description: "卷积神经网络与循环神经网络" },
-    { name: "Transformer 与大语言模型", xp: 400, description: "Attention 机制、GPT、BERT 原理" },
-    { name: "AI Agent 与多模态系统", xp: 600, description: "LangChain、RAG、多模态融合" },
+  0: [ // 科技与 AI
+    { name: "机器学习基础：回归与分类", xp: 120, description: "掌握逻辑回归、决策树与 SVM" },
+    { name: "深度学习进阶：CNN 与 RNN", xp: 180, description: "卷积神经网络与序列模型实战" },
+    { name: "Transformer 与大语言模型", xp: 250, description: "Attention 机制与 GPT 架构解析" },
+    { name: "强化学习与多智能体系统", xp: 400, description: "Q-Learning 与多智能体博弈" },
+    { name: "AI Agent 与具身智能", xp: 600, description: "LangChain、RAG 与机器人控制" },
   ],
-  1: [
-    { name: "统计学进阶：假设检验", xp: 150, description: "t 检验、卡方检验、ANOVA" },
-    { name: "时间序列分析", xp: 220, description: "ARIMA、GARCH 模型实战" },
-    { name: "量化策略回测框架", xp: 350, description: "Backtrader、Zipline 使用" },
-    { name: "机器学习在量化中的应用", xp: 450, description: "因子挖掘、模型集成" },
-    { name: "高频交易与执行算法", xp: 700, description: "TWAP、VWAP、市场微观结构" },
+  1: [ // 工程与建造
+    { name: "分布式系统基础与共识算法", xp: 180, description: "CAP 定理、Paxos 与 Raft 协议" },
+    { name: "微服务架构与容器化编排", xp: 280, description: "Docker、Kubernetes 与 Service Mesh" },
+    { name: "高并发系统设计与调优", xp: 350, description: "缓存策略、消息队列与限流熔断" },
+    { name: "云原生基础设施与 DevOps", xp: 450, description: "CI/CD 流水线、IaC 与可观测性" },
+    { name: "大型复杂系统工程与重构", xp: 700, description: "DDD 领域驱动设计与遗留系统演进" },
   ],
-  2: [
-    { name: "分布式系统基础", xp: 180, description: "CAP 定理、一致性哈希" },
-    { name: "微服务与容器化", xp: 280, description: "Docker、Kubernetes 实战" },
-    { name: "消息队列与事件驱动", xp: 350, description: "Kafka、RabbitMQ 架构设计" },
-    { name: "高并发数据库优化", xp: 450, description: "分库分表、读写分离、缓存策略" },
-    { name: "云原生与 DevOps", xp: 600, description: "CI/CD、监控、自动化部署" },
+  2: [ // 数据与金融
+    { name: "统计学进阶与假设检验", xp: 150, description: "t 检验、ANOVA 与贝叶斯推断" },
+    { name: "时间序列分析与预测", xp: 220, description: "ARIMA、GARCH 与状态空间模型" },
+    { name: "量化策略回测与因子挖掘", xp: 350, description: "多因子模型与 Backtrader 实战" },
+    { name: "机器学习在金融中的应用", xp: 450, description: "随机森林与 XGBoost 预测资产价格" },
+    { name: "高频交易与微观结构", xp: 700, description: "订单簿动态、TWAP/VWAP 算法" },
   ],
-  3: [
-    { name: "用户研究与需求分析", xp: 100, description: "用户画像、旅程地图、KANO 模型" },
-    { name: "数据驱动的产品迭代", xp: 200, description: "A/B 测试、漏斗分析、留存优化" },
-    { name: "B 端产品架构设计", xp: 350, description: "权限系统、工作流引擎、多租户" },
-    { name: "AI 产品商业化落地", xp: 500, description: "Prompt 工程、AI 功能设计" },
-    { name: "增长黑客与商业化", xp: 700, description: "PLG、病毒循环、定价策略" },
+  3: [ // 科学与生命
+    { name: "计算生物学与基因组学", xp: 300, description: "序列比对、NGS 数据分析" },
+    { name: "生物信息学与系统生物学", xp: 450, description: "代谢网络建模与通路分析" },
+    { name: "分子动力学模拟与计算化学", xp: 550, description: "GROMACS 与蛋白质折叠预测" },
+    { name: "医疗数据挖掘与临床信息学", xp: 800, description: "EHR 数据处理与疾病风险预测" },
+    { name: "脑机接口与神经计算", xp: 1200, description: "EEG 信号处理与神经解码算法" },
   ],
-  4: [
-    { name: "量子计算基础", xp: 300, description: "量子比特、量子门、量子算法" },
-    { name: "脑机接口原理", xp: 450, description: "EEG 信号处理、神经反馈" },
-    { name: "合成生物学入门", xp: 550, description: "基因编辑、CRISPR 技术" },
-    { name: "可控核聚变工程", xp: 800, description: "等离子体物理、磁约束" },
-    { name: "星际航行技术", xp: 1200, description: "轨道力学、推进系统" },
+  4: [ // 商业与社会
+    { name: "用户研究与数据驱动决策", xp: 100, description: "A/B 测试、漏斗分析与 KANO 模型" },
+    { name: "B 端产品架构与商业化设计", xp: 200, description: "SaaS 定价策略与多租户架构" },
+    { name: "增长黑客与病毒循环机制", xp: 350, description: "PLG 模式、留存优化与裂变营销" },
+    { name: "组织行为学与敏捷管理", xp: 500, description: "Scrum 框架、OKR 与团队动力学" },
+    { name: "宏观经济学与公共政策分析", xp: 700, description: "博弈论、市场失灵与政策评估" },
   ]
 };
 
@@ -57,7 +58,7 @@ export default function LearningDashboard({ onBack, userSkills, careers, ability
   const [, setActiveNodeId] = useState<number | null>(2);
 
   // 👈 关键修复：categoryNames 必须在组件最顶部声明，杜绝 TDZ 崩溃
-  const categoryNames = ["AI 与数据", "量化与金融", "全栈与云", "产品与设计", "前沿科技"];
+  const categoryNames = GALAXY_NAMES; // 👈 使用 adapter 提供的统一数据源
 
   const routeData = useMemo(() => {
     if (!userSkills || userSkills.size === 0 || !careers) {

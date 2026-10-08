@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// 🎬 终极剧本库：5 大类别全覆盖,每个都有专属 Artifact
+// 🎬 终极剧本库：5 大类别全覆盖
 const SCENARIOS: Record<number, any> = {
   0: {
     bossName: "Alex (技术总监)", bossAvatar: "👨‍💻", themeColor: "cyan",
@@ -148,17 +148,27 @@ SELECT user_id, COUNT(*) FROM orders WHERE status = 'PAID' GROUP BY user_id; # �
   }
 };
 
+// 🌟 Phase 4：星系与剧本的完美映射
+const SCENARIO_MAP: Record<number, number> = {
+  0: 0, // 科技与 AI -> Alex
+  1: 2, // 工程与建造 -> Mike
+  2: 1, // 数据与金融 -> David
+  3: 4, // 科学与生命 -> Eve
+  4: 3, // 商业与社会 -> Sarah
+};
+
 const DEFAULT_SCENARIO = SCENARIOS[0];
 
 interface SimulatorModalProps {
   isOpen: boolean;
   career: any;
   onClose: () => void;
-  onComplete: (success: boolean, abilityChanges?: any) => void; // 👈 新增 abilityChanges 参数
+  onComplete: (success: boolean, abilityChanges?: any) => void;
 }
 
 export default function SimulatorModal({ isOpen, career, onClose, onComplete }: SimulatorModalProps) {
-  const scenario = SCENARIOS[career?.category] || DEFAULT_SCENARIO;
+  const scenarioKey = SCENARIO_MAP[career?.category] ?? 0;
+  const scenario = SCENARIOS[scenarioKey] || DEFAULT_SCENARIO;
   
   const [roundIndex, setRoundIndex] = useState(0);
   const [step, setStep] = useState(0);
@@ -171,27 +181,33 @@ export default function SimulatorModal({ isOpen, career, onClose, onComplete }: 
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [visibleMessages, bossResponse]);
 
-  useEffect(() => {
+  // 🛡️ 修复隐患 2：打字机 useEffect 加入清理函数，防止组件卸载后幽灵更新
+      useEffect(() => {
     if (!isOpen) {
       setRoundIndex(0); setStep(0); setVisibleMessages([]); setBossResponse(""); setAngerLevel(0);
       return;
     }
-    if (step === 0 && roundIndex < scenario.rounds.length) {
-      const currentRound = scenario.rounds[roundIndex];
-      let delaySum = 0;
-      currentRound.messages.forEach((msg: string, index: number) => {
-        delaySum += 800;
-        setTimeout(() => {
-          setVisibleMessages(prev => [...prev, { id: Date.now() + index, text: msg }]);
-          if (index === currentRound.messages.length - 1) setTimeout(() => setStep(2), 1000);
-        }, delaySum);
-      });
-      setStep(1);
-    }
-  }, [isOpen, step, roundIndex, scenario]);
+    if (roundIndex >= scenario.rounds.length) return;
+
+
+    const currentRound = scenario.rounds[roundIndex];
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    let delaySum = 0;
+
+    currentRound.messages.forEach((msg: string, index: number) => {
+      delaySum += 800;
+      timers.push(setTimeout(() => {
+        setVisibleMessages(prev => [...prev, { id: Date.now() + index, text: msg }]);
+        if (index === currentRound.messages.length - 1) {
+          timers.push(setTimeout(() => setStep(2), 1000));
+        }
+      }, delaySum));
+    });
+
+    return () => timers.forEach(t => clearTimeout(t));
+  }, [isOpen, roundIndex, scenario]);
 
   const handleOptionClick = (option: any) => {
-    // 👇 智能推断能力变化 (根据选项文本关键词匹配)
     const abilityChanges = {
       technical: option.text.match(/代码|技术|监控|数据库|SQL|缓存|索引|隔离|密钥/i) ? 20 : 10,
       logic: option.text.match(/排查|分析|逻辑|优化|重构|回测|特征/i) ? 20 : 10,
@@ -201,16 +217,20 @@ export default function SimulatorModal({ isOpen, career, onClose, onComplete }: 
       leadership: option.text.match(/管理|带领|决策|负责|主导|协调/i) ? 20 : 5,
     };
 
+    // 🛡️ 修复隐患 1：闭包陷阱，提前计算真实的愤怒值
+    const newAngerLevel = angerLevel + option.anger; 
+
     setStep(3);
     setBossResponse("Typing...");
-    setAngerLevel(prev => prev + option.anger);
+    setAngerLevel(newAngerLevel);
 
     setTimeout(() => {
       setBossResponse(option.reply);
       setTimeout(() => {
         if (option.next === -1) {
           setTimeout(() => {
-            onComplete(angerLevel + option.anger < 50, abilityChanges); // 👈 传递能力变化
+            // 使用计算好的 newAngerLevel，而不是闭包里的旧 angerLevel
+            onComplete(newAngerLevel < 50, abilityChanges); 
           }, 2000);
         } else {
           setRoundIndex(prev => prev + 1);

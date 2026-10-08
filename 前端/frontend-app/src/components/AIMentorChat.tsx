@@ -1,240 +1,247 @@
 // src/components/AIMentorChat.tsx
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-type Persona = 'student' | 'career-changer' | 'lifelong-learner';
-
-interface Message {
-  id: string;
-  sender: 'user' | 'ai';
-  text: string;
-  timestamp: Date;
-}
+import { GALAXY_NAMES } from '../data/careerAdapter';
 
 interface AIMentorChatProps {
   onBack: () => void;
-  userSkills?: Set<number>;
-  careers?: any[];
-  abilityScores?: number[];
-  userPersona?: Persona | null; // 确保这里是 Persona
+  userSkills: Set<number>;
+  careers: any[];
+  abilityScores: number[];
+  userPersona: string | null;
+  recipes?: Record<string, number>;
 }
 
-export default function AIMentorChat({ onBack, userSkills, careers, abilityScores, userPersona }: AIMentorChatProps) {  const [input, setInput] = useState('');
-  const getOpeningMessage = () => {
-  const skillCount = userSkills?.size || 0;
-  
-  if (skillCount === 0) {
-    const personaMessages: Record<Persona, string> = {
-      'student': '你好！我注意到你是一名大学生。别担心迷茫，每个优秀的架构师都从这里开始。去宇宙点击那个发光的"START HERE"星球，迈出第一步吧！',
-      'career-changer': '你好！转行需要勇气，但你已经迈出了最重要的一步。告诉我你的目标职业，我会帮你规划最高效的技能路径。',
-      'lifelong-learner': '你好！终身学习是最值得敬佩的品质。你的宇宙已经准备好，想从哪个领域开始探索？',
-    };
-    return userPersona ? personaMessages[userPersona] : '你好！我是你的 AI 职业规划师。今天想聊点什么？';
+interface Message {
+  id: number;
+  role: 'mentor' | 'user';
+  text: string;
+}
+
+const ABILITY_LABELS = ["技术", "逻辑", "沟通", "抗压", "创新", "领导"];
+
+// 能力短板 -> 针对性训练剧本映射
+const COACH_MAP = [
+  { boss: "Alex (技术总监)", drill: "线上 OOM 代码危机" },
+  { boss: "David (量化总监)", drill: "实盘亏损归因危机" },
+  { boss: "Sarah (产品副总裁)", drill: "跨部门汇报危机" },
+  { boss: "Mike (首席架构师)", drill: "双十一高压排障" },
+  { boss: "Sarah (产品副总裁)", drill: "竞品追赶创新危机" },
+  { boss: "Eve (CISO)", drill: "凌晨安全事件指挥" },
+];
+
+interface StateAnalysis {
+  categoryCount: number[];
+  topCategory: number;
+  weakestIdx: number;
+  strongestIdx: number;
+  readyToCraft: { a: number; b: number; resultId: number }[];
+  oneStepCraft: { missing: number; resultId: number }[];
+}
+
+function analyzeState(userSkills: Set<number>, careers: any[], abilityScores: number[], recipes?: Record<string, number>): StateAnalysis {
+  const categoryCount = [0, 0, 0, 0, 0];
+  userSkills.forEach(id => {
+    const c = careers.find(x => x.id === id);
+    if (c) categoryCount[c.category]++;
+  });
+  const topCategory = categoryCount.indexOf(Math.max(...categoryCount));
+  const weakestIdx = abilityScores.indexOf(Math.min(...abilityScores));
+  const strongestIdx = abilityScores.indexOf(Math.max(...abilityScores));
+
+  const readyToCraft: { a: number; b: number; resultId: number }[] = [];
+  const oneStepCraft: { missing: number; resultId: number }[] = [];
+  Object.entries(recipes || {}).forEach(([key, resultId]) => {
+    const [a, b] = key.split('-').map(Number);
+    if (userSkills.has(resultId)) return;
+    const hasA = userSkills.has(a);
+    const hasB = userSkills.has(b);
+    if (hasA && hasB) readyToCraft.push({ a, b, resultId });
+    else if (hasA || hasB) oneStepCraft.push({ missing: hasA ? b : a, resultId });
+  });
+
+  return { categoryCount, topCategory, weakestIdx, strongestIdx, readyToCraft, oneStepCraft };
+}
+
+// 🧠 数据感知洞察引擎：把真实状态翻译成教练语言
+function buildInsights(s: StateAnalysis, careers: any[], userSkills: Set<number>, abilityScores: number[]): string[] {
+  const out: string[] = [];
+  const name = (id: number) => careers[id]?.name || '未知职业';
+
+  if (userSkills.size > 0) {
+    out.push(`📉 我注意到你的【${ABILITY_LABELS[s.weakestIdx]}】能力只有 ${abilityScores[s.weakestIdx]} 分，是六维中最弱的。建议立刻去挑战 ${COACH_MAP[s.weakestIdx].boss} 的「${COACH_MAP[s.weakestIdx].drill}」，针对性补强。`);
+    out.push(`📈 相对地，你的【${ABILITY_LABELS[s.strongestIdx]}】能力已达 ${abilityScores[s.strongestIdx]} 分，这是你的王牌维度，继续保持。`);
   }
-  
-  return `欢迎回来！我看到你已经点亮了 ${skillCount} 个技能，进展不错。${
-    userPersona === 'student' ? '作为大学生，你的学习速度很快！' :
-    userPersona === 'career-changer' ? '转行之路虽然辛苦，但每一步都算数。' :
-    '持续学习的你，正在不断拓展能力边界。'
-  } 今天想继续探索哪个方向？`;
-};
 
-const [messages, setMessages] = useState<Message[]>([
-  {
-    id: '1',
-    sender: 'ai',
-    text: getOpeningMessage(),
-    timestamp: new Date(),
-  },
-]);
-  const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const abilityLabels = ["技术", "逻辑", "沟通", "抗压", "创新", "领导"];
-  const topAbilityIdx = abilityScores ? abilityScores.indexOf(Math.max(...abilityScores)) : 0;
-  const lowAbilityIdx = abilityScores ? abilityScores.indexOf(Math.min(...abilityScores)) : 0;
-  const topScore = abilityScores ? abilityScores[topAbilityIdx] : 0;
-  const lowScore = abilityScores ? abilityScores[lowAbilityIdx] : 0;
-  const skillCount = userSkills?.size || 0;
-
-  // 获取已点亮的技能名称
-  const masteredSkills = useMemo(() => {
-    if (!userSkills || !careers) return [];
-    return Array.from(userSkills).slice(0, 3).map(id => careers.find(c => c.id === id)?.name).filter(Boolean);
-  }, [userSkills, careers]);
-
-  // 智能生成快捷提问
-  const quickPrompts = useMemo(() => {
-  const skillCount = userSkills?.size || 0;
-  const prompts: string[] = [];
-  
-  if (skillCount === 0) {
-    prompts.push('我该如何开始探索？');
-    prompts.push(`${userPersona === 'student' ? '大学生' : userPersona === 'career-changer' ? '转行者' : '学习者'}适合什么方向？`);
-  } else {
-    prompts.push('分析一下我目前的技能树');
-    if (lowScore < 60 && lowScore > 0) prompts.push(`我的${abilityLabels[lowAbilityIdx]}较弱，怎么补？`);
-    if (topScore > 70) prompts.push(`如何发挥我的${abilityLabels[topAbilityIdx]}优势？`);
+  if (s.readyToCraft.length > 0) {
+    const r = s.readyToCraft[0];
+    out.push(`🧪 合成台有好消息：你已掌握「${name(r.a)}」和「${name(r.b)}」，现在就能合成隐藏职业「${name(r.resultId)}」！`);
+  } else if (s.oneStepCraft.length > 0) {
+    const r = s.oneStepCraft[0];
+    out.push(`🧪 距离隐藏配方只差一步：先去点亮「${name(r.missing)}」，就能和已有技能合成「${name(r.resultId)}」了。`);
   }
-  
-  return prompts.slice(0, 3);
-}, [abilityLabels, lowAbilityIdx, lowScore, topAbilityIdx, topScore, userSkills, userPersona]);
+
+  const cnt = s.categoryCount[s.topCategory];
+  if (cnt > 0) {
+    const need = Math.max(0, 5 - cnt);
+    out.push(need === 0
+      ? `🌌 你在【${GALAXY_NAMES[s.topCategory]}】星系已点亮 ${cnt} 颗星，命运轨迹已解锁！`
+      : `🌌 你在【${GALAXY_NAMES[s.topCategory]}】星系已点亮 ${cnt} 颗星，再点亮 ${need} 颗即可解锁该星系的命运轨迹。`);
+  }
+  return out;
+}
+
+// 🧠 意图识别 + 数据感知回复
+function respond(input: string, s: StateAnalysis, careers: any[], userSkills: Set<number>, abilityScores: number[]): string {
+  const q = input.toLowerCase();
+  const name = (id: number) => careers[id]?.name || '未知职业';
+  const insights = buildInsights(s, careers, userSkills, abilityScores);
+
+  if (/能力|雷达|短板|弱|提升|强项/.test(q)) {
+    if (userSkills.size === 0) return "你还没有任何能力数据。先去宇宙里点亮第一颗星球、完成一次模拟，我才能为你做六维诊断。";
+    return `你的六维画像：${abilityScores.map((v, i) => `${ABILITY_LABELS[i]} ${v}`).join(' / ')}。\n\n最该补的是【${ABILITY_LABELS[s.weakestIdx]}】——去挑战 ${COACH_MAP[s.weakestIdx].boss} 的「${COACH_MAP[s.weakestIdx].drill}」；你的王牌是【${ABILITY_LABELS[s.strongestIdx]}】，善用它。`;
+  }
+  if (/合成|配方|解锁|隐藏/.test(q)) {
+    if (s.readyToCraft.length > 0) {
+      const r = s.readyToCraft[0];
+      return `现在就能合成！「${name(r.a)}」+「${name(r.b)}」→「${name(r.resultId)}」。打开合成台点击该配方即可自动定位。`;
+    }
+    if (s.oneStepCraft.length > 0) {
+      const r = s.oneStepCraft[0];
+      return `还差一步：点亮「${name(r.missing)}」后，就能合成「${name(r.resultId)}」。我建议把它作为你的下一个目标。`;
+    }
+    return "暂时还没有成熟的合成机会。先专注点亮你主攻星系的基础职业，配方会自动浮现。";
+  }
+  if (/进度|下一步|学|路线|任务|目标|计划/.test(q)) {
+    const cnt = s.categoryCount[s.topCategory];
+    const target = careers.find(c => c.category === s.topCategory && !userSkills.has(c.id) && c.tier === 0);
+    return `当前主攻【${GALAXY_NAMES[s.topCategory]}】星系（已点亮 ${cnt} 星）。\n\n下一步建议：${target ? `去挑战「${target.name}」，它是该星系不错的切入点。` : '该星系基础职业已清空，尝试合成高阶职业或开拓新星系。'}\n\n学习中心的 Daily Missions 也已按此星系同步更新。`;
+  }
+  if (/职业|推荐|适合|方向|选/.test(q)) {
+    const rec = careers.find(c => c.category === s.topCategory && !userSkills.has(c.id));
+    return rec
+      ? `结合你的探索轨迹，我推荐关注「${rec.name}」（${rec.categoryName}）。它要求：${(rec.requiredSkills || []).slice(0, 3).join('、')}。晋升路径：${rec.careerPath || '暂无'}。`
+      : "你的数据还太少，先点亮几颗星球，我才能给出有依据的方向推荐。";
+  }
+  if (/迷茫|累|放弃|难|烦|挫败/.test(q)) {
+    return `我理解这种感受。但看看你的数据：你已经点亮了 ${userSkills.size} 颗星球${userSkills.size > 0 ? `，其中最强维度【${ABILITY_LABELS[s.strongestIdx]}】达到 ${abilityScores[s.strongestIdx]} 分` : ''}。成长从来不是直线，而是螺旋。休息一会儿，然后从最小的一步开始——我永远在这里陪你复盘。`;
+  }
+  if (/你好|hi|hello|在吗|嗨/.test(q)) {
+    return `你好！我是你的数据感知导师。我刚扫描了你的实时状态：\n\n${insights.join('\n\n') || '你还没有数据，去点亮第一颗星球吧！'}\n\n想深聊哪个方面？`;
+  }
+  // 默认：主动给出一条洞察
+  return insights.length > 0
+    ? `让我看看你的实时数据……\n\n${insights[Math.floor(Math.random() * insights.length)]}`
+    : "你的宇宙还是一片空白。点击那颗发着白光的 START HERE 星球，完成第一次模拟，我们才有数据可聊。";
+}
+
+export default function AIMentorChat({ onBack, userSkills, careers, abilityScores, userPersona, recipes }: AIMentorChatProps) {
+  const state = analyzeState(userSkills, careers, abilityScores, recipes);
+  const insights = buildInsights(state, careers, userSkills, abilityScores);
+
+  const greeting = userSkills.size === 0
+    ? "你好，我是你的 AI 导师。目前你的宇宙还没有任何数据——点击那颗发白光的 START HERE 星球，完成第一次职场模拟，我就能开始为你做个性化诊断。"
+    : `你好，我是你的 AI 导师。我刚扫描了你的实时状态：\n\n${insights.join('\n\n')}`;
+
+  const [messages, setMessages] = useState<Message[]>([{ id: 0, role: 'mentor', text: greeting }]);
+  const [input, setInput] = useState('');
+  const [typing, setTyping] = useState(false);
+  const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, typing]);
 
-  //  增强版本地智能引擎 (无需联网，极速响应，动态组合话术)
-  const generateAIResponse = (userText: string): string => {
-    const lowerText = userText.toLowerCase();
-    
-    // 1. 关于"方向/适合"
-    if (lowerText.includes('适合') || lowerText.includes('方向') || lowerText.includes('选') || lowerText.includes('分析')) {
-      if (skillCount === 0) {
-        return `我注意到你的宇宙还是暗的。别急，规划的第一步是探索。\n\n建议你点击几个基础星球（比如"AI 算法"或"全栈开发"），完成一次模拟。有了数据，我才能给你精准的画像。去试试吧！`;
-      }
-      
-      const skillsStr = masteredSkills.length > 0 ? masteredSkills.join('、') : '相关基础技能';
-      return `根据你点亮的 ${skillCount} 个节点（如${skillsStr}），以及你的能力模型：\n\n你的 **${abilityLabels[topAbilityIdx]}** 是你的核心引擎 (${topScore}分)。这意味着你在需要深度思考和${abilityLabels[topAbilityIdx]}的领域会如鱼得水。\n\n**我的建议**：不要盲目追热点。沿着你已点亮的技能树，向“进阶”和“专家”层级探索。你的路径已经初具雏形了。`;
-    }
-    
-    // 2. 关于"弱项/提升/差"
-    if (lowerText.includes(abilityLabels[lowAbilityIdx]) || lowerText.includes('弱') || lowerText.includes('提升') || lowerText.includes('差') || lowerText.includes('补')) {
-      if (lowScore === 0) {
-        return `${abilityLabels[lowAbilityIdx]}能力暂未评分。这通常意味着你还没有在模拟器中接触过相关挑战。\n\n不用焦虑，去“学习执行中心”找几个相关的 Daily Mission，做完一次模拟，分数自然就有了。`;
-      }
-      
-      return `${abilityLabels[lowAbilityIdx]} (${lowScore}分) 确实是目前木桶的短板，但这也是你进步空间最大的地方。\n\n**三步提升法**：\n1. **刻意练习**：在学习中心，优先做带有“限时”标签的任务，强迫自己在压力下做决策。\n2. **跨界合成**：去图鉴里找找需要 ${abilityLabels[lowAbilityIdx]} 的跨领域配方，逼自己跳出舒适区。\n3. **接受不完美**：不用强求六边形。把它提升到 60 分“不拖后腿”即可，把 80% 的精力留给你的 ${abilityLabels[topAbilityIdx]}。`;
-    }
-
-    // 3. 关于"优势/强/擅长"
-    if (lowerText.includes(abilityLabels[topAbilityIdx]) || lowerText.includes('优势') || lowerText.includes('强') || lowerText.includes('擅长')) {
-      return `你的 **${abilityLabels[topAbilityIdx]}** 达到了 ${topScore} 分，这是你区别于他人的核心竞争力！🌟\n\n**如何放大它？**\n- **寻找高杠杆场景**：在团队中主动承担需要高${abilityLabels[topAbilityIdx]}的难题。\n- **打造个人标签**：让别人一提到${abilityLabels[topAbilityIdx]}就想到你。\n- **探索隐藏配方**：去宇宙深处找找那些需要极高${abilityLabels[topAbilityIdx]}才能解锁的“专家级”星球。\n\n记住，优势不是用来保持的，是用来碾压的。`;
-    }
-
-    // 4. 关于"综合/平衡/全面"
-    if (lowerText.includes('综合') || lowerText.includes('平衡') || lowerText.includes('全面') || lowerText.includes('六边形')) {
-      return `追求“六边形战士”是个陷阱。真正的职场高手都是“T型人才”。\n\n你现在的模型很真实：${abilityLabels[topAbilityIdx]} (${topScore}) 是你的那一竖，足够深；其他几项是你的那一横。\n\n**我的策略**：只要最弱的 ${abilityLabels[lowAbilityIdx]} 不低于 50 分，你就完全具备竞争力。把剩下的时间全部投入到你的长板中，做到极致。`;
-    }
-
-    // 5. 默认回复 (引导式)
-    const defaultResponses = [
-      `这是个好问题。不过为了给你更精准的建议，你能具体说说吗？比如问问“我的${abilityLabels[lowAbilityIdx]}怎么提升”，或者“我适合什么方向”。`,
-      `我理解你的困惑。建议你点开左侧的“快捷提问”，那里有几个基于你当前数据生成的好问题。或者，去“学习执行中心”跑几个任务，行动会带来答案。`,
-      `作为你的 AI 导师，我随时在这里。你可以问我关于技能合成、职业路径、或者能力雷达图的任何事。试试问我：“分析一下我的技能树”？`
-    ];
-    return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
-  };
-
-  const handleSend = (text: string) => {
-    if (!text.trim()) return;
-
-    const userMsg: Message = { id: Date.now().toString(), sender: 'user', text, timestamp: new Date() };
-    setMessages(prev => [...prev, userMsg]);
+  const send = (raw?: string) => {
+    const text = (raw ?? input).trim();
+    if (!text || typing) return;
     setInput('');
-    setIsTyping(true);
-
-    // 模拟思考延迟 (0.8 - 1.5秒)
-    const delay = 800 + Math.random() * 700;
+    setMessages(prev => [...prev, { id: Date.now(), role: 'user', text }]);
+    setTyping(true);
     setTimeout(() => {
-      const aiText = generateAIResponse(text);
-      const aiMsg: Message = { id: (Date.now() + 1).toString(), sender: 'ai', text: aiText, timestamp: new Date() };
-      setMessages(prev => [...prev, aiMsg]);
-      setIsTyping(false);
-    }, delay);
+      const reply = respond(text, state, careers, userSkills, abilityScores);
+      setMessages(prev => [...prev, { id: Date.now() + 1, role: 'mentor', text: reply }]);
+      setTyping(false);
+    }, 700);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    handleSend(input);
-  };
+  const quickQuestions = ["我的能力短板是什么？", "我现在该合成什么？", "下一步学什么？", "给我点鼓励"];
 
   return (
-    <div className="w-full h-screen bg-[#050810] relative overflow-hidden flex text-white font-sans">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(168,85,247,0.05),transparent_50%)] pointer-events-none"></div>
+    <div className="w-full h-screen bg-[#050810] flex flex-col text-white font-sans relative overflow-hidden">
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.03)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none"></div>
 
-      {/* 左侧 */}
-      <div className="w-[30%] h-full border-r border-white/5 p-8 flex flex-col z-10 bg-black/20">
-        <div className="mb-8">
-          <h2 className="text-2xl font-black tracking-tight mb-2">AI MENTOR</h2>
+      {/* 顶栏 */}
+      <div className="relative z-10 flex items-center justify-between px-8 py-5 border-b border-white/10 bg-black/40 backdrop-blur-md flex-shrink-0">
+        <div className="flex items-center gap-4">
           <button onClick={onBack} className="group flex items-center gap-2 text-sm text-white/50 hover:text-cyan-400 transition-all">
             <span className="group-hover:-translate-x-1 transition-transform">←</span> 返回宇宙
           </button>
-        </div>
-
-        <div className="mb-6">
-          <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-3">Quick Prompts</h3>
-          <div className="space-y-2">
-            {quickPrompts.map((prompt, idx) => (
-              <motion.button
-                key={idx}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                onClick={() => handleSend(prompt)}
-                className="w-full text-left p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-cyan-500/30 transition-all text-sm text-white/80 group"
-              >
-                {prompt}
-              </motion.button>
-            ))}
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-xl shadow-lg">🤖</div>
+          <div>
+            <h2 className="font-bold text-sm">AI 导师 · 数据感知版</h2>
+            <p className="text-green-400 text-xs flex items-center gap-1">
+              <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+              已接入你的实时能力雷达 / 合成台 / 星系进度
+            </p>
           </div>
         </div>
-
-        <div className="flex-1">
-          <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-3">Chat History</h3>
-          <div className="space-y-3 opacity-50">
-            <div className="p-3 rounded-lg bg-white/5 text-xs text-white/60 truncate">昨天：关于量化交易的学习路径...</div>
-            <div className="p-3 rounded-lg bg-white/5 text-xs text-white/60 truncate">前天：如何平衡技术与沟通能力...</div>
-          </div>
-        </div>
+        <span className="text-xs text-white/40 font-mono">已点亮 {userSkills.size} 星</span>
       </div>
 
-      {/* 右侧 */}
-      <div className="w-[70%] h-full flex flex-col z-10">
-        <div className="flex-1 overflow-y-auto p-10 space-y-6">
-          <AnimatePresence>
-            {messages.map((msg) => (
-              <motion.div key={msg.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[70%] ${msg.sender === 'user' ? 'order-2' : ''}`}>
-                  <div className={`flex items-center gap-2 mb-1 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}>
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${msg.sender === 'user' ? 'bg-cyan-500 text-black' : 'bg-purple-500 text-white'}`}>
-                      {msg.sender === 'user' ? 'Me' : 'AI'}
-                    </div>
-                    <span className="text-xs text-white/40">{msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                  </div>
-                  <div className={`p-4 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${msg.sender === 'user' ? 'bg-cyan-500/20 border border-cyan-500/30 text-white rounded-tr-sm' : 'bg-white/5 border border-white/10 text-white/90 rounded-tl-sm'}`}>
-                    {msg.text}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-
-          {isTyping && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-              <div className="bg-white/5 border border-white/10 p-4 rounded-2xl rounded-tl-sm flex items-center gap-2">
-                <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-2 h-2 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+      {/* 消息区 */}
+      <div className="relative z-10 flex-1 overflow-y-auto px-8 py-6 space-y-4 custom-scrollbar">
+        <AnimatePresence>
+          {messages.map(m => (
+            <motion.div
+              key={m.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-line
+                ${m.role === 'user'
+                  ? 'bg-cyan-600/80 text-white rounded-br-sm'
+                  : 'bg-white/5 border border-white/10 text-white/90 rounded-bl-sm'}`}
+              >
+                {m.text}
               </div>
             </motion.div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
+          ))}
+        </AnimatePresence>
+        {typing && (
+          <div className="flex justify-start">
+            <div className="bg-white/5 border border-white/10 px-4 py-3 rounded-2xl rounded-bl-sm text-white/50 text-sm flex items-center gap-2">
+              <div className="w-3 h-3 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+              正在分析你的实时数据…
+            </div>
+          </div>
+        )}
+        <div ref={endRef} />
+      </div>
 
-        <div className="p-8 border-t border-white/5 bg-black/40 backdrop-blur-xl">
-          <form onSubmit={handleSubmit} className="relative">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="询问关于职业规划、技能提升的任何问题..."
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 pr-16 text-white placeholder-white/30 focus:outline-none focus:border-cyan-500/50 transition-colors"
-            />
-            <button type="submit" disabled={!input.trim() || isTyping} className="absolute right-3 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-cyan-500 hover:bg-cyan-400 disabled:bg-white/10 disabled:cursor-not-allowed rounded-lg flex items-center justify-center transition-all">
-              <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
-            </button>
-          </form>
-          <p className="text-center text-[10px] text-white/20 mt-3">AI 规划师基于你的 3D 宇宙数据生成回答 · 仅供参考</p>
+      {/* 快捷问题 */}
+      <div className="relative z-10 px-8 pb-3 flex gap-2 flex-wrap flex-shrink-0">
+        {quickQuestions.map(q => (
+          <button key={q} onClick={() => send(q)} className="text-xs px-3 py-1.5 rounded-full border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10 transition-all">
+            {q}
+          </button>
+        ))}
+      </div>
+
+      {/* 输入区 */}
+      <div className="relative z-10 px-8 pb-6 flex-shrink-0">
+        <div className="flex gap-3">
+          <input
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && send()}
+            placeholder="问问你的能力短板、合成机会或下一步路线…"
+            className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-cyan-500/50 transition-colors placeholder:text-white/30"
+          />
+          <button onClick={() => send()} className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 font-bold text-sm hover:from-cyan-400 hover:to-blue-400 transition-all active:scale-95">
+            发送
+          </button>
         </div>
       </div>
     </div>
