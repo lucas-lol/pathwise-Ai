@@ -545,6 +545,39 @@ export default function CareerUniverse() {
     setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3000);
   };
 
+  // 🎭 演示模式：一键从初始状态载入"已探索一段时间"的富状态
+  const activateDemoMode = () => {
+    // 按 tier 升序挑选，保证前置依赖尽量自洽
+    const pick = (cat: number, n: number) =>
+      careers
+        .filter(c => c.category === cat)
+        .sort((a, b) => a.tier - b.tier)
+        .slice(0, n)
+        .map(c => c.id);
+
+    const demoSkills = [...pick(0, 5), ...pick(2, 5)];
+    setUserSkills(new Set(demoSkills));
+    setUnlockedPaths(new Set([0, 2]));
+    setAbilityScores({ technical: 68, logic: 74, communication: 52, stress: 45, innovation: 61, leadership: 38 });
+    setCareersWithAttack(new Set());
+    showToast("✨ 演示状态已载入", 'success');
+  };
+
+  // 触发器 1：秘密键盘快捷键 Shift + D（无可见按钮）
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.key.toLowerCase() === 'd') activateDemoMode();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [careers]);
+
+  // 触发器 2：URL 参数 ?demo=1
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('demo') === '1') activateDemoMode();
+  }, [careers]);
+
   const forceFlyTo = (careerId: number) => {
     setActiveId(careerId);
     setCameraTrigger(prev => prev + 1);
@@ -686,7 +719,8 @@ export default function CareerUniverse() {
     return <LearningDashboard onBack={() => setShowLearningHub(false)} userSkills={userSkills} careers={careers} abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} />;
   }
   if (showProfile) {
-    return <CareerProfile onBack={() => setShowProfile(false)} userSkills={userSkills} careers={careers} abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} />;
+    
+    return <CareerProfile onBack={() => setShowProfile(false)} userSkills={userSkills} careers={careers} abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} unlockedPaths={unlockedPaths} />;
   }
 
   return (
