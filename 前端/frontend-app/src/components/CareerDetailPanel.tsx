@@ -6,7 +6,8 @@ import SimulatorModal from './SimulatorModal';
 interface CareerDetailPanelProps {
   career: any;
   onClose: () => void;
-  onSimulationComplete: (careerId: number, success: boolean) => void;
+  rating?: 'S' | 'A' | 'B' | 'C';
+  onSimulationComplete: (careerId: number, success: boolean, abilityChanges?: any, rating?: 'S' | 'A' | 'B' | 'C') => void;
 }
 
 //  1. 定义全息雷达图组件
@@ -97,8 +98,7 @@ function HolographicRadar({ skills }: { skills: { name: string; level: number }[
   );
 }
 
-export default function CareerDetailPanel({ career, onClose, onSimulationComplete }: CareerDetailPanelProps) {
-  const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
+export default function CareerDetailPanel({ career, onClose, onSimulationComplete, rating }: CareerDetailPanelProps) {  const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
 
   const skills = [
     { name: "核心专业技能", level: Math.floor(career.complexity * 100) },
@@ -115,10 +115,10 @@ export default function CareerDetailPanel({ career, onClose, onSimulationComplet
     visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } }
   };
 
-  const handleSimulatorComplete = (success: boolean) => {
+    const handleSimulatorComplete = (success: boolean, abilityChanges?: any, newRating?: 'S' | 'A' | 'B' | 'C') => {
     setIsSimulatorOpen(false);
-    onSimulationComplete(career.id, success);
-    onClose(); 
+    onSimulationComplete(career.id, success, abilityChanges, newRating);
+    onClose();
   };
 
   return (
@@ -136,6 +136,11 @@ export default function CareerDetailPanel({ career, onClose, onSimulationComplet
             <span className="px-2 py-1 bg-indigo-500/20 text-indigo-300 text-xs font-bold rounded border border-indigo-500/30">
               匹配度 {career.match}%
             </span>
+            {rating && (
+              <span className="px-2 py-1 bg-yellow-500/20 text-yellow-300 text-xs font-bold rounded border border-yellow-500/40">
+                历史评级 {rating}
+              </span>
+            )}
           </div>
           <h2 className="text-4xl font-bold text-white tracking-tight mb-4">{career.name}</h2>
           <p className="text-white/60 text-sm leading-relaxed">

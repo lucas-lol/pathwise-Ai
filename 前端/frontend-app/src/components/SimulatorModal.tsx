@@ -163,7 +163,7 @@ interface SimulatorModalProps {
   isOpen: boolean;
   career: any;
   onClose: () => void;
-  onComplete: (success: boolean, abilityChanges?: any) => void;
+  onComplete: (success: boolean, abilityChanges?: any, rating?: 'S' | 'A' | 'B' | 'C') => void;
 }
 
 export default function SimulatorModal({ isOpen, career, onClose, onComplete }: SimulatorModalProps) {
