@@ -16,7 +16,6 @@ import { type GameStats } from '../utils/badges';
 import { CAREERS, GALAXY_NAMES, type AdaptedCareer, processRawCareers } from '../data/careerAdapter';
 import { playSound } from '../utils/gameFx';
 
-
 type Persona = 'student' | 'career-changer' | 'lifelong-learner';
 type Rating = 'S' | 'A' | 'B' | 'C';
 
@@ -62,8 +61,6 @@ interface FutureNodeData {
   color: THREE.Color;
   category: number;
 }
-
-// 🌟 P2 基建：全局游戏统计（P3 成就 / P4 任务链 / P5 连击等级 共用）
 
 interface BurstData {
   id: number;
@@ -385,7 +382,6 @@ function CameraController({ targetPosition, isActive, controlsRef, onAnimStart, 
       tl.to(camera, { fov: 60, duration: 0.9, ease: "power2.out", onUpdate: () => camera.updateProjectionMatrix() }, 0.9);
     }
     return () => { controls.enableDamping = originalDamping; };
-    // 注意：onAnimStart/onAnimEnd 为内联回调，绝不能进依赖数组（否则死循环）
   }, [trigger, isActive, targetPosition, camera]);
   return null;
 }
@@ -653,7 +649,6 @@ export default function CareerUniverse() {
     setUnlockedPaths(new Set([0, 2]));
     setAbilityScores({ technical: 68, logic: 74, communication: 52, stress: 45, innovation: 61, leadership: 38 });
     setCareersWithAttack(new Set());
-    // 🌟 Demo 也带评级与 XP，展示更丰满
     setStats((prev) => ({
       ...prev,
       simSuccess: Math.max(prev.simSuccess, 8),
@@ -685,6 +680,74 @@ export default function CareerUniverse() {
     if (p < 60) return `已成为 ${getGoalTitle()} 的有力竞争者 (${p}%)`;
     return `距离 ${getGoalTitle()} 仅一步之遥 (${p}%)`;
   };
+
+  // 🌟 P4：动态推导下一步任务链
+  const nextSteps = useMemo(() => {
+    const steps: { id: string; title: string; desc: string; targetId?: number; type: 'craft' | 'unlock' | 'path' }[] = [];
+
+    // 优先级 1：有现成的合成配方
+    const readyCrafts = Object.entries(CRAFTING_RECIPES).filter(([key, resId]) => {
+      const [a, b] = key.split('-').map(Number);
+      return userSkills.has(a) && userSkills.has(b) && !userSkills.has(resId);
+    });
+    if (readyCrafts.length > 0) {
+      const [key, resId] = readyCrafts[0];
+      const [a, b] = key.split('-').map(Number);
+      steps.push({
+        id: 'craft',
+        type: 'craft',
+        title: `✨ 立即合成：${careers[resId]?.name}`,
+        desc: `材料已就绪（${careers[a]?.name} + ${careers[b]?.name}）`,
+        targetId: resId
+      });
+    }
+
+    // 优先级 2：差 1 个技能解锁命运轨迹
+    const categoryCount = [0, 0, 0, 0, 0];
+    userSkills.forEach(id => { const c = careers.find(x => x.id === id); if (c) categoryCount[c.category]++; });
+    const almostDoneCat = categoryCount.findIndex(cnt => cnt === 4); // 5个解锁，4个就是差1个
+    if (almostDoneCat !== -1 && !unlockedPaths.has(almostDoneCat)) {
+      const nextCareer = careers.find(c => c.category === almostDoneCat && !userSkills.has(c.id) && c.tier === 0);
+      steps.push({
+        id: 'path',
+        type: 'path',
+        title: `🛤️ 解锁命运轨迹：${CATEGORY_NAMES[almostDoneCat]}`,
+        desc: `再点亮 1 个该星系技能即可 (推荐: ${nextCareer?.name || '任意基础职业'})`,
+        targetId: nextCareer?.id
+      });
+    }
+
+    // 优先级 3：兴趣推荐 (保底)
+    if (steps.length < 2 && userInterests.size > 0) {
+      const interestRec = careers.find(c => !userSkills.has(c.id) && (c.interestTags || []).some(t => userInterests.has(t)) && c.tier === 0);
+      if (interestRec) {
+        steps.push({
+          id: 'interest',
+          type: 'unlock',
+          title: `🎯 探索兴趣领域：${interestRec.name}`,
+          desc: `与你选择的兴趣标签高度匹配`,
+          targetId: interestRec.id
+        });
+      }
+    }
+
+    // 优先级 4：常规推荐 (保底)
+    if (steps.length < 2) {
+      const topCat = categoryCount.indexOf(Math.max(...categoryCount));
+      const rec = careers.find(c => c.category === topCat && !userSkills.has(c.id) && c.tier === 0);
+      if (rec && !steps.find(s => s.targetId === rec.id)) {
+        steps.push({
+          id: 'normal',
+          type: 'unlock',
+          title: `🚀 进阶挑战：${rec.name}`,
+          desc: `继续深耕 ${CATEGORY_NAMES[topCat]} 星系`,
+          targetId: rec.id
+        });
+      }
+    }
+
+    return steps.slice(0, 2); // 最多显示 2 个任务，保持界面简洁
+  }, [userSkills, careers, CRAFTING_RECIPES, unlockedPaths, userInterests]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -861,7 +924,8 @@ export default function CareerUniverse() {
           <button onClick={() => setShowMentorChat(true)} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm">💬 AI 导师</button>
           <button onClick={() => setShowLearningHub(true)} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm">🚀 学习中心</button>
           <button onClick={() => setShowProfile(true)} className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm">✨ 档案</button>
-          <button onClick={() => setShowAchievements(true)} className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm">🏆 成就 <span className="bg-white/20 px-1.5 rounded text-[10px]">{Object.keys(stats.ratings).length > 0 ? '🔥' : ''}</span></button>          <button onClick={() => setShowAtlas(!showAtlas)} className="bg-black/80 border border-cyan-500/30 text-cyan-400 px-4 py-2 rounded-full backdrop-blur-md shadow-lg hover:bg-cyan-500/20 transition-all flex items-center gap-2 font-bold text-sm"><span>🗺️</span> 星图</button>
+          <button onClick={() => setShowAchievements(true)} className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm">🏆 成就 <span className="bg-white/20 px-1.5 rounded text-[10px]">{Object.keys(stats.ratings).length > 0 ? '🔥' : ''}</span></button>
+          <button onClick={() => setShowAtlas(!showAtlas)} className="bg-black/80 border border-cyan-500/30 text-cyan-400 px-4 py-2 rounded-full backdrop-blur-md shadow-lg hover:bg-cyan-500/20 transition-all flex items-center gap-2 font-bold text-sm"><span>🗺️</span> 星图</button>
           <button onClick={() => setShowCodex(!showCodex)} className="bg-black/80 border border-cyan-500/30 text-cyan-400 px-4 py-2 rounded-full backdrop-blur-md shadow-lg hover:bg-cyan-500/20 transition-all flex items-center gap-2 font-bold text-sm"><span>🧪</span> 合成</button>
         </div>
       )}
@@ -871,15 +935,40 @@ export default function CareerUniverse() {
         {showAtlas && <CareerAtlas careers={displayCareers} userSkills={userSkills} onClose={() => setShowAtlas(false)} onPick={(id: number) => { setShowAtlas(false); forceFlyTo(id); setSelectedCareer(displayCareers.find((c: CareerData) => c.id === id) || null); }} />}
       </AnimatePresence>
 
+      {/* 🌟 修复：平级且结构正确的 PageOverlay 抽屉 */}
       <PageOverlay show={showMentorChat} direction="right">
-        <AIMentorChat onBack={() => setShowMentorChat(false)} userSkills={userSkills} careers={careers} abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} userPersona={userPersona} recipes={CRAFTING_RECIPES} />
-        userInterests={userInterests}
+        <AIMentorChat 
+          onBack={() => setShowMentorChat(false)} 
+          userSkills={userSkills} 
+          careers={careers} 
+          abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} 
+          userPersona={userPersona} 
+          recipes={CRAFTING_RECIPES} 
+          userInterests={userInterests} 
+        />
       </PageOverlay>
+
       <PageOverlay show={showLearningHub} direction="right">
-        <LearningDashboard onBack={() => setShowLearningHub(false)} userSkills={userSkills} careers={careers} abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} />
+        <LearningDashboard 
+          onBack={() => setShowLearningHub(false)} 
+          userSkills={userSkills} 
+          careers={careers} 
+          abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} 
+        />
       </PageOverlay>
+
       <PageOverlay show={showProfile} direction="bottom">
-                   <PageOverlay show={showAchievements} direction="bottom">
+        <CareerProfile 
+          onBack={() => setShowProfile(false)} 
+          userSkills={userSkills} 
+          careers={careers} 
+          abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} 
+          unlockedPaths={unlockedPaths} 
+          stats={stats} 
+        />
+      </PageOverlay>
+
+      <PageOverlay show={showAchievements} direction="bottom">
         <AchievementPanel
           onBack={() => setShowAchievements(false)}
           userSkills={userSkills}
@@ -888,9 +977,7 @@ export default function CareerUniverse() {
           stats={stats}
         />
       </PageOverlay>
-        <CareerProfile onBack={() => setShowProfile(false)} userSkills={userSkills} careers={careers} abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} unlockedPaths={unlockedPaths} />
-        stats={stats}
-      </PageOverlay>
+
       <AnimatePresence>
         {showInterestEditor && <InterestEditor allInterests={allInterests} currentInterests={userInterests} onSave={(s: Set<string>) => { setUserInterests(s); setShowInterestEditor(false); showToast("🎯 匹配度已重新计算", 'success'); }} onClose={() => setShowInterestEditor(false)} />}
       </AnimatePresence>
@@ -912,6 +999,58 @@ export default function CareerUniverse() {
         <div className="text-cyan-400 font-mono text-xs mt-1">
           XP <span className="text-white">{stats.xp}</span> · 合成 <span className="text-white">{stats.craftCount}</span> · 危机解除 <span className="text-white">{stats.crisisFixed}</span>
           {stats.combo > 1 && <span className="ml-2 text-orange-400 font-bold">🔥 连击 x{stats.combo}</span>}
+              <div className="absolute top-6 left-6 z-10 pointer-events-none">
+        <div className="text-cyan-400 font-mono text-xs tracking-widest mb-1">{userPersona ? `JOURNEY TO ${getGoalTitle().toUpperCase()}` : 'SYSTEM STATUS'}</div>
+        <div className="text-white font-mono text-xl font-bold">{getProgressNarrative()}</div>
+        <div className="text-yellow-400 font-mono text-xs mt-2">
+          已掌握 <span className="text-white">{userSkills.size}</span> / {careers.length} 技能 · 命运路径 <span className="text-white">{unlockedPaths.size}</span> / 5
+          {userInterests.size > 0 && <span className="ml-2 text-cyan-400">· 兴趣匹配已激活</span>}
+        </div>
+        
+        {/* 🌟 P4：主线任务面板 */}
+        {nextSteps.length > 0 && !selectedCareer && (
+          <div className="mt-4 space-y-2 pointer-events-auto">
+            <div className="text-[10px] text-white/40 uppercase tracking-widest font-bold mb-1">Current Objectives</div>
+            {nextSteps.map((step, idx) => (
+              <motion.button
+                key={step.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                onClick={() => {
+                  if (step.type === 'craft' && step.targetId !== undefined) {
+                    // 如果是合成任务，触发合成逻辑
+                    const key = Object.keys(CRAFTING_RECIPES).find(k => CRAFTING_RECIPES[k] === step.targetId);
+                    if (key) {
+                      const [a, b] = key.split('-').map(Number);
+                      handleLocateRecipe(a, b);
+                    }
+                  } else if (step.targetId !== undefined) {
+                    forceFlyTo(step.targetId);
+                    const targetCareer = careers.find(c => c.id === step.targetId);
+                    if (targetCareer) setSelectedCareer(targetCareer);
+                  }
+                }}
+                className="group w-full max-w-sm text-left bg-black/60 border border-cyan-500/30 hover:border-cyan-400 hover:bg-cyan-500/10 rounded-lg p-3 backdrop-blur-md transition-all shadow-lg"
+              >
+                <div className="flex items-start gap-2">
+                  <span className="mt-0.5 text-cyan-400 group-hover:animate-pulse">▹</span>
+                  <div>
+                    <div className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">{step.title}</div>
+                    <div className="text-[11px] text-white/60 mt-0.5">{step.desc}</div>
+                  </div>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+        )}
+
+        {/* 🌟 P2：XP 与连击显示 (保持在最下方) */}
+        <div className="text-cyan-400 font-mono text-xs mt-3 pt-3 border-t border-white/10">
+          XP <span className="text-white">{stats.xp}</span> · 合成 <span className="text-white">{stats.craftCount}</span> · 危机解除 <span className="text-white">{stats.crisisFixed}</span>
+          {stats.combo > 1 && <span className="ml-2 text-orange-400 font-bold">🔥 连击 x{stats.combo}</span>}
+        </div>
+      </div>
         </div>
       </div>
 
