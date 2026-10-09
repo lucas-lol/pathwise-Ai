@@ -15,9 +15,11 @@ export default function AchievementPanel({ onBack, userSkills, unlockedPaths, ab
   const unlockedCount = allBadges.filter(b => b.unlocked).length;
 
   return (
+    
     <div className="w-full h-screen bg-[#050810] flex flex-col text-white font-sans relative overflow-hidden">
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.03)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none"></div>
-
+      {/* 加入这两行背景，与导师界面统一 */}
+      <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(6,182,212,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#050810_100%)] pointer-events-none"></div>
       <div className="relative z-10 flex items-center justify-between px-8 py-5 border-b border-white/10 bg-black/40 backdrop-blur-md flex-shrink-0">
         <div className="flex items-center gap-4">
           <button onClick={onBack} className="group flex items-center gap-2 text-sm text-white/50 hover:text-cyan-400 transition-all">
@@ -41,12 +43,13 @@ export default function AchievementPanel({ onBack, userSkills, unlockedPaths, ab
               transition={{ delay: i * 0.05 }}
               className={`p-4 rounded-xl border backdrop-blur-md transition-all ${
                 badge.unlocked 
-                  ? RARITY_STYLE[badge.rarity] 
-                  : 'border-white/10 text-white/30 bg-white/5 grayscale opacity-50'
+                                    ? RARITY_STYLE[badge.rarity] 
+                  : 'border-white/5 bg-black/40 text-white/20' // 更深的背景，更低的透明度
               }`}
             >
               <div className="flex items-center gap-3 mb-2">
-                <span className={`text-3xl ${!badge.unlocked ? 'grayscale' : ''}`}>{badge.icon}</span>
+                <span className={`text-3xl ${!badge.unlocked ? 'grayscale opacity-30' : ''}`}>{badge.icon}</span>
+{!badge.unlocked && <span className="absolute top-4 right-4 text-xs">🔒</span>} // 需要父级 relative
                 <div>
                   <div className="font-bold text-sm">{badge.name}</div>
                   <div className="text-[10px] uppercase tracking-wider opacity-60">{badge.rarity}</div>

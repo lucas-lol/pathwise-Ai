@@ -936,7 +936,7 @@ export default function CareerUniverse() {
       </AnimatePresence>
 
       {/* 🌟 修复：平级且结构正确的 PageOverlay 抽屉 */}
-      <PageOverlay show={showMentorChat} direction="right">
+            <PageOverlay show={showMentorChat} direction="right">
         <AIMentorChat 
           onBack={() => setShowMentorChat(false)} 
           userSkills={userSkills} 
@@ -944,7 +944,8 @@ export default function CareerUniverse() {
           abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} 
           userPersona={userPersona} 
           recipes={CRAFTING_RECIPES} 
-          userInterests={userInterests} 
+          userInterests={userInterests}
+          onFlyToCareer={(id) => { setShowMentorChat(false); forceFlyTo(id); setTimeout(() => setSelectedCareer(careers.find(c => c.id === id) || null), 1000); }} 
         />
       </PageOverlay>
 
