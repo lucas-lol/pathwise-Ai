@@ -28,13 +28,33 @@ function tone(freq: number, start: number, dur: number, type: OscillatorType, pe
   osc.stop(t0 + dur + 0.05);
 }
 
-export type FxSound = 'click' | 'success' | 'fail' | 'craft';
+export type FxSound = 'click' | 'success' | 'fail' | 'craft' | 'demo';
+
+let muted = false;
+export function setMuted(m: boolean) { muted = m; }
 
 export function playSound(kind: FxSound) {
+  if (muted) return;
   switch (kind) {
     case 'click': tone(620, 0, 0.08, 'triangle', 0.06); break;
     case 'success': tone(523, 0, 0.15, 'sine', 0.12); tone(659, 0.09, 0.15, 'sine', 0.12); tone(784, 0.18, 0.25, 'sine', 0.12); break;
     case 'fail': tone(300, 0, 0.2, 'sawtooth', 0.08); tone(180, 0.15, 0.3, 'sawtooth', 0.08); break;
     case 'craft': tone(880, 0, 0.12, 'triangle', 0.1); tone(1174, 0.08, 0.12, 'triangle', 0.1); tone(1568, 0.16, 0.3, 'triangle', 0.1); break;
+    case 'demo': {
+      const ac = getCtx();
+      if (ac) {
+        const t0 = ac.currentTime;
+        const osc = ac.createOscillator(); const g = ac.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(120, t0);
+        osc.frequency.exponentialRampToValueAtTime(880, t0 + 0.6);
+        g.gain.setValueAtTime(0, t0);
+        g.gain.linearRampToValueAtTime(0.07, t0 + 0.5);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.7);
+        osc.connect(g); g.connect(ac.destination); osc.start(t0); osc.stop(t0 + 0.75);
+      }
+      tone(523, 0.7, 0.3, 'sine', 0.1); tone(659, 0.78, 0.3, 'sine', 0.1); tone(784, 0.86, 0.4, 'sine', 0.12); tone(1046, 0.94, 0.6, 'sine', 0.1);
+      break;
+    }
   }
 }

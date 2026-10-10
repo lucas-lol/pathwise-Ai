@@ -1,79 +1,33 @@
-# PathWise AI 🌌
+# 职业宇宙 Career Universe · PathWise AI
 
-> **Navigate Your Career Galaxy. Level Up Your Skills.**
-> 探索你的职业星系，点亮你的技能图谱。
+一个基于 **3D 可视化 + 游戏化 + 数据感知 AI** 的沉浸式职业探索平台。
+把枯燥的职业规划，变成一场看得见的星际航行。
 
-**2026 年第一届「码梦成真」编程进班快闪活动 参赛作品**
+## 🎮 核心玩法闭环
+接任务(P4 任务链) → 探索星球(学习/模拟) → 职场危机 QTE(P5) → 获得评级/XP/成就(P2/P3) → 解锁新星系/合成高阶职业 → 新任务
 
-PathWise AI 是一款面向大学生与职场新人的 **3D 沉浸式职业能力图谱系统**。它打破了传统的“填表式”职业测试与线性学习路径，让探索者在 3D 星空中通过解决真实的“职场危机模拟”来点亮技能树，并由底层的自适应算法引擎动态生成个性化的成长雷达与学习路线。
+## 🧱 架构
+- **双引擎渐进增强**：前端内置 `src/data/careers.json`（100 真实职业）离线可用；可选联调 Python Engine（已归档于 `legacy/engine`，启动后监听 `localhost:8000` 即自动切换远端数据），离线时优雅降级（Console 有绿色/灰色日志）。- **状态驱动渲染**：全局 `GameStats`（XP/连击/评级/合成/危机）打通 3D 场景、HUD、成就面板、AI 导师，一处点亮处处联动。
+- **PageOverlay 抽屉架构**：子页面（导师/学习/档案/成就）以 spring 抽屉覆盖，3D Canvas 常驻不卸载，切换零重建、零卡顿。
 
----
-
-## 🏗️ 架构设计：展示与计算分离
-```mermaid
-graph LR
-    User((探索者)) -->|3D 交互与职场危机模拟| Frontend
-    
-    subgraph 交互展示层 [前端 frontend-app]
-        Frontend[3D 职业宇宙<br>React + Three.js]
-        Local[本地规则引擎<br>轻量级状态闭环]
-        Frontend --- Local
-    end
-    
-    subgraph 核心算法引擎 [engine]
-        API[FastAPI 服务接口]
-        Algo[EMA 动态评估算法<br>防泄题抽题机制]
-        DB[(SQLite 状态数据库<br>pathwise.db)]
-        API --> Algo --> DB
-    end
-
-    Frontend -.->|可选: 本地全栈深度联调| API
-    
-    style Frontend fill:#0ea5e9,stroke:#0284c7,stroke-width:2px,color:#fff
-    style API fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff
-    style DB fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff
-
-为了兼顾“极致的演示体验”与“深度的算法支撑”，本项目采用了**展示与计算分离**的双引擎架构：
-
-1. **交互展示层 (前端/frontend-app)**：基于 React + Three.js 构建的 3D 宇宙。内置轻量级本地规则引擎，保证在纯静态部署（如 Vercel）下依然能提供完整的 3D 探索与模拟闭环。
-2. **核心算法引擎 (engine/)**：基于 FastAPI 构建的自适应计算服务。提供企业级的 **EMA (指数移动平均) 动态能力评估算法**、**防泄题抽题机制**以及**状态机流转管理**。
-
-*注：在本地全栈开发环境中，前端可接入 engine 获取更深度的能力计算结果；线上演示环境默认使用前端本地引擎以保证零依赖运行。*
-
----
-
-## ✨ 核心特性
-
-| 模块 | 说明 |
+## 📦 模块
+| 文件 | 职责 |
 |---|---|
-| ① 3D 职业宇宙 | 斐波那契球面分布算法生成 100+ 技能星球，支持自由视角探索与连线 |
-| ② 职场危机模拟 | 沉浸式对话引擎，还原真实高压职场场景（如线上 OOM、量化滑点、K8s 故障） |
-| ③ EMA 能力雷达 | 摒弃线性加分，采用 EMA 算法结合题目难度，动态更新 6 维能力雷达图 |
-| ④ 身份与叙事化 | 根据用户身份（大学生/转行者）定制目标星球与动态进度文案 |
-| ⑤ 技能合成系统 | 掌握基础技能后，可通过“配方”合成高阶跨领域技能（如 AI + 架构 = AI 架构师） |
-| ⑥ 动态学习中心 | 根据已点亮的技能类别与数量，自动解锁并生成下一阶段的学习任务 |
+| `CareerUniverse.tsx` | 主场景：3D 星系、相机编排、QTE、任务链、演示过场 |
+| `careerAdapter.ts` | 真实职业数据适配：分类/tier/匹配度/兴趣标签 |
+| `SimulatorModal.tsx` | 职场情景模拟：对话树 + 愤怒值 + S/A/B/C 评级 |
+| `AIMentorChat.tsx` | 数据感知导师：读雷达/合成/星系/兴趣，可一键导航 |
+| `LearningDashboard.tsx` | 学习中心：真实进度任务链 + 宇宙跳转 |
+| `AchievementPanel.tsx` / `badges.ts` | 成就系统：10 徽章 + 稀有度 + 进度 |
+| `gameFx.ts` | WebAudio 合成音效（零资源文件）+ 静音开关 |
 
----
+## ⚡ 性能优化清单
+DPR 限制 [1,1.5] · 几何细分封顶 · Bloom mipmapBlur + 阈值调优 · 连线距离裁剪 · 粒子数动态降级 · 金属度修正（无环境贴图防发黑）
 
-## 🔄 系统运行流程
+## 🎬 演示快捷键
+- `Shift + D`：载入演示状态 + 5 秒电影级过场（连锁点亮/相机导览/数字滚动）
+- `?demo=1`：URL 直接进演示态
+- `M`：静音 / 取消静音
 
-```text
-探索者进入 3D 宇宙
-     │
-     ▼
-① 身份锚定 ──────────► 选择身份 (大学生/转行者/终身学习者) -> 生成目标星球
-     │
-     ▼
-② 技能探索 ──────────► 点击星球 -> 查看前置依赖 -> 开启职场模拟
-     │
-     ▼
-③ 危机模拟 ──────────► 阅读代码/日志 Artifact -> 做出决策 -> 结算愤怒值与能力增益
-     │
-     ▼
-④ 雷达更新 ──────────► EMA 算法计算 -> 3D 雷达图动态膨胀 -> 解锁命运轨迹
-     │
-     ▼
-⑤ 学习执行 ──────────► 进入学习中心 -> 查看基于真实能力生成的 Daily Missions
-     │
-     ▼
-     循环 ◄──────◄──── 返回宇宙继续探索高阶节点
+## 🛠 技术栈
+React 18 · TypeScript · Three.js (React Three Fiber / Drei / Postprocessing) · GSAP · Framer Motion · Tailwind CSS · WebAudio API

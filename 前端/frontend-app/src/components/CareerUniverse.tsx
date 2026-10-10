@@ -15,7 +15,6 @@ import AchievementPanel from './AchievementPanel';
 import { type GameStats } from '../utils/badges';
 import { CAREERS, GALAXY_NAMES, type AdaptedCareer, processRawCareers } from '../data/careerAdapter';
 import { playSound } from '../utils/gameFx';
-
 type Persona = 'student' | 'career-changer' | 'lifelong-learner';
 type Rating = 'S' | 'A' | 'B' | 'C';
 
@@ -101,6 +100,21 @@ function useCountUp(target: number, duration = 1400): number {
   return val;
 }
 
+// 🎬 电影开场：从深空缓慢 dolly 接近星系
+function IntroDolly({ trigger, controlsRef }: { trigger: number; controlsRef: React.MutableRefObject<any> }) {
+  const { camera } = useThree();
+  useEffect(() => {
+    if (trigger === 0 || !controlsRef.current) return;
+    const controls = controlsRef.current;
+    controls.enabled = false;
+    camera.position.set(0, 0, 140);
+    const tl = gsap.timeline({ onComplete: () => { controls.enabled = true; controls.update(); } });
+    tl.to(camera.position, { x: 0, y: 0, z: 50, duration: 3.2, ease: 'power2.out', onUpdate: () => camera.lookAt(0, 0, 0) }, 0);
+    return () => { tl.kill(); controls.enabled = true; };
+  }, [trigger, camera, controlsRef]);
+  return null;
+}
+
 // 🎬 Demo 过场：相机自动导览（拉远俯瞰 → 环绕 → 两站导览 → 归位）
 function DemoCameraTour({ trigger, controlsRef }: { trigger: number; controlsRef: React.MutableRefObject<any> }) {
   const { camera } = useThree();
@@ -121,8 +135,7 @@ function DemoCameraTour({ trigger, controlsRef }: { trigger: number; controlsRef
       }
     }, 1.2);
     tl.to(camera.position, { x: 22, y: 10, z: 22, duration: 1.1, ease: 'power2.inOut', onUpdate: () => camera.lookAt(0, 0, 0) }, 3.4);
-    tl.to(camera.position, { x: -18, y: 26, z: -14, duration: 1.1, ease: 'power2.inOut', onUpdate: () => camera.lookAt(0, 6, 0) }, 4.6);
-    tl.to(camera.position, { x: 0, y: 0, z: 50, duration: 1.3, ease: 'power3.inOut', onUpdate: () => camera.lookAt(0, 0, 0) }, 5.8);
+    tl.to(camera.position, { x: 0, y: 0, z: 50, duration: 1.4, ease: 'power3.inOut', onUpdate: () => camera.lookAt(0, 0, 0) }, 4.9);
     return () => { tl.kill(); controls.enabled = true; };
   }, [trigger, camera, controlsRef]);
   return null;
@@ -347,6 +360,9 @@ export default function CareerUniverse() {
   const [demoFlash, setDemoFlash] = useState(0);
   const [demoBanner, setDemoBanner] = useState(false);
   const [demoTour, setDemoTour] = useState(0);
+  const [cinemaMode, setCinemaMode] = useState(false);
+  const [introDolly, setIntroDolly] = useState(0);
+  const [muted, setMutedState] = useState(false);
 
   useEffect(() => {
     fetch('http://localhost:8000/api/careers').then((res: Response) => { if (!res.ok) throw new Error(); return res.json(); }).then((rawData: any) => { setCareers(enrichCareers(processRawCareers(rawData))); console.log('%c✅ Engine 连接成功', 'color: #22c55e;'); }).catch(() => { console.log('%cℹ️ Engine 离线，使用本地数据', 'color: #94a3b8;'); });
@@ -385,6 +401,18 @@ export default function CareerUniverse() {
   };
 
   useEffect(() => { const onKey = (e: KeyboardEvent) => { if (e.shiftKey && e.key.toLowerCase() === 'd') activateDemoMode(); }; window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey); }, [careers]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.key.toLowerCase() === 'm') setMutedState(p => !p);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  useEffect(() => { setMuted(muted); }, [muted]);
   useEffect(() => { if (new URLSearchParams(window.location.search).get('demo') === '1') activateDemoMode(); }, [careers]);
 
   const getGoalTitle = (): string => (userPersona ? GOAL_TITLES[userPersona] : '未知');
@@ -428,7 +456,8 @@ export default function CareerUniverse() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (userSkills.size > 0 && !activeCrisis) {
+      const uiBusy = showMentorChat || showLearningHub || showProfile || showAchievements || showCodex || showAtlas || showInterestEditor || showPersonaSelector || showIntro || selectedCareer !== null;
+      if (userSkills.size > 0 && !activeCrisis && !uiBusy) {
         const ids = Array.from(userSkills).filter(id => !downedCareers.has(id));
         if (ids.length === 0) return;
         const targetId = ids[Math.floor(Math.random() * ids.length)];
@@ -438,7 +467,7 @@ setActiveCrisis({ id: Date.now(), careerId: targetId, clicksNeeded: 3, timeLeft:
       }
     }, 25000);
     return () => clearInterval(interval);
-  }, [userSkills, careers, activeCrisis, downedCareers]);
+    }, [userSkills, careers, activeCrisis, downedCareers, showMentorChat, showLearningHub, showProfile, showAchievements, showCodex, showAtlas, showInterestEditor, showPersonaSelector, showIntro, selectedCareer]);
 
   const handleLocateRecipe = (idA: number, idB: number) => {
     setShowCodex(false);
@@ -504,7 +533,7 @@ setActiveCrisis({ id: Date.now(), careerId: targetId, clicksNeeded: 3, timeLeft:
       {showIntro && <IntroSequence onComplete={() => { setShowIntro(false); setShowPersonaSelector(true); }} />}
       {showPersonaSelector && (<div className="fixed inset-0 z-[90] bg-black/95 backdrop-blur-xl flex items-center justify-center overflow-y-auto py-10"><div className="text-center max-w-5xl mx-auto px-8">
         <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500 mb-4">你是谁？</h2><p className="text-white/60 text-lg mb-8">选择身份与兴趣，宇宙将为你重新计算星球匹配度</p>
-        <div className="grid grid-cols-3 gap-6 mb-10">{personaCards.map((p: PersonaCard) => (<button key={p.id} onClick={() => { setUserPersona(p.id); setShowPersonaSelector(false); forceFlyTo(0); }} className="group relative p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 transition-all hover:scale-105 text-left"><div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${p.color} opacity-0 group-hover:opacity-10 transition-opacity`}></div><div className="relative z-10"><div className="text-5xl mb-4">{p.icon}</div><h3 className="text-xl font-bold text-white mb-2">{p.title}</h3><p className="text-white/60 text-sm">{p.desc}</p><div className="mt-4 pt-4 border-t border-white/10"><div className="text-xs text-white/40 uppercase tracking-wider mb-1">目标职业</div><div className="text-cyan-400 font-bold text-lg">{p.goal}</div></div></div></button>))}</div>
+        <div className="grid grid-cols-3 gap-6 mb-10">{personaCards.map((p: PersonaCard) => (<button key={p.id} onClick={() => { setUserPersona(p.id); setShowPersonaSelector(false); setCinemaMode(true); setIntroDolly(d => d + 1); setTimeout(() => { setCinemaMode(false); forceFlyTo(0); }, 3400); }} className="group relative p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/30 transition-all hover:scale-105 text-left"><div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${p.color} opacity-0 group-hover:opacity-10 transition-opacity`}></div><div className="relative z-10"><div className="text-5xl mb-4">{p.icon}</div><h3 className="text-xl font-bold text-white mb-2">{p.title}</h3><p className="text-white/60 text-sm">{p.desc}</p><div className="mt-4 pt-4 border-t border-white/10"><div className="text-xs text-white/40 uppercase tracking-wider mb-1">目标职业</div><div className="text-cyan-400 font-bold text-lg">{p.goal}</div></div></div></button>))}</div>
         <div className="border-t border-white/10 pt-8"><h3 className="text-xl font-bold text-white mb-2">🎯 你的兴趣领域</h3><p className="text-white/40 text-sm mb-4">选择 1~5 个标签，直接影响星球的匹配度百分比</p><div className="flex flex-wrap gap-2 justify-center max-w-3xl mx-auto">{allInterests.slice(0, 20).map((tag: string) => (<button key={tag} onClick={() => { const next = new Set(userInterests); if (next.has(tag)) next.delete(tag); else if (next.size < 5) next.add(tag); setUserInterests(next); }} className={`px-4 py-1.5 rounded-full text-sm border transition-all ${userInterests.has(tag) ? 'bg-cyan-500/30 border-cyan-400 text-cyan-200 shadow-[0_0_10px_rgba(6,182,212,0.3)]' : 'bg-white/5 border-white/10 text-white/50 hover:border-white/30'}`}>{tag}</button>))}</div></div>
       </div></div>)}
 
@@ -552,6 +581,21 @@ setActiveCrisis({ id: Date.now(), careerId: targetId, clicksNeeded: 3, timeLeft:
         )}
       </AnimatePresence>
 
+
+      <AnimatePresence>
+        {cinemaMode && (
+          <motion.div className="absolute inset-0 z-[97] pointer-events-none" initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
+            <motion.div className="absolute top-0 left-0 right-0 bg-black" initial={{ height: 0 }} animate={{ height: '12vh' }} transition={{ duration: 0.6 }} />
+            <motion.div className="absolute bottom-0 left-0 right-0 bg-black" initial={{ height: 0 }} animate={{ height: '12vh' }} transition={{ duration: 0.6 }} />
+            <motion.div className="absolute inset-0 flex items-center justify-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5, duration: 0.9 }}>
+              <div className="text-center">
+                <div className="text-white/90 text-3xl font-light tracking-[0.6em] mb-3">职 业 宇 宙</div>
+                <div className="text-cyan-300/70 font-mono text-[11px] tracking-[0.4em]">100 REAL CAREERS · 5 GALAXIES · ONE PATH</div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {activeCrisis && (
         <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute top-24 left-1/2 transform -translate-x-1/2 z-50 bg-red-900/90 border-2 border-red-500 px-6 py-3 rounded-xl shadow-[0_0_30px_rgba(255,0,0,0.6)] flex items-center gap-4">
@@ -613,6 +657,7 @@ setActiveCrisis({ id: Date.now(), careerId: targetId, clicksNeeded: 3, timeLeft:
           {!isCameraMoving && !selectedCareer && labelCareer && !labelCareer.prerequisites.some((p: number) => !userSkills.has(p)) && (userSkills.has(labelCareer.id) || activeId === labelCareer.id || hoveredId === labelCareer.id) && (<Html zIndexRange={[10, 0]} position={[labelCareer.position.x, labelCareer.position.y + 1.8, labelCareer.position.z]} center distanceFactor={15} className="pointer-events-none" style={{ transition: 'opacity 0.3s' }}><div className={`px-3 py-1.5 rounded-lg text-xs font-bold backdrop-blur-md shadow-[0_0_15px_rgba(255,255,255,0.5)] whitespace-nowrap border ${activeId === labelCareer.id ? 'bg-white/20 border-white/50 text-white' : 'bg-black/90 border-white/20 text-white'}`}>{labelCareer.name}<div className="text-[10px] text-white/70 mt-0.5 text-center">匹配度 {labelCareer.match}%{stats.ratings[labelCareer.id] ? ` · 评级 ${stats.ratings[labelCareer.id]}` : ''}</div></div></Html>)}
           <OrbitControls ref={controlsRef} enablePan={false} enableZoom={true} minDistance={4} maxDistance={80} enableDamping={true} dampingFactor={0.08} rotateSpeed={0.5} zoomSpeed={0.8} />
            <DemoCameraTour trigger={demoTour} controlsRef={controlsRef} />
+          <IntroDolly trigger={introDolly} controlsRef={controlsRef} />
           <CameraController trigger={cameraTrigger} targetPosition={activeId !== null ? careers.find((c: CareerData) => c.id === activeId)?.position || null : null} isActive={activeId !== null} controlsRef={controlsRef} onAnimStart={() => setIsCameraMoving(true)} onAnimEnd={() => setIsCameraMoving(false)} />
           <EffectComposer>
             {/* 亮度回调：恢复泛光 glow 感，减轻暗角 */}
