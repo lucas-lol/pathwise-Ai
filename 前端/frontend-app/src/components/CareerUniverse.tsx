@@ -456,7 +456,15 @@ setActiveCrisis({ id: Date.now(), careerId: targetId, clicksNeeded: 3, timeLeft:
       <AnimatePresence>{showCodex && <CraftingCodex careers={careers} recipes={CRAFTING_RECIPES} isOpen={showCodex} onClose={() => setShowCodex(false)} onLocate={handleLocateRecipe} userSkills={userSkills} />}{showAtlas && <CareerAtlas careers={displayCareers} userSkills={userSkills} onClose={() => setShowAtlas(false)} onPick={(id: number) => { setShowAtlas(false); forceFlyTo(id); setSelectedCareer(displayCareers.find((c: CareerData) => c.id === id) || null); }} />}</AnimatePresence>
 
       <PageOverlay show={showMentorChat} direction="right"><AIMentorChat onBack={() => setShowMentorChat(false)} userSkills={userSkills} careers={careers} abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} userPersona={userPersona} recipes={CRAFTING_RECIPES} userInterests={userInterests} onFlyToCareer={(id) => { setShowMentorChat(false); forceFlyTo(id); setTimeout(() => setSelectedCareer(careers.find(c => c.id === id) || null), 1000); }} /></PageOverlay>
-      <PageOverlay show={showLearningHub} direction="right"><LearningDashboard onBack={() => setShowLearningHub(false)} userSkills={userSkills} careers={careers} abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} /></PageOverlay>
+      <PageOverlay show={showLearningHub} direction="right">
+        <LearningDashboard 
+          onBack={() => setShowLearningHub(false)} 
+          onGoToCareer={(id) => { setShowLearningHub(false); forceFlyTo(id); setTimeout(() => setSelectedCareer(careers.find(c => c.id === id) || null), 1000); }}
+          userSkills={userSkills} 
+          careers={careers} 
+          abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} 
+        />
+      </PageOverlay>     
       <PageOverlay show={showProfile} direction="bottom"><CareerProfile onBack={() => setShowProfile(false)} userSkills={userSkills} careers={careers} abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} unlockedPaths={unlockedPaths} stats={stats} /></PageOverlay>
       <PageOverlay show={showAchievements} direction="bottom"><AchievementPanel onBack={() => setShowAchievements(false)} userSkills={userSkills} unlockedPaths={unlockedPaths} abilityScores={[abilityScores.technical, abilityScores.logic, abilityScores.communication, abilityScores.stress, abilityScores.innovation, abilityScores.leadership]} stats={stats} /></PageOverlay>
       <AnimatePresence>{showInterestEditor && <InterestEditor allInterests={allInterests} currentInterests={userInterests} onSave={(s: Set<string>) => { setUserInterests(s); setShowInterestEditor(false); showToast("🎯 匹配度已重新计算", 'success'); }} onClose={() => setShowInterestEditor(false)} />}</AnimatePresence>
