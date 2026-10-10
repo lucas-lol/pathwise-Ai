@@ -610,10 +610,15 @@ function OnboardingTour({ step, onNext, onFinish }: { step: number; onNext: () =
       />
       
       <motion.div 
-        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-        className="absolute bg-[#0a0f14] border border-cyan-500/50 p-5 rounded-xl shadow-2xl max-w-xs pointer-events-auto z-[101]"
-        style={bubblePos}
-      >
+  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+  className="absolute bg-[#0a0f14] border border-cyan-500/50 p-5 rounded-xl shadow-2xl max-w-xs pointer-events-auto z-[200]" // 🌟 z-index 提高到 200
+  style={{
+    // 🌟 强制把气泡放在屏幕中间偏左，远离 Sidebar
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-120%, -50%)', // 向左偏移，避免和 Sidebar 重叠
+  }}
+>
         <h4 className="text-cyan-400 font-bold mb-2 text-lg">{content.title}</h4>
         <p className="text-white/80 text-sm mb-4 leading-relaxed">{content.desc}</p>
         <button 
@@ -1156,36 +1161,38 @@ export default function CareerUniverse() {
       </div>
 
       {/* YouTube 风格滑动侧边栏 */}
-      {!selectedCareer && (
-        <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-40 group/sidebar">
-          <div className="flex flex-col gap-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-2xl p-2 transition-all duration-300 hover:bg-black/80 hover:border-cyan-500/30 shadow-2xl">
-            {[
-              { icon: '', label: '兴趣', onClick: () => setShowInterestEditor(true) },
-              { icon: '💬', label: 'AI 导师', onClick: () => { setShowMentorChat(true); document.getElementById('tour-mentor')?.click(); } },
-              { icon: '🚀', label: '学习中心', onClick: () => setShowLearningHub(true) },
-              { icon: '✨', label: '档案', onClick: () => setShowProfile(true) },
-              { icon: '🏆', label: '成就', onClick: () => setShowAchievements(true) },
-              { icon: '🗺️', label: '星图', onClick: () => setShowAtlas(!showAtlas) },
-              { icon: '🧪', label: '合成', onClick: () => { setShowCodex(!showCodex); document.getElementById('tour-craft')?.click(); } },
-            ].map((item, idx) => (
-              <button
-                key={idx}
-                id={idx === 1 ? 'tour-mentor' : idx === 6 ? 'tour-craft' : undefined}
-                onClick={item.onClick}
-                className="group relative flex items-center justify-start w-10 h-10 group-hover/sidebar:w-32 px-2 rounded-xl transition-all duration-300 bg-transparent hover:bg-white/10 overflow-hidden"
-                title={item.label}
-              >
-                <span className="text-xl min-w-[24px] text-center transition-transform group-hover/sidebar:scale-110 group-hover/sidebar:text-cyan-400">
-                  {item.icon}
-                </span>
-                <span className="ml-2 text-xs font-bold text-white opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-                  {item.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+{!selectedCareer && (
+  <div className={`fixed right-6 top-1/2 transform -translate-y-1/2 z-40 group/sidebar transition-all duration-300 ${
+    tourStep > 0 ? 'pointer-events-none opacity-30' : '' // 🌟 引导期间禁用 Sidebar 交互并变淡
+  }`}>
+    <div className="flex flex-col gap-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-2xl p-2 transition-all duration-300 hover:bg-black/80 hover:border-cyan-500/30 shadow-2xl">
+      {[
+        { icon: '🎯', label: '兴趣', onClick: () => setShowInterestEditor(true) }, // 确保这里有 icon
+        { icon: '💬', label: 'AI 导师', onClick: () => setShowMentorChat(true) },
+        { icon: '🚀', label: '学习中心', onClick: () => setShowLearningHub(true) },
+        { icon: '✨', label: '档案', onClick: () => setShowProfile(true) },
+        { icon: '🏆', label: '成就', onClick: () => setShowAchievements(true) },
+        { icon: '🗺️', label: '星图', onClick: () => setShowAtlas(!showAtlas) },
+        { icon: '⚗️', label: '合成', onClick: () => setShowCodex(!showCodex) }, // 🌟 换成 ⚗️ 避免显示问题
+      ].map((item, idx) => (
+        <button
+          key={idx}
+          id={idx === 1 ? 'tour-mentor' : idx === 6 ? 'tour-craft' : undefined}
+          onClick={item.onClick}
+          className="group relative flex items-center justify-start w-10 h-10 group-hover/sidebar:w-32 px-2 rounded-xl transition-all duration-300 bg-transparent hover:bg-white/10 overflow-hidden"
+          title={item.label}
+        >
+          <span className="text-xl min-w-[24px] text-center transition-transform group-hover/sidebar:scale-110 group-hover/sidebar:text-cyan-400 flex items-center justify-center">
+            {item.icon}
+          </span>
+          <span className="ml-2 text-xs font-bold text-white opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+            {item.label}
+          </span>
+        </button>
+      ))}
+    </div>
+  </div>
+)}
 
       {/* 新手引导 */}
       {tourStep > 0 && !showLearningHub && !showMentorChat && !showProfile && !showAchievements && !showAtlas && !showCodex && (
