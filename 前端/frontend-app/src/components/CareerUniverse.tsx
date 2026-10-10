@@ -153,10 +153,9 @@ function ProceduralPlanet({ data, isActive, onClick, onHover, isMastered, isLock
     groupRef.current.scale.lerp(new THREE.Vector3(ts, ts, ts), 0.1);
     if (!isLocked) groupRef.current.rotation.y += delta * 0.15 * dynamicComplexity;
     if (isUnderAttack && crisisClicksLeft > 0) {
-      groupRef.current.position.x = data.position.x + (Math.random() - 0.5) * 0.1;
-      groupRef.current.position.y = data.position.y + (Math.random() - 0.5) * 0.1;
-    } else {
-      groupRef.current.position.copy(data.position);
+      groupRef.current.position.set((Math.random() - 0.5) * 0.15, (Math.random() - 0.5) * 0.15, (Math.random() - 0.5) * 0.15);
+    } else if (groupRef.current.position.lengthSq() > 0.0001) {
+      groupRef.current.position.set(0, 0, 0);
     }
   });
 
@@ -175,8 +174,7 @@ function ProceduralPlanet({ data, isActive, onClick, onHover, isMastered, isLock
             metalness={0.35}
             roughness={0.35}
             emissive={displayEmissive}
-            emissiveIntensity={isActive ? 3.0 : (isStartGlow ? 2.2 : (isMastered ? 2.5 : (isLocked ? 0.25 : (hovered || isSelected ? 1.8 : 0.55))))}
-            wireframe={dynamicComplexity < 0.5}
+            emissiveIntensity={isActive ? 3.5 : (isStartGlow ? 2.6 : (isMastered ? 3.0 : (isLocked ? 0.4 : (hovered || isSelected ? 2.2 : 1.15))))}            wireframe={dynamicComplexity < 0.5}
             toneMapped={false}
           />
         </mesh>
@@ -504,10 +502,10 @@ export default function CareerUniverse() {
       <Canvas camera={{ position: [0, 0, 50], fov: 60 }} dpr={[1, 1.5]} gl={{ antialias: false, powerPreference: 'high-performance' }}>
         <Suspense fallback={null}>
           {/* 亮度回调：三光源全面提亮 */}
-          <ambientLight intensity={0.5} />
-          <pointLight position={[50, 50, 50]} intensity={2.2} />
-          <pointLight position={[-40, -30, -40]} intensity={0.8} color="#4060ff" />
-          <hemisphereLight args={['#606080', '#101018', 0.9]} />
+          <ambientLight intensity={0.7} />
+          <pointLight position={[50, 50, 50]} intensity={2.6} />
+          <pointLight position={[-40, -30, -40]} intensity={1.0} color="#4060ff" />
+          <hemisphereLight args={['#707090', '#181822', 1.1]} />
           <Stars radius={100} depth={50} count={1500} factor={4} saturation={0} fade speed={1} />
           <mesh><sphereGeometry args={[1.5, 32, 32]} /><meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={3} toneMapped={false} /></mesh>
           {userPersona && (<group position={[0, 0, 0]}><mesh><sphereGeometry args={[2.5, 32, 32]} /><meshStandardMaterial color="#ffd700" emissive="#ffd700" emissiveIntensity={2} transparent opacity={0.45} toneMapped={false} /></mesh><Html zIndexRange={[10, 0]} position={[0, 4, 0]} center distanceFactor={20} className="pointer-events-none"><div className="bg-black/80 border border-yellow-500/50 text-yellow-400 px-6 py-3 rounded-xl text-base font-bold backdrop-blur-md shadow-[0_0_30px_rgba(255,215,0,0.5)] whitespace-nowrap">🎯 目标：{getGoalTitle()}<div className="text-[10px] text-white/60 mt-1 text-center">距离目标还有 {careers.length - userSkills.size} 个技能</div></div></Html></group>)}
@@ -523,12 +521,11 @@ export default function CareerUniverse() {
           {futureNodes.map((node: FutureNodeData) => <FutureNode key={node.id} data={node} isUnlocked={unlockedPaths.has(node.category)} />)}
           {bursts.map((b: BurstData) => (<Burst key={b.id} data={b} onDone={(id: number) => setBursts((prev) => prev.filter((x) => x.id !== id))} />))}
           {!isCameraMoving && !selectedCareer && labelCareer && !labelCareer.prerequisites.some((p: number) => !userSkills.has(p)) && (userSkills.has(labelCareer.id) || activeId === labelCareer.id || hoveredId === labelCareer.id) && (<Html zIndexRange={[10, 0]} position={[labelCareer.position.x, labelCareer.position.y + 1.8, labelCareer.position.z]} center distanceFactor={15} className="pointer-events-none" style={{ transition: 'opacity 0.3s' }}><div className={`px-3 py-1.5 rounded-lg text-xs font-bold backdrop-blur-md shadow-[0_0_15px_rgba(255,255,255,0.5)] whitespace-nowrap border ${activeId === labelCareer.id ? 'bg-white/20 border-white/50 text-white' : 'bg-black/90 border-white/20 text-white'}`}>{labelCareer.name}<div className="text-[10px] text-white/70 mt-0.5 text-center">匹配度 {labelCareer.match}%{stats.ratings[labelCareer.id] ? ` · 评级 ${stats.ratings[labelCareer.id]}` : ''}</div></div></Html>)}
-          <OrbitControls ref={controlsRef} enablePan={false} enableZoom={true} minDistance={10} maxDistance={80} enableDamping={true} dampingFactor={0.08} rotateSpeed={0.5} zoomSpeed={0.8} />
+          <OrbitControls ref={controlsRef} enablePan={false} enableZoom={true} minDistance={4} maxDistance={80} enableDamping={true} dampingFactor={0.08} rotateSpeed={0.5} zoomSpeed={0.8} />
           <CameraController trigger={cameraTrigger} targetPosition={activeId !== null ? careers.find((c: CareerData) => c.id === activeId)?.position || null : null} isActive={activeId !== null} controlsRef={controlsRef} onAnimStart={() => setIsCameraMoving(true)} onAnimEnd={() => setIsCameraMoving(false)} />
           <EffectComposer>
             {/* 亮度回调：恢复泛光 glow 感，减轻暗角 */}
-            <Bloom luminanceThreshold={0.65} luminanceSmoothing={0.9} intensity={1.1} mipmapBlur />
-            <Vignette eskil={false} offset={0.1} darkness={0.35} />
+            <Bloom luminanceThreshold={0.35} luminanceSmoothing={0.9} intensity={1.3} mipmapBlur />            <Vignette eskil={false} offset={0.1} darkness={0.35} />
           </EffectComposer>
         </Suspense>
       </Canvas>
