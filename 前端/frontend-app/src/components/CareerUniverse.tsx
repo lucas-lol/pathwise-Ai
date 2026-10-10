@@ -368,8 +368,7 @@ export default function CareerUniverse() {
         if (ids.length === 0) return;
         const targetId = ids[Math.floor(Math.random() * ids.length)];
         setCareersWithAttack(p => new Set(p).add(targetId));
-        setActiveCrisis({ id: Date.now(), careerId: targetId, clicksNeeded: 3, timeLeft: 5 });
-        showToast("⚠️ 行业危机来袭！快速点击红色星球修复！", 'error');
+setActiveCrisis({ id: Date.now(), careerId: targetId, clicksNeeded: 3, timeLeft: 30 });        showToast("⚠️ 行业危机来袭！快速点击红色星球修复！", 'error');
         playSound('fail');
       }
     }, 25000);
@@ -469,7 +468,8 @@ export default function CareerUniverse() {
           <div className="text-red-100 font-bold text-lg animate-pulse">⚠️ 系统危机!</div>
           <div className="text-white font-mono">目标: <span className="text-yellow-300 font-bold">{careers.find(c => c.id === activeCrisis.careerId)?.name}</span></div>
           <div className="text-white font-mono">剩余点击: <span className="text-green-400 font-bold text-xl">{activeCrisis.clicksNeeded}</span></div>
-          <div className="text-white font-mono">时间: <span className={`font-bold text-xl ${activeCrisis.timeLeft <= 2 ? 'text-red-500 animate-pulse' : 'text-cyan-300'}`}>{activeCrisis.timeLeft}s</span></div>
+          <div className="text-white font-mono">时间: <span className={`font-bold text-xl ${activeCrisis.timeLeft <= 5 ? 'text-red-500 animate-pulse' : 'text-cyan-300'}`}>{activeCrisis.timeLeft}s</span></div>
+          <button onClick={() => forceFlyTo(activeCrisis.careerId)} className="px-4 py-1.5 rounded-lg bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-sm transition-all shadow-[0_0_12px_rgba(234,179,8,0.6)]">🚀 带我去</button>
         </motion.div>
       )}
 
