@@ -33,12 +33,18 @@ export type FxSound = 'click' | 'success' | 'fail' | 'craft' | 'demo';
 let muted = false;
 export function setMuted(m: boolean) { muted = m; }
 
-export function playSound(kind: FxSound) {
+export function playSound(kind: FxSound, combo: number = 0) {
   if (muted) return;
   switch (kind) {
     case 'click': tone(620, 0, 0.08, 'triangle', 0.06); break;
-    case 'success': tone(523, 0, 0.15, 'sine', 0.12); tone(659, 0.09, 0.15, 'sine', 0.12); tone(784, 0.18, 0.25, 'sine', 0.12); break;
-    case 'fail': tone(300, 0, 0.2, 'sawtooth', 0.08); tone(180, 0.15, 0.3, 'sawtooth', 0.08); break;
+    case 'success': {
+      // 🌟 连击升调：每增加1个combo，基准音高提升40Hz (约半个音阶)
+      const baseFreq = 440 + Math.min(combo, 10) * 40; 
+      tone(baseFreq, 0, 0.1, 'sine', 0.12);
+      tone(baseFreq * 1.25, 0.08, 0.1, 'sine', 0.12);
+      tone(baseFreq * 1.5, 0.16, 0.2, 'sine', 0.12);
+      break;
+    }    case 'fail': tone(300, 0, 0.2, 'sawtooth', 0.08); tone(180, 0.15, 0.3, 'sawtooth', 0.08); break;
     case 'craft': tone(880, 0, 0.12, 'triangle', 0.1); tone(1174, 0.08, 0.12, 'triangle', 0.1); tone(1568, 0.16, 0.3, 'triangle', 0.1); break;
     case 'demo': {
       const ac = getCtx();
