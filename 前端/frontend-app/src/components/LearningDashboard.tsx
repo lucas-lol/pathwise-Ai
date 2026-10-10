@@ -125,7 +125,7 @@ export default function LearningDashboard({ onBack, onGoToCareer, userSkills, ca
   const lowScore = abilityScores ? abilityScores[lowAbilityIdx] : 0;
 
   return (
-    <div className="w-full h-screen bg-[#050810] relative overflow-hidden flex text-white font-sans selection:bg-cyan-500/30">
+    <div className="w-full h-full bg-[#050810] relative overflow-hidden flex text-white font-sans selection:bg-cyan-500/30">
       <div className="absolute inset-0 bg-[linear-gradient(rgba(6,182,212,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(6,182,212,0.03)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none"></div>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#050810_100%)] pointer-events-none"></div>
 

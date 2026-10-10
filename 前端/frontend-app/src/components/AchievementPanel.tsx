@@ -13,9 +13,15 @@ interface AchievementPanelProps {
 export default function AchievementPanel({ onBack, userSkills, unlockedPaths, abilityScores, stats }: AchievementPanelProps) {
   const allBadges = computeBadges(userSkills.size, unlockedPaths.size, abilityScores, stats);
   const unlockedCount = allBadges.filter(b => b.unlocked).length;
+    const ratingCounts: Record<string, number> = { S: 0, A: 0, B: 0, C: 0 };
+  Object.values(stats.ratings).forEach(r => { ratingCounts[r] = (ratingCounts[r] || 0) + 1; });
+  const totalRatings = Object.values(ratingCounts).reduce((a, b) => a + b, 0);
+  const sPct = totalRatings ? (ratingCounts.S / totalRatings) * 100 : 0;
+  const aPct = totalRatings ? ((ratingCounts.S + ratingCounts.A) / totalRatings) * 100 : 0;
+  const bPct = totalRatings ? ((ratingCounts.S + ratingCounts.A + ratingCounts.B) / totalRatings) * 100 : 0;
 
   return (
-    <div className="w-full h-screen bg-[#050810] flex flex-col text-white font-sans relative overflow-hidden">
+    <div className="w-full h-full bg-[#050810] flex flex-col text-white font-sans relative overflow-hidden">
       {/* 全息网格背景，与 AI 导师/学习中心视觉统一 */}
       <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(6,182,212,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#050810_100%)] pointer-events-none"></div>
@@ -33,6 +39,21 @@ export default function AchievementPanel({ onBack, userSkills, unlockedPaths, ab
               已解锁 <span className="font-bold">{unlockedCount}</span> / {allBadges.length}
             </p>
           </div>
+        </div>
+        <div className="flex items-center gap-4">
+          {totalRatings > 0 ? (
+            <>
+              <div className="relative w-14 h-14 rounded-full" style={{ background: `conic-gradient(#facc15 0 ${sPct}%, #34d399 ${sPct}% ${aPct}%, #60a5fa ${aPct}% ${bPct}%, #94a3b8 ${bPct}% 100%)` }}>
+                <div className="absolute inset-1.5 rounded-full bg-[#050810] flex items-center justify-center text-[10px] font-mono text-white/70">{totalRatings}</div>
+              </div>
+              <div className="text-[10px] font-mono space-y-0.5 text-white/60">
+                <div><span className="text-yellow-300">S</span> {ratingCounts.S} · <span className="text-emerald-300">A</span> {ratingCounts.A}</div>
+                <div><span className="text-blue-300">B</span> {ratingCounts.B} · <span className="text-slate-300">C</span> {ratingCounts.C}</div>
+              </div>
+            </>
+          ) : (
+            <span className="text-[10px] font-mono text-white/40">暂无评级</span>
+          )}
         </div>
       </div>
 

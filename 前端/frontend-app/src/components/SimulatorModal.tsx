@@ -1,14 +1,23 @@
 // src/components/SimulatorModal.tsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// 🎬 终极剧本库：5 大类别全覆盖
+// 🌟 修复 Tailwind 动态类名失效：必须定义完整的类名映射
+const THEME_CONFIG: Record<string, { bg: string; text: string; border: string; avatarBg: string; hoverText: string }> = {
+  cyan: { bg: 'bg-cyan-500/20', text: 'text-cyan-400', border: 'border-cyan-500/30', avatarBg: 'bg-cyan-500', hoverText: 'group-hover:text-cyan-300' },
+  green: { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/30', avatarBg: 'bg-green-500', hoverText: 'group-hover:text-green-300' },
+  blue: { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30', avatarBg: 'bg-blue-500', hoverText: 'group-hover:text-blue-300' },
+  pink: { bg: 'bg-pink-500/20', text: 'text-pink-400', border: 'border-pink-500/30', avatarBg: 'bg-pink-500', hoverText: 'group-hover:text-pink-300' },
+  red: { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30', avatarBg: 'bg-red-500', hoverText: 'group-hover:text-red-300' },
+};
+
+// 🎬 终极剧本库：加入更多 {careerName} 占位符，让通用剧本变专属
 const SCENARIOS: Record<number, any> = {
   0: {
     bossName: "Alex (技术总监)", bossAvatar: "👨‍💻", themeColor: "cyan",
     rounds: [
       {
-        messages: ["Lucas,还没睡吧?", "线上推荐系统延迟突然飙升到 2 秒,客诉爆了！🔥", "你只有 5 分钟。告诉我排查思路。"],
+        messages: ["Lucas,还没睡吧?", "你负责的【{careerName}】核心业务延迟突然飙升到 2 秒,客诉爆了！🔥", "你只有 5 分钟。告诉我排查思路。"],
         options: [
           { text: "先查数据库 CPU 和慢查询日志。", next: 1, anger: 20, reply: "数据库 CPU 才 30%,根本不是瓶颈！你连监控面板都没看就瞎猜?" },
           { text: "先看 Grafana 监控,确认是接口超时还是下游服务问题。同时准备回滚。", next: 1, anger: 0, reply: "这就对了。监控显示是模型推理服务 OOM 了。回滚后恢复了。" },
@@ -16,7 +25,7 @@ const SCENARIOS: Record<number, any> = {
         ]
       },
       {
-        messages: ["既然排查方向对了,那你来看看这段昨天刚合并的代码。", "为什么这个简单的推理接口会导致内存持续飙升?找出问题。"],
+        messages: ["既然排查方向对了,那你来看看这段昨天刚合并的【{careerName}】代码。", "为什么这个简单的推理接口会导致内存持续飙升?找出问题。"],
         artifact: {
           type: "code", language: "python", filename: "inference_service.py",
           code: `def batch_predict(user_ids, model):
@@ -44,7 +53,7 @@ const SCENARIOS: Record<number, any> = {
     bossName: "David (量化交易总监)", bossAvatar: "📈", themeColor: "green",
     rounds: [
       {
-        messages: ["Lucas,早上的实盘数据看了吗?", "我们回测夏普比率 3.5 的模型,实盘第一天就亏了 2%！💸", "老板在群里发火了,立刻给我原因。"],
+        messages: ["Lucas,早上的实盘数据看了吗?", "我们回测夏普比率 3.5 的【{careerName}】模型,实盘第一天就亏了 2%！💸", "老板在群里发火了,立刻给我原因。"],
         options: [
           { text: "可能是实盘滑点和手续费没算进去,我重新跑一遍回测。", next: 1, anger: 10, reply: "滑点不可能造成 2% 的差距。你的模型在实盘环境下完全失效了。" },
           { text: "我怀疑是过拟合。回测数据包含了未来函数,或者参数调得太死。", next: 1, anger: 0, reply: "终于说到点子上了。去检查你的特征工程,看看有没有用到 T+1 才能拿到的数据。" },
@@ -52,7 +61,7 @@ const SCENARIOS: Record<number, any> = {
         ]
       },
       {
-        messages: ["找到了,看看这段特征提取代码。", "为什么这个模型在历史数据上表现完美,一上实盘就拉胯?"],
+        messages: ["找到了,看看这段【{careerName}】的特征提取代码。", "为什么这个模型在历史数据上表现完美,一上实盘就拉胯?"],
         artifact: {
           type: "code", language: "python", filename: "feature_engineering.py",
           code: `def calculate_moving_avg(df, window=5):
@@ -74,7 +83,7 @@ const SCENARIOS: Record<number, any> = {
     bossName: "Mike (首席架构师)", bossAvatar: "☁️", themeColor: "blue",
     rounds: [
       {
-        messages: ["Lucas,双十一预演刚结束,系统差点挂了。", "订单服务 QPS 到 5000 时,数据库 CPU 直接飙到 100%。🔥", "给你 10 分钟,说出你的优化方案。"],
+        messages: ["Lucas,双十一预演刚结束,系统差点挂了。", "【{careerName}】订单服务 QPS 到 5000 时,数据库 CPU 直接飙到 100%。🔥", "给你 10 分钟,说出你的优化方案。"],
         options: [
           { text: "给数据库加几个从库,做读写分离。", next: 1, anger: 10, reply: "读写分离能解决读多写少,但订单创建是写操作,主库一样会挂。" },
           { text: "在 Redis 里加一层缓存,把热点商品数据拦住,别打到 DB。", next: 1, anger: 0, reply: "方向对了。但如果是秒杀场景,缓存击穿怎么办?想想分布式锁。" },
@@ -82,7 +91,7 @@ const SCENARIOS: Record<number, any> = {
         ]
       },
       {
-        messages: ["缓存方案通过了。但 DBA 还是报警,说有一条 SQL 拖慢了整体。", "看看这段订单查询代码,找出性能杀手。"],
+        messages: ["缓存方案通过了。但 DBA 还是报警,说有一条【{careerName}】的 SQL 拖慢了整体。", "看看这段订单查询代码,找出性能杀手。"],
         artifact: {
           type: "code", language: "sql", filename: "order_query.sql",
           code: `SELECT * FROM orders WHERE user_id = 12345 AND created_at > '2023-10-01' ORDER BY created_at DESC;
@@ -101,7 +110,7 @@ SELECT user_id, COUNT(*) FROM orders WHERE status = 'PAID' GROUP BY user_id; # �
     bossName: "Sarah (产品副总裁)", bossAvatar: "‍💼", themeColor: "pink",
     rounds: [
       {
-        messages: ["Lucas,来我办公室一下。", "刚看了你提交的 Q3 产品规划。", "太保守了！竞品上周已经上了 AI 助手功能,我们还在做基础优化?"],
+        messages: ["Lucas,来我办公室一下。", "刚看了你提交的【{careerName}】Q3 产品规划。", "太保守了！竞品上周已经上了 AI 助手功能,我们还在做基础优化?"],
         options: [
           { text: "竞品那个功能日活很低,我们调研过,用户核心痛点还是稳定性。", next: 1, anger: 10, reply: "稳定性是底线,不是增长点。老板要的是故事,是 DAU 的翻倍。" },
           { text: "明白,我马上调整方向。我们可以把 AI 助手作为 Q3 的核心亮点,先做个 MVP 试水。", next: 1, anger: 0, reply: "这就对了。我要的就是这种魄力。明天早会你来讲这个新方案。" },
@@ -109,7 +118,7 @@ SELECT user_id, COUNT(*) FROM orders WHERE status = 'PAID' GROUP BY user_id; # �
         ]
       },
       {
-        messages: ["另外,设计组说你的原型图交互太复杂。", "用户学习成本太高。你打算怎么改?"],
+        messages: ["另外,设计组说你的【{careerName}】原型图交互太复杂。", "用户学习成本太高。你打算怎么改?"],
         options: [
           { text: "砍掉 50% 的次要功能,只保留核心路径,做极简设计。", next: -1, anger: 0, reply: "同意。Less is more。去跟设计组对齐吧。" },
           { text: "加一个新手引导弹窗,一步步教用户怎么用。", next: -1, anger: 20, reply: "用户没耐心看弹窗。直接改交互,别打补丁。" }
@@ -121,7 +130,7 @@ SELECT user_id, COUNT(*) FROM orders WHERE status = 'PAID' GROUP BY user_id; # �
     bossName: "Eve (CISO 首席安全官)", bossAvatar: "🛡️", themeColor: "red",
     rounds: [
       {
-        messages: ["Lucas,凌晨 3 点把你叫起来,出大事了。", "核心用户数据库被勒索软件加密了,黑客留了比特币地址。🚨", "现在全公司都在等你,第一步做什么?"],
+        messages: ["Lucas,凌晨 3 点把你叫起来,出大事了。", "核心【{careerName}】用户数据库被勒索软件加密了,黑客留了比特币地址。🚨", "现在全公司都在等你,第一步做什么?"],
         options: [
           { text: "立刻联系黑客谈判,尽量压低赎金,保住数据。", next: 1, anger: 50, reply: "绝对不行！公司政策严禁支付赎金。而且付了钱他们也不一定给解密钥匙。" },
           { text: "立刻断开受感染服务器的网络,隔离内网,防止横向扩散。", next: 1, anger: 0, reply: "反应很快。物理隔离是第一步。然后立刻启动冷备份恢复流程。" },
@@ -129,7 +138,7 @@ SELECT user_id, COUNT(*) FROM orders WHERE status = 'PAID' GROUP BY user_id; # �
         ]
       },
       {
-        messages: ["网络隔离完成了。现在要查入侵源头。", "看看这段防火墙和登录日志,找出黑客是怎么进来的。"],
+        messages: ["网络隔离完成了。现在要查【{careerName}】系统的入侵源头。", "看看这段防火墙和登录日志,找出黑客是怎么进来的。"],
         artifact: {
           type: "code", language: "log", filename: "auth_server.log",
           code: `[2023-10-24 02:14:01] INFO: User 'admin' login success from 192.168.1.10
@@ -148,15 +157,9 @@ SELECT user_id, COUNT(*) FROM orders WHERE status = 'PAID' GROUP BY user_id; # �
   }
 };
 
-// 🌟 Phase 4：星系与剧本的完美映射
 const SCENARIO_MAP: Record<number, number> = {
-  0: 0, // 科技与 AI -> Alex
-  1: 2, // 工程与建造 -> Mike
-  2: 1, // 数据与金融 -> David
-  3: 4, // 科学与生命 -> Eve
-  4: 3, // 商业与社会 -> Sarah
+  0: 0, 1: 2, 2: 1, 3: 4, 4: 3,
 };
-
 const DEFAULT_SCENARIO = SCENARIOS[0];
 
 interface SimulatorModalProps {
@@ -167,8 +170,36 @@ interface SimulatorModalProps {
 }
 
 export default function SimulatorModal({ isOpen, career, onClose, onComplete }: SimulatorModalProps) {
-  const scenarioKey = SCENARIO_MAP[career?.category] ?? 0;
-  const scenario = SCENARIOS[scenarioKey] || DEFAULT_SCENARIO;
+  const cat = career?.category !== undefined ? career.category : 0;
+  if (career?.category === undefined) {
+    console.warn(`[Simulator Warning] Career "${career?.name}" has undefined category! Defaulting to 0.`);
+  }
+  
+  const scenarioKey = SCENARIO_MAP[cat] ?? 0;
+  const baseScenario = SCENARIOS[scenarioKey] || DEFAULT_SCENARIO;
+  const careerName = career?.name || "未知职业";
+
+  // ✅ 用 useMemo 缓存，避免每次渲染都重新生成对象
+  const finalScenario = useMemo(() => {
+    const dynamicScenario = JSON.parse(JSON.stringify(baseScenario));
+    const replacePlaceholders = (obj: any): any => {
+      if (typeof obj === 'string') return obj.replace(/{careerName}/g, careerName);
+      if (Array.isArray(obj)) return obj.map(replacePlaceholders);
+      if (obj && typeof obj === 'object') {
+        const newObj: any = {};
+        for (const key in obj) newObj[key] = replacePlaceholders(obj[key]);
+        return newObj;
+      }
+      return obj;
+    };
+    return replacePlaceholders(dynamicScenario);
+  }, [baseScenario, careerName]);
+
+  console.log(`[Simulator Debug] Career: ${career?.name}, Category: ${cat}, ScenarioKey: ${scenarioKey}, Boss: ${finalScenario.bossName}, Theme: ${finalScenario.themeColor}`);
+
+  const theme = THEME_CONFIG[finalScenario.themeColor] || THEME_CONFIG.cyan;
+  
+  // ... 下面是 useState 和 useEffect ...
   
   const [roundIndex, setRoundIndex] = useState(0);
   const [step, setStep] = useState(0);
@@ -176,36 +207,37 @@ export default function SimulatorModal({ isOpen, career, onClose, onComplete }: 
   const [bossResponse, setBossResponse] = useState("");
   const [angerLevel, setAngerLevel] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const perfectRun = useRef(true);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [visibleMessages, bossResponse]);
 
-  // 🛡️ 修复隐患 2：打字机 useEffect 加入清理函数，防止组件卸载后幽灵更新
-      useEffect(() => {
-    if (!isOpen) {
-      setRoundIndex(0); setStep(0); setVisibleMessages([]); setBossResponse(""); setAngerLevel(0);
-      return;
-    }
-    if (roundIndex >= scenario.rounds.length) return;
+  // ✅ 修复代码：移除 finalScenario 依赖，改用 useMemo 缓存
+useEffect(() => {
+  if (!isOpen) {
+    setRoundIndex(0); setStep(0); setVisibleMessages([]); setBossResponse(""); setAngerLevel(0);
+    perfectRun.current = true;
+    return;
+  }
+  if (roundIndex >= finalScenario.rounds.length) return;
 
+  const currentRound = finalScenario.rounds[roundIndex];
+  const timers: ReturnType<typeof setTimeout>[] = [];
+  let delaySum = 0;
 
-    const currentRound = scenario.rounds[roundIndex];
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    let delaySum = 0;
+  currentRound.messages.forEach((msg: string, index: number) => {
+    delaySum += 800;
+    timers.push(setTimeout(() => {
+      setVisibleMessages(prev => [...prev, { id: Date.now() + index, text: msg }]);
+      if (index === currentRound.messages.length - 1) {
+        timers.push(setTimeout(() => setStep(2), 1000));
+      }
+    }, delaySum));
+  });
 
-    currentRound.messages.forEach((msg: string, index: number) => {
-      delaySum += 800;
-      timers.push(setTimeout(() => {
-        setVisibleMessages(prev => [...prev, { id: Date.now() + index, text: msg }]);
-        if (index === currentRound.messages.length - 1) {
-          timers.push(setTimeout(() => setStep(2), 1000));
-        }
-      }, delaySum));
-    });
-
-    return () => timers.forEach(t => clearTimeout(t));
-  }, [isOpen, roundIndex, scenario]);
+  return () => timers.forEach(t => clearTimeout(t));
+}, [isOpen, roundIndex]); // 👈 只依赖 isOpen 和 roundIndex
 
   const handleOptionClick = (option: any) => {
     const abilityChanges = {
@@ -217,20 +249,23 @@ export default function SimulatorModal({ isOpen, career, onClose, onComplete }: 
       leadership: option.text.match(/管理|带领|决策|负责|主导|协调/i) ? 20 : 5,
     };
 
-    // 🛡️ 修复隐患 1：闭包陷阱，提前计算真实的愤怒值
     const newAngerLevel = angerLevel + option.anger; 
-
     setStep(3);
     setBossResponse("Typing...");
     setAngerLevel(newAngerLevel);
+    if (option.anger > 0) perfectRun.current = false;
 
     setTimeout(() => {
       setBossResponse(option.reply);
       setTimeout(() => {
         if (option.next === -1) {
           setTimeout(() => {
-            // 使用计算好的 newAngerLevel，而不是闭包里的旧 angerLevel
-            onComplete(newAngerLevel < 50, abilityChanges); 
+            const success = newAngerLevel < 50;
+            const rating: 'S' | 'A' | 'B' | 'C' = !success ? 'C'
+              : (perfectRun.current && newAngerLevel === 0) ? 'S'
+              : newAngerLevel <= 20 ? 'A'
+              : newAngerLevel <= 45 ? 'B' : 'C';
+            onComplete(success, abilityChanges, rating);
           }, 2000);
         } else {
           setRoundIndex(prev => prev + 1);
@@ -244,17 +279,17 @@ export default function SimulatorModal({ isOpen, career, onClose, onComplete }: 
 
   if (!isOpen) return null;
 
-  const currentRound = scenario.rounds[roundIndex];
+  const currentRound = finalScenario.rounds[roundIndex];
   const hasArtifact = currentRound?.artifact;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-lg p-4" onClick={onClose}>
-      <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} className={`w-full max-w-3xl bg-[#1a1d21] rounded-xl shadow-2xl overflow-hidden border border-white/10 flex flex-col h-[650px]`} onClick={(e: any) => e.stopPropagation()}>
+      <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} className="w-full max-w-3xl bg-[#1a1d21] rounded-xl shadow-2xl overflow-hidden border border-white/10 flex flex-col h-[650px]" onClick={(e: any) => e.stopPropagation()}>
         <div className="bg-[#222529] p-4 border-b border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-lg bg-${scenario.themeColor}-500/20 flex items-center justify-center text-xl`}>{scenario.bossAvatar}</div>
+            <div className={`w-10 h-10 rounded-lg ${theme.bg} flex items-center justify-center text-xl`}>{finalScenario.bossAvatar}</div>
             <div>
-              <h3 className="text-white font-bold text-sm">{scenario.bossName}</h3>
+              <h3 className="text-white font-bold text-sm">{finalScenario.bossName}</h3>
               <p className="text-green-400 text-xs flex items-center gap-1"><span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>Online · {career?.name} 专属挑战</p>
             </div>
           </div>
@@ -268,7 +303,7 @@ export default function SimulatorModal({ isOpen, career, onClose, onComplete }: 
                 <div key={msg.id} className="text-center text-white/30 text-xs my-4">- {msg.text} -</div>
               ) : (
                 <motion.div key={msg.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex gap-3">
-                  <div className={`w-8 h-8 rounded bg-${scenario.themeColor}-500/20 flex items-center justify-center text-sm flex-shrink-0`}>{scenario.bossAvatar}</div>
+                  <div className={`w-8 h-8 rounded ${theme.bg} flex items-center justify-center text-sm flex-shrink-0`}>{finalScenario.bossAvatar}</div>
                   <div className="bg-[#2d3136] p-3 rounded-r-lg rounded-bl-lg text-white/90 text-sm max-w-[80%] shadow-sm">{msg.text}</div>
                 </motion.div>
               )
@@ -298,9 +333,9 @@ export default function SimulatorModal({ isOpen, career, onClose, onComplete }: 
               </div>
               <div className="p-4 bg-[#161b22] border-t border-white/5">
                 <div className="flex gap-3">
-                  <div className={`w-6 h-6 rounded bg-${scenario.themeColor}-500/20 flex items-center justify-center text-xs flex-shrink-0`}>{scenario.bossAvatar}</div>
+                  <div className={`w-6 h-6 rounded ${theme.bg} flex items-center justify-center text-xs flex-shrink-0`}>{finalScenario.bossAvatar}</div>
                   <div className="bg-[#2d3136] p-3 rounded-lg text-white/90 text-sm shadow-sm border border-white/5">
-                    <div className="text-xs text-white/40 mb-1">{scenario.bossName} · Line {hasArtifact.commentLine}</div>
+                    <div className="text-xs text-white/40 mb-1">{finalScenario.bossName} · Line {hasArtifact.commentLine}</div>
                     {hasArtifact.commentText}
                   </div>
                 </div>
@@ -310,7 +345,7 @@ export default function SimulatorModal({ isOpen, career, onClose, onComplete }: 
 
           {bossResponse && (
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex gap-3">
-              <div className={`w-8 h-8 rounded bg-${scenario.themeColor}-500/20 flex items-center justify-center text-sm flex-shrink-0`}>{scenario.bossAvatar}</div>
+              <div className={`w-8 h-8 rounded ${theme.bg} flex items-center justify-center text-sm flex-shrink-0`}>{finalScenario.bossAvatar}</div>
               <div className={`p-3 rounded-r-lg rounded-bl-lg text-sm max-w-[80%] shadow-sm ${angerLevel > 40 ? "bg-red-900/30 text-red-100 border border-red-500/30" : "bg-green-900/30 text-green-100 border border-green-500/30"}`}>{bossResponse}</div>
             </motion.div>
           )}
@@ -322,13 +357,13 @@ export default function SimulatorModal({ isOpen, career, onClose, onComplete }: 
             <div className="grid grid-cols-1 gap-2 w-full">
               {currentRound.options.map((opt: any, idx: number) => (
                 <button key={idx} onClick={() => handleOptionClick(opt)} className="text-left bg-[#2d3136] hover:bg-[#383c42] text-white/90 p-3 rounded-lg text-sm transition-all border border-transparent hover:border-cyan-500/50 group">
-                  <span className={`text-${scenario.themeColor}-400 font-bold mr-2 group-hover:text-${scenario.themeColor}-300`}>{String.fromCharCode(65 + idx)}.</span>{opt.text}
+                  <span className={`${theme.text} font-bold mr-2 ${theme.hoverText}`}>{String.fromCharCode(65 + idx)}.</span>{opt.text}
                 </button>
               ))}
             </div>
           ) : step === 3 ? (
             <div className="text-white/50 text-sm flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>{scenario.bossName} 正在输入...
+              <div className="w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>{finalScenario.bossName} 正在输入...
             </div>
           ) : (
             <div className="text-white/30 text-sm">等待消息...</div>

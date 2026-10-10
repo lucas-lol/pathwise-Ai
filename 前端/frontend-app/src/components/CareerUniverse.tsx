@@ -16,7 +16,7 @@ import AchievementPanel from './AchievementPanel';
 
 import { type GameStats } from '../utils/badges';
 import { CAREERS, GALAXY_NAMES, type AdaptedCareer, processRawCareers } from '../data/careerAdapter';
-import { playSound, setMuted } from '../utils/gameFx'; // 🌟 修复：导入 setMuted
+import { playSound} from '../utils/gameFx';
 
 type Persona = 'student' | 'career-changer' | 'lifelong-learner';
 type Rating = 'S' | 'A' | 'B' | 'C';
@@ -183,6 +183,7 @@ function DemoCameraTour({ trigger, controlsRef }: { trigger: number; controlsRef
   }, [trigger, camera, controlsRef]);
   return null;
 }
+
 interface BeamData { id: number; from: THREE.Vector3; to: THREE.Vector3; }
 
 function EnergyRay({ data, onDone }: { data: BeamData; onDone: () => void }) {
@@ -203,6 +204,7 @@ function EnergyRay({ data, onDone }: { data: BeamData; onDone: () => void }) {
     </mesh>
   );
 }
+
 function Burst({ data, onDone }: { data: BurstData; onDone: (id: number) => void }) {
   const ref = useRef<THREE.Mesh>(null);
   const life = useRef(0);
@@ -526,7 +528,7 @@ function CareerAtlas({ careers, userSkills, onClose, onPick }: { careers: Career
   return (
     <motion.div initial={{ x: 320, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 320, opacity: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 30 }} className="absolute top-24 right-6 z-40 w-96 bg-black/90 border border-cyan-500/30 rounded-xl p-6 backdrop-blur-xl shadow-2xl max-h-[80vh] flex flex-col">
       <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3 flex-shrink-0">
-        <h3 className="text-cyan-400 font-bold text-lg flex items-center gap-2"><span className="text-2xl">🗺️</span> 职业星图</h3>
+        <h3 className="text-cyan-400 font-bold text-lg flex items-center gap-2"><span className="text-2xl">️</span> 职业星图</h3>
         <button onClick={onClose} className="text-white/50 hover:text-white transition-colors text-xl">✕</button>
       </div>
       <div className="text-xs text-white/50 mb-3 flex-shrink-0">收录 <span className="text-cyan-300 font-bold">{careers.length}</span> 个真实职业 · 已掌握 <span className="text-yellow-300 font-bold">{userSkills.size}</span> 个</div>
@@ -563,16 +565,13 @@ function OnboardingTour({ step, onNext, onFinish }: { step: number; onNext: () =
   useEffect(() => {
     if (step === 0) return;
     
-    // 默认位置（屏幕中心）
     let targetRect = { top: window.innerHeight / 2 - 100, left: window.innerWidth / 2 - 100, width: 200, height: 200 };
     let bubbleStyle = { top: '20%', right: '5%', left: 'auto', transform: 'none' };
 
     if (step === 1) {
-      // 第一步：START HERE (屏幕中心)
       targetRect = { top: window.innerHeight / 2 - 120, left: window.innerWidth / 2 - 120, width: 240, height: 240 };
       bubbleStyle = { top: '15%', left: '50%', transform: 'translateX(-50%)', right: 'auto' };
     } else if (step === 2) {
-      // 第二步：AI 导师
       const el = document.getElementById('tour-mentor');
       if (el) {
         const r = el.getBoundingClientRect();
@@ -580,7 +579,6 @@ function OnboardingTour({ step, onNext, onFinish }: { step: number; onNext: () =
         bubbleStyle = { top: `${r.bottom + 10}px`, right: '20%', left: 'auto', transform: 'none' };
       }
     } else if (step === 3) {
-      // 第三步：合成
       const el = document.getElementById('tour-craft');
       if (el) {
         const r = el.getBoundingClientRect();
@@ -606,13 +604,11 @@ function OnboardingTour({ step, onNext, onFinish }: { step: number; onNext: () =
 
   return (
     <div className="fixed inset-0 z-[100] pointer-events-none">
-      {/* 高亮框 */}
       <div 
         className="absolute rounded-full border-4 border-cyan-400 animate-pulse shadow-[0_0_30px_rgba(6,182,212,0.6)] pointer-events-none transition-all duration-500"
         style={{ top: coords.top, left: coords.left, width: coords.width, height: coords.height }}
       />
       
-      {/* 气泡弹窗 */}
       <motion.div 
         initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
         className="absolute bg-[#0a0f14] border border-cyan-500/50 p-5 rounded-xl shadow-2xl max-w-xs pointer-events-auto z-[101]"
@@ -669,7 +665,10 @@ export default function CareerUniverse() {
   const [selectedCareer, setSelectedCareer] = useState<CareerData | null>(null);
   const controlsRef = useRef<any>(null);
   const [isCameraMoving, setIsCameraMoving] = useState(false);
-
+  
+  const [isShaking] = useState(false);
+  
+  
   const [showAtlas, setShowAtlas] = useState(false);
   const [showCodex, setShowCodex] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -704,7 +703,6 @@ export default function CareerUniverse() {
   const [cinemaMode, setCinemaMode] = useState(false);
   const [introDolly, setIntroDolly] = useState(0);
   const [muted, setMutedState] = useState(false);
-  
   const [savePrompt, setSavePrompt] = useState<SaveData | null>(null);
   const [saveEnabled, setSaveEnabled] = useState(false);
   const [tourStep, setTourStep] = useState(0);
@@ -753,7 +751,6 @@ export default function CareerUniverse() {
     setBeams(p => [...p, { id: Date.now() + Math.random(), from: from.clone(), to: to.clone() }]);
   };
 
-  // 🌟 修复：补充缺失的存档应用与清空函数
   const applySave = (s: SaveData) => {
     setUserSkills(new Set(s.userSkills || []));
     setUnlockedPaths(new Set(s.unlockedPaths || []));
@@ -764,7 +761,7 @@ export default function CareerUniverse() {
     setSaveEnabled(true);
     setSavePrompt(null);
     forceFlyTo(0);
-    showToast("💾 已恢复上次旅程", 'success');
+    showToast(" 已恢复上次旅程", 'success');
   };
 
   const startFresh = () => {
@@ -825,8 +822,7 @@ export default function CareerUniverse() {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-    useEffect(() => {
-    // 🌟 修复：只有没完成过教学 (tourFinished === false) 才触发
+  useEffect(() => {
     if (saveEnabled && !cinemaMode && tourStep === 0 && !tourFinished) {
       const timer = setTimeout(() => setTourStep(1), 1000); 
       return () => clearTimeout(timer);
@@ -902,6 +898,7 @@ export default function CareerUniverse() {
           playSound('fail');
           setStats(p => ({ ...p, combo: 0, xp: Math.max(0, p.xp - 20) }));
           setDownedCareers(p => new Set(p).add(prev.careerId));
+          setCareersWithAttack(p => { const n = new Set(p); n.delete(prev.careerId); return n; });
           showToast("⚠️ 危机处理失败！星球宕机，连击清零。", 'error');
           return null;
         }
@@ -937,7 +934,12 @@ export default function CareerUniverse() {
     setShowCodex(false);
     if (userSkills.has(idA) && userSkills.has(idB)) {
       const res = CRAFTING_RECIPES[`${Math.min(idA, idB)}-${Math.max(idA, idB)}`];
-            if (res && !userSkills.has(res)) { setUserSkills((p) => new Set(p).add(res)); playSound('craft'); spawnBurst(careers[res].position, '#22d3ee'); spawnBeam(careers[idA].position, careers[res].position); spawnBeam(careers[idB].position, careers[res].position);
+      if (res && !userSkills.has(res)) {
+        setUserSkills((p) => new Set(p).add(res));
+        playSound('craft');
+        spawnBurst(careers[res].position, '#22d3ee');
+        spawnBeam(careers[idA].position, careers[res].position);
+        spawnBeam(careers[idB].position, careers[res].position);
         setStats((p) => ({ ...p, craftCount: p.craftCount + 1, xp: p.xp + 50 }));
         showToast(`🎉 自动合成成功！解锁：${careers[res].name}`, 'success');
         forceFlyTo(res);
@@ -953,7 +955,7 @@ export default function CareerUniverse() {
     else { message = `需要先点亮 ${careers[idA].name} 和 ${careers[idB].name}。请先完成 ${careers[idA].name} 的模拟！`; }
     setSelectedForCraft(null);
     forceFlyTo(targetId);
-    showToast(`🧭 ${message}`, 'warning');
+    showToast(` ${message}`, 'warning');
   };
 
   const handlePlanetClick = (career: CareerData) => {
@@ -972,18 +974,24 @@ export default function CareerUniverse() {
       }
       return;
     }
-    if (downedCareers.has(career.id)) { showToast("💀 该星球已宕机，等待恢复...", 'warning'); return; }
+    if (downedCareers.has(career.id)) { showToast(" 该星球已宕机，等待恢复...", 'warning'); return; }
     
     const isLocked = career.prerequisites.length > 0 && !career.prerequisites.every((p: number) => userSkills.has(p));
     if (isLocked) { forceFlyTo(career.id); showToast(`🔒 前置技能未满足！需要先点亮：${career.prerequisites.map((id: number) => careers[id]?.name).join(", ")}`, 'error'); return; }
     
     if (selectedForCraft !== null && selectedForCraft !== career.id) {
       const res = CRAFTING_RECIPES[`${Math.min(selectedForCraft, career.id)}-${Math.max(selectedForCraft, career.id)}`];
-            if (res !== undefined) { if (!userSkills.has(res)) { setUserSkills((p) => new Set(p).add(res)); playSound('craft'); spawnBurst(careers[res].position, '#22d3ee'); spawnBeam(careers[selectedForCraft!].position, careers[res].position); spawnBeam(careers[career.id].position, careers[res].position);
+      if (res !== undefined) {
+        if (!userSkills.has(res)) {
+          setUserSkills((p) => new Set(p).add(res));
+          playSound('craft');
+          spawnBurst(careers[res].position, '#22d3ee');
+          spawnBeam(careers[selectedForCraft!].position, careers[res].position);
+          spawnBeam(careers[career.id].position, careers[res].position);
           setStats((p) => ({ ...p, craftCount: p.craftCount + 1, xp: p.xp + 50 }));
           showToast(`🎉 合成成功！解锁：${careers[res].name}`, 'success');
           forceFlyTo(res);
-        } else showToast("⚠️ 该技能已解锁。", 'warning');
+        } else showToast("️ 该技能已解锁。", 'warning');
       } else showToast("❌ 合成失败！配方不正确。", 'error');
       setSelectedForCraft(null);
     } else if (userSkills.has(career.id)) {
@@ -997,7 +1005,9 @@ export default function CareerUniverse() {
   };
 
   const handleSimulationComplete = (careerId: number, success: boolean, abilityChanges?: any, rating?: Rating) => {
-        if (success) { playSound('success', stats.combo); const career = careers.find((c: CareerData) => c.id === careerId);
+    if (success) {
+      playSound('success', stats.combo);
+      const career = careers.find((c: CareerData) => c.id === careerId);
       if (career) spawnBurst(career.position, '#ffd700');
       const xpGain = (rating === 'S' ? 100 : rating === 'A' ? 70 : rating === 'B' ? 40 : 20);
       setStats((prev) => {
@@ -1051,14 +1061,14 @@ export default function CareerUniverse() {
   ];
 
   return (
-    <div className="w-full h-screen bg-black relative overflow-hidden">
-            {showIntro && <IntroSequence onComplete={() => { 
+    <div className={`w-full h-screen bg-black relative overflow-hidden ${isShaking ? 'screen-shake' : ''}`}>
+      {/* 初始化序列 */}
+      {showIntro && <IntroSequence onComplete={() => { 
         setShowIntro(false); 
         try { 
           const raw = localStorage.getItem(SAVE_KEY); 
           if (raw) { 
             const parsed = JSON.parse(raw) as SaveData; 
-            // 🌟 修复：只有存档里真的有技能，才弹窗询问；否则直接进选人界面
             if (parsed.userSkills && parsed.userSkills.length > 0) {
               setSavePrompt(parsed); 
             } else { 
@@ -1068,6 +1078,7 @@ export default function CareerUniverse() {
         } catch { setShowPersonaSelector(true); } 
       }} />}
 
+      {/* 存档提示 */}
       {savePrompt && (
         <div className="fixed inset-0 z-[95] bg-black/95 backdrop-blur-xl flex items-center justify-center">
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center max-w-md px-8 py-10 rounded-2xl border border-cyan-500/30 bg-[#0a0f14] shadow-2xl">
@@ -1082,6 +1093,7 @@ export default function CareerUniverse() {
         </div>
       )}
 
+      {/* 角色选择器 */}
       {showPersonaSelector && (
         <div className="fixed inset-0 z-[90] bg-black/95 backdrop-blur-xl flex items-center justify-center overflow-y-auto py-10">
           <div className="text-center max-w-5xl mx-auto px-8">
@@ -1138,29 +1150,54 @@ export default function CareerUniverse() {
         </div>
       )}
 
+      {/* Toast 提示 */}
       <div className={`absolute top-20 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ${toast.visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'}`}>
         <div className={`${toastColor} text-white px-6 py-3 rounded-full shadow-lg backdrop-blur-md border font-bold text-sm flex items-center gap-2`}>{toast.msg}</div>
       </div>
 
+      {/* YouTube 风格滑动侧边栏 */}
       {!selectedCareer && (
-        <div className="absolute top-6 right-6 z-40 flex items-center gap-3">
-          <button onClick={() => { if (window.confirm('确定清空存档、重新开始吗？')) { try { localStorage.removeItem(SAVE_KEY); } catch { /* ignore */ } location.reload(); } }} title="清空存档" className="bg-black/80 border border-white/20 text-white/70 px-3 py-2 rounded-full backdrop-blur-md shadow-lg hover:bg-red-500/20 hover:text-red-300 transition-all font-bold text-sm">🗑</button>
-          <button onClick={() => setMutedState(p => !p)} title="静音 (M)" className="bg-black/80 border border-white/20 text-white/70 px-3 py-2 rounded-full backdrop-blur-md shadow-lg hover:bg-white/10 transition-all font-bold text-sm">{muted ? '🔇' : '🔊'}</button>
-          <button onClick={() => setShowInterestEditor(true)} className="bg-black/80 border border-purple-500/30 text-purple-400 px-4 py-2 rounded-full backdrop-blur-md shadow-lg hover:bg-purple-500/20 transition-all flex items-center gap-2 font-bold text-sm"><span>🎯</span> 兴趣</button>
-          <button onClick={() => setShowMentorChat(true)} id="tour-mentor" className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm">💬 AI 导师</button>
-          <button onClick={() => setShowLearningHub(true)} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm">🚀 学习中心</button>
-          <button onClick={() => setShowProfile(true)} className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm">✨ 档案</button>
-          <button onClick={() => setShowAchievements(true)} className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-bold text-sm">🏆 成就</button>
-          <button onClick={() => setShowAtlas(!showAtlas)} className="bg-black/80 border border-cyan-500/30 text-cyan-400 px-4 py-2 rounded-full backdrop-blur-md shadow-lg hover:bg-cyan-500/20 transition-all flex items-center gap-2 font-bold text-sm"><span>🗺️</span> 星图</button>
-          <button onClick={() => setShowCodex(!showCodex)} id="tour-craft" className="bg-black/80 border border-cyan-500/30 text-cyan-400 px-4 py-2 rounded-full backdrop-blur-md shadow-lg hover:bg-cyan-500/20 transition-all flex items-center gap-2 font-bold text-sm"><span>🧪</span> 合成</button>
+        <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-40 group/sidebar">
+          <div className="flex flex-col gap-2 bg-black/60 backdrop-blur-md border border-white/10 rounded-2xl p-2 transition-all duration-300 hover:bg-black/80 hover:border-cyan-500/30 shadow-2xl">
+            {[
+              { icon: '', label: '兴趣', onClick: () => setShowInterestEditor(true) },
+              { icon: '💬', label: 'AI 导师', onClick: () => { setShowMentorChat(true); document.getElementById('tour-mentor')?.click(); } },
+              { icon: '🚀', label: '学习中心', onClick: () => setShowLearningHub(true) },
+              { icon: '✨', label: '档案', onClick: () => setShowProfile(true) },
+              { icon: '🏆', label: '成就', onClick: () => setShowAchievements(true) },
+              { icon: '🗺️', label: '星图', onClick: () => setShowAtlas(!showAtlas) },
+              { icon: '🧪', label: '合成', onClick: () => { setShowCodex(!showCodex); document.getElementById('tour-craft')?.click(); } },
+            ].map((item, idx) => (
+              <button
+                key={idx}
+                id={idx === 1 ? 'tour-mentor' : idx === 6 ? 'tour-craft' : undefined}
+                onClick={item.onClick}
+                className="group relative flex items-center justify-start w-10 h-10 group-hover/sidebar:w-32 px-2 rounded-xl transition-all duration-300 bg-transparent hover:bg-white/10 overflow-hidden"
+                title={item.label}
+              >
+                <span className="text-xl min-w-[24px] text-center transition-transform group-hover/sidebar:scale-110 group-hover/sidebar:text-cyan-400">
+                  {item.icon}
+                </span>
+                <span className="ml-2 text-xs font-bold text-white opacity-0 group-hover/sidebar:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                  {item.label}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
-      <OnboardingTour 
-        step={tourStep} 
-        onNext={() => setTourStep(p => p + 1)} 
-        onFinish={() => { setTourStep(0); setTourFinished(true); }} 
-      />      <AnimatePresence>
+      {/* 新手引导 */}
+      {tourStep > 0 && !showLearningHub && !showMentorChat && !showProfile && !showAchievements && !showAtlas && !showCodex && (
+        <OnboardingTour 
+          step={tourStep} 
+          onNext={() => setTourStep(p => p + 1)} 
+          onFinish={() => { setTourStep(0); setTourFinished(true); }} 
+        />
+      )}
+
+      {/* 面板组件 */}
+      <AnimatePresence>
         {showCodex && <CraftingCodex careers={careers} recipes={CRAFTING_RECIPES} isOpen={showCodex} onClose={() => setShowCodex(false)} onLocate={handleLocateRecipe} userSkills={userSkills} />}
         {showAtlas && <CareerAtlas careers={displayCareers} userSkills={userSkills} onClose={() => setShowAtlas(false)} onPick={(id: number) => { setShowAtlas(false); forceFlyTo(id); setSelectedCareer(displayCareers.find((c: CareerData) => c.id === id) || null); }} />}
       </AnimatePresence>
@@ -1213,12 +1250,14 @@ export default function CareerUniverse() {
         {showInterestEditor && <InterestEditor allInterests={allInterests} currentInterests={userInterests} onSave={(s: Set<string>) => { setUserInterests(s); setShowInterestEditor(false); showToast("🎯 匹配度已重新计算", 'success'); }} onClose={() => setShowInterestEditor(false)} />}
       </AnimatePresence>
 
+      {/* 合成台提示 */}
       {selectedForCraft !== null && (
         <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-40 bg-black/80 border border-cyan-500/50 px-6 py-3 rounded-full backdrop-blur-md shadow-2xl">
           <div className="text-cyan-400 font-bold text-sm">🔧 合成台：已选中 <span className="text-white">{careers[selectedForCraft].name}</span> · 点击另一个已点亮技能</div>
         </div>
       )}
 
+      {/* Demo 特效 */}
       {demoFlash > 0 && (
         <motion.div key={demoFlash} className="absolute inset-0 z-[95] pointer-events-none bg-cyan-200" initial={{ opacity: 0.85 }} animate={{ opacity: 0 }} transition={{ duration: 0.7, ease: 'easeOut' }} />
       )}
@@ -1234,6 +1273,7 @@ export default function CareerUniverse() {
         )}
       </AnimatePresence>
 
+      {/* 电影模式 */}
       <AnimatePresence>
         {cinemaMode && (
           <motion.div className="absolute inset-0 z-[97] pointer-events-none" initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
@@ -1249,9 +1289,10 @@ export default function CareerUniverse() {
         )}
       </AnimatePresence>
 
+      {/* 危机警报 */}
       {activeCrisis && (
         <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute top-24 left-1/2 transform -translate-x-1/2 z-50 bg-red-900/90 border-2 border-red-500 px-6 py-3 rounded-xl shadow-[0_0_30px_rgba(255,0,0,0.6)] flex items-center gap-4">
-          <div className="text-red-100 font-bold text-lg animate-pulse">⚠️ 系统危机!</div>
+          <div className="text-red-100 font-bold text-lg animate-pulse">️ 系统危机!</div>
           <div className="text-white font-mono">目标: <span className="text-yellow-300 font-bold">{careers.find(c => c.id === activeCrisis.careerId)?.name}</span></div>
           <div className="text-white font-mono">剩余点击: <span className="text-green-400 font-bold text-xl">{activeCrisis.clicksNeeded}</span></div>
           <div className="text-white font-mono">时间: <span className={`font-bold text-xl ${activeCrisis.timeLeft <= 5 ? 'text-red-500 animate-pulse' : 'text-cyan-300'}`}>{activeCrisis.timeLeft}s</span></div>
@@ -1259,14 +1300,22 @@ export default function CareerUniverse() {
         </motion.div>
       )}
 
+      {/* HUD - 科幻风格 */}
       <div className="absolute top-6 left-6 z-10 pointer-events-none max-w-sm">
-        <div className="text-cyan-400 font-mono text-xs tracking-widest mb-1">{userPersona ? `JOURNEY TO ${getGoalTitle().toUpperCase()}` : 'SYSTEM STATUS'}</div>
-        <div className="text-white font-mono text-xl font-bold">{getProgressNarrative()}</div>
-        <div className="text-yellow-400 font-mono text-xs mt-2">
-          已掌握 <span className="text-white">{hudSkills}</span> / {careers.length} 技能 · 命运路径 <span className="text-white">{unlockedPaths.size}</span> / 5
-          {userInterests.size > 0 && <span className="ml-2 text-cyan-400">· 兴趣匹配已激活</span>}
+        <div className="relative bg-black/20 backdrop-blur-sm border-l-2 border-t-2 border-cyan-500/30 p-4 rounded-tl-2xl">
+          {/* 装饰性角落刻度 */}
+          <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-cyan-400"></div>
+          <div className="absolute bottom-0 right-0 w-2 h-2 bg-cyan-400/50 rounded-full"></div>
+          
+          <div className="text-cyan-400 font-mono text-xs tracking-widest mb-1">{userPersona ? `JOURNEY TO ${getGoalTitle().toUpperCase()}` : 'SYSTEM STATUS'}</div>
+          <div className="text-white font-mono text-xl font-bold">{getProgressNarrative()}</div>
+          <div className="text-yellow-400 font-mono text-xs mt-2">
+            已掌握 <span className="text-white">{hudSkills}</span> / {careers.length} 技能 · 命运路径 <span className="text-white">{unlockedPaths.size}</span> / 5
+            {userInterests.size > 0 && <span className="ml-2 text-cyan-400">· 兴趣匹配已激活</span>}
+          </div>
         </div>
-        
+
+        {/* 任务列表 */}
         {nextSteps.length > 0 && !selectedCareer && (
           <div className="mt-4 space-y-2 pointer-events-auto">
             <div className="text-[10px] text-white/40 uppercase tracking-widest font-bold mb-1">Current Objectives</div>
@@ -1300,12 +1349,14 @@ export default function CareerUniverse() {
           </div>
         )}
 
+        {/* 统计信息 */}
         <div className="text-cyan-400 font-mono text-xs mt-3 pt-3 border-t border-white/10">
           XP <span className="text-white">{hudXp}</span> · 合成 <span className="text-white">{stats.craftCount}</span> · 危机解除 <span className="text-white">{stats.crisisFixed}</span>
-          {stats.combo > 1 && <span className="ml-2 text-orange-400 font-bold">🔥 连击 x{stats.combo}</span>}
+          {stats.combo > 1 && <span className="ml-2 text-orange-400 font-bold"> 连击 x{stats.combo}</span>}
         </div>
       </div>
 
+      {/* 3D Canvas */}
       <Canvas camera={{ position: [0, 0, 50], fov: 60 }} dpr={[1, 1.5]} gl={{ antialias: false, powerPreference: 'high-performance' }}>
         <Suspense fallback={null}>
           <ambientLight intensity={0.7} />
@@ -1369,7 +1420,21 @@ export default function CareerUniverse() {
             </Html>
           )}
 
-          <OrbitControls ref={controlsRef} enablePan={false} enableZoom={true} minDistance={4} maxDistance={80} enableDamping={true} dampingFactor={0.08} rotateSpeed={0.5} zoomSpeed={0.8} />
+          {/*  修复：启用摄像头平移 */}
+          <OrbitControls 
+            ref={controlsRef} 
+            enablePan={true}  // ✅ 启用平移
+            enableZoom={true} 
+            enableRotate={true} // ✅ 启用旋转
+            minDistance={4} 
+            maxDistance={80} 
+            enableDamping={true} 
+            dampingFactor={0.08} 
+            rotateSpeed={0.5} 
+            zoomSpeed={0.8}
+            panSpeed={0.5} // 添加平移速度控制
+          />
+          
           <DemoCameraTour trigger={demoTour} controlsRef={controlsRef} />
           <IntroDolly trigger={introDolly} controlsRef={controlsRef} />
           <CameraController trigger={cameraTrigger} targetPosition={activeId !== null ? careers.find((c: CareerData) => c.id === activeId)?.position || null : null} isActive={activeId !== null} controlsRef={controlsRef} onAnimStart={() => setIsCameraMoving(true)} onAnimEnd={() => setIsCameraMoving(false)} />

@@ -167,7 +167,7 @@ export default function AIMentorChat({ onBack, userSkills, careers, abilityScore
   const quickQuestions = ["我的能力短板是什么？", "我现在该合成什么？", "下一步学什么？", "给我推荐一个职业", "给我点鼓励"];
 
   return (
-    <div className="w-full h-screen bg-[#050810] flex flex-col text-white font-sans relative overflow-hidden">
+    <div className="w-full h-full bg-[#050810] flex flex-col text-white font-sans relative overflow-hidden">
       {/*  全息网格背景 */}
       <div className="absolute inset-0 pointer-events-none" 
            style={{ 
