@@ -7,22 +7,90 @@ import * as THREE from 'three';
 import { motion } from 'framer-motion';
 import { computeBadges, RARITY_STYLE, type GameStats } from '../utils/badges';
 
-// 复用之前的星球组件
-function ProfilePlanet({ data, position }: any) {
+// ==================== 常量定义 ====================
+const CATEGORY_COLORS: string[] = ["#4f46e5", "#06b6d4", "#eab308", "#d946ef", "#22c55e"];
+const FUTURE_TITLES: string[] = [
+  "科技与 AI 领航者",
+  "工程与建造大宗师",
+  "数据与金融掌控者",
+  "科学与生命探索者",
+  "商业与社会塑造者"
+];
+const FUTURE_GOALS: string[] = [
+  "首席 AI 架构师",
+  "分布式系统专家",
+  "量化交易总监",
+  "生物信息学科学家",
+  "产品战略顾问"
+];
+
+// ==================== 3D 场景组件 ====================
+
+// 🌟 脉冲星球（带呼吸效果 + 轨道环）
+function PulsingPlanet({ data, position, isMastered, color }: {
+  data: { name: string; category: number };
+  position: THREE.Vector3;
+  isMastered: boolean;
+  color: string;
+}) {
   const meshRef = useRef<THREE.Mesh>(null);
-  useFrame((_state, delta) => {
+  const glowRef = useRef<THREE.Mesh>(null);
+  const ringRef = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.rotation.y += delta * 0.2;
+      meshRef.current.rotation.y += 0.008;
+      if (isMastered) {
+        const scale = 1 + Math.sin(state.clock.elapsedTime * 2) * 0.06;
+        meshRef.current.scale.set(scale, scale, scale);
+      }
+    }
+    if (glowRef.current && isMastered) {
+      const glowScale = 1.6 + Math.sin(state.clock.elapsedTime * 1.5) * 0.25;
+      glowRef.current.scale.set(glowScale, glowScale, glowScale);
+    }
+    if (ringRef.current && isMastered) {
+      ringRef.current.rotation.x += 0.01;
+      ringRef.current.rotation.y += 0.015;
     }
   });
+
   return (
     <group position={position}>
+      {/* 外层光晕 */}
+      {isMastered && (
+        <mesh ref={glowRef}>
+          <sphereGeometry args={[1.2, 16, 16]} />
+          <meshBasicMaterial color={color} transparent opacity={0.18} side={THREE.BackSide} toneMapped={false} />
+        </mesh>
+      )}
+
+      {/* 核心星球 */}
       <mesh ref={meshRef}>
-        <icosahedronGeometry args={[0.8, 2]} />
-        <meshStandardMaterial color="#ffffff" emissive="#ffd700" emissiveIntensity={2} toneMapped={false} />
+        <icosahedronGeometry args={[0.7, 2]} />
+        <meshStandardMaterial
+          color={isMastered ? "#ffffff" : "#333333"}
+          emissive={isMastered ? color : "#111111"}
+          emissiveIntensity={isMastered ? 2.5 : 0.2}
+          toneMapped={false}
+        />
       </mesh>
-      <Html position={[0, 1.5, 0]} center distanceFactor={10} className="pointer-events-none">
-        <div className="bg-black/80 border border-yellow-500/50 text-yellow-400 px-2 py-1 rounded text-xs font-bold whitespace-nowrap">
+
+      {/* 轨道环 */}
+      {isMastered && (
+        <mesh ref={ringRef} rotation={[Math.PI / 3, 0, 0]}>
+          <torusGeometry args={[1.0, 0.025, 8, 32]} />
+          <meshBasicMaterial color={color} transparent opacity={0.7} toneMapped={false} />
+        </mesh>
+      )}
+
+      {/* 名称标签 */}
+      <Html position={[0, 1.6, 0]} center distanceFactor={10} className="pointer-events-none">
+        <div className={`px-2 py-1 rounded text-[10px] font-bold whitespace-nowrap backdrop-blur-md border ${
+          isMastered
+            ? 'bg-black/80 border-yellow-500/50 text-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.3)]'
+            : 'bg-black/60 border-white/20 text-white/40'
+        }`}>
           {data.name}
         </div>
       </Html>
@@ -30,17 +98,131 @@ function ProfilePlanet({ data, position }: any) {
   );
 }
 
-function ProfileConnections({ points }: { points: number[][] }) {
+// 🌟 同类别连线（已掌握）
+function MasteredConnections({ careers, userSkills }: { careers: any[]; userSkills: Set<number> }) {
+  const lines = useMemo(() => {
+    const result: number[][] = [];
+    const mastered = careers.filter((c: any) => userSkills.has(c.id));
+    for (let i = 0; i < mastered.length; i++) {
+      for (let j = i + 1; j < mastered.length; j++) {
+        if (mastered[i].category === mastered[j].category && mastered[i].position.distanceTo(mastered[j].position) < 15) {
+          result.push([
+            mastered[i].position.x, mastered[i].position.y, mastered[i].position.z,
+            mastered[j].position.x, mastered[j].position.y, mastered[j].position.z
+          ]);
+        }
+      }
+    }
+    return result;
+  }, [careers, userSkills]);
+
   return (
     <>
-      {points.map((line, idx) => (
+      {lines.map((line, idx) => (
         <Line key={idx} points={line} color="#ffd700" lineWidth={2} transparent opacity={0.6} />
       ))}
     </>
   );
 }
 
-// 🌟 3D 雷达图场景组件
+// 🌟 成长轨迹线（按 tier 从低到高连接已掌握星球）
+function GrowthTrajectory({ careers, userSkills }: { careers: any[]; userSkills: Set<number> }) {
+  const lines = useMemo(() => {
+    const result: number[][] = [];
+    const mastered = careers.filter((c: any) => userSkills.has(c.id));
+    mastered.sort((a: any, b: any) => a.tier - b.tier);
+    for (let i = 0; i < mastered.length - 1; i++) {
+      result.push([
+        mastered[i].position.x, mastered[i].position.y, mastered[i].position.z,
+        mastered[i + 1].position.x, mastered[i + 1].position.y, mastered[i + 1].position.z
+      ]);
+    }
+    return result;
+  }, [careers, userSkills]);
+
+  return (
+    <>
+      {lines.map((line, idx) => (
+        <Line key={`traj-${idx}`} points={line} color="#22d3ee" lineWidth={1.5} transparent opacity={0.5} dashed={false} />
+      ))}
+    </>
+  );
+}
+
+// 🌟 命运路径（已掌握星球 → 终极目标）
+function DestinyPathLines({ careers, userSkills, unlockedPaths }: {
+  careers: any[];
+  userSkills: Set<number>;
+  unlockedPaths: Set<number>;
+}) {
+  const lines = useMemo(() => {
+    const result: { points: number[][]; color: string }[] = [];
+    unlockedPaths.forEach((catId: number) => {
+      const color = CATEGORY_COLORS[catId] || "#ffffff";
+      const masteredInCat = careers.filter((c: any) => c.category === catId && userSkills.has(c.id));
+      masteredInCat.forEach((c: any) => {
+        const targetPos = c.position.clone().normalize().multiplyScalar(35);
+        result.push({
+          points: [[c.position.x, c.position.y, c.position.z, targetPos.x, targetPos.y, targetPos.z]],
+          color
+        });
+      });
+    });
+    return result;
+  }, [careers, userSkills, unlockedPaths]);
+
+  return (
+    <>
+      {lines.map((group, idx) =>
+        group.points.map((line, j) => (
+          <Line key={`destiny-${idx}-${j}`} points={line} color={group.color} lineWidth={2} transparent opacity={0.7} />
+        ))
+      )}
+    </>
+  );
+}
+
+// 🌟 终极目标节点
+function FutureGoalNode({ category, title, color }: { category: number; title: string; color: string }) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const glowRef = useRef<THREE.Mesh>(null);
+  const position = useMemo(() => {
+    // 根据 category 分布到不同方向
+    const angle = (category / 5) * Math.PI * 2;
+    return new THREE.Vector3(Math.cos(angle) * 30, Math.sin(angle) * 8, Math.sin(angle) * 30);
+  }, [category]);
+
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y += 0.01;
+      meshRef.current.rotation.z += 0.005;
+    }
+    if (glowRef.current) {
+      const s = 1.5 + Math.sin(state.clock.elapsedTime * 1.2) * 0.3;
+      glowRef.current.scale.set(s, s, s);
+    }
+  });
+
+  return (
+    <group position={position}>
+      <mesh ref={glowRef}>
+        <sphereGeometry args={[2, 32, 32]} />
+        <meshBasicMaterial color={color} transparent opacity={0.2} side={THREE.BackSide} toneMapped={false} />
+      </mesh>
+      <mesh ref={meshRef}>
+        <icosahedronGeometry args={[1.5, 2]} />
+        <meshStandardMaterial color="#ffffff" emissive={color} emissiveIntensity={3} toneMapped={false} />
+      </mesh>
+      <Html position={[0, 2.5, 0]} center distanceFactor={20} className="pointer-events-none">
+        <div className="bg-black/80 border border-yellow-500/50 text-yellow-400 px-4 py-2 rounded-lg text-sm font-bold backdrop-blur-md shadow-[0_0_20px_rgba(255,215,0,0.5)] whitespace-nowrap">
+          🎯 {title}
+        </div>
+      </Html>
+    </group>
+  );
+}
+
+// 🌟 3D 雷达图
 function RadarChartScene({ skills }: { skills: number[] }) {
   const groupRef = useRef<THREE.Group>(null);
   const dimensions = ["技术", "逻辑", "沟通", "抗压", "创新", "领导"];
@@ -80,7 +262,6 @@ function RadarChartScene({ skills }: { skills: number[] }) {
     return lines;
   }, []);
 
-  // 🛡️ 修复：移除了之前混入的乱码，恢复干净的 useFrame
   useFrame((_state, delta) => {
     if (groupRef.current) {
       groupRef.current.rotation.y += delta * 0.3;
@@ -135,7 +316,7 @@ function RadarChartScene({ skills }: { skills: number[] }) {
 
 function RadarChart3D({ skills }: { skills: number[] }) {
   return (
-    <div className="relative w-72 h-72 mx-auto">
+    <div className="relative w-full h-48 mx-auto">
       <Canvas camera={{ position: [0, 4.5, 5.5], fov: 45 }}>
         <ambientLight intensity={0.5} />
         <pointLight position={[0, 5, 0]} intensity={1} color="#06b6d4" />
@@ -145,25 +326,19 @@ function RadarChart3D({ skills }: { skills: number[] }) {
   );
 }
 
-interface CareerProfileProps {
-  userSkills: Set<number>;
-  careers: any[];
-  onBack: () => void;
-  abilityScores?: number[];
-  unlockedPaths?: Set<number>;
-  stats?: GameStats;
-}
-
-// ============ 全息升级包 ============
+// ==================== UI 特效组件 ====================
 function HoloBootSequence() {
   const [done, setDone] = useState(false);
-  useEffect(() => { const t = setTimeout(() => setDone(true), 1400); return () => clearTimeout(t); }, []);
+  useEffect(() => {
+    const t = setTimeout(() => setDone(true), 1400);
+    return () => clearTimeout(t);
+  }, []);
   if (done) return null;
   return (
-    <motion.div className="absolute inset-0 z-50 pointer-events-none overflow-hidden bg-black/70"
-      initial={{ opacity: 1 }} animate={{ opacity: 0 }} transition={{ delay: 1.1, duration: 0.3 }}>
+    <motion.div className="absolute inset-0 z-50 pointer-events-none overflow-hidden bg-black/80"
+      initial={{ opacity: 1 }} animate={{ opacity: 0 }} transition={{ delay: 1.1, duration: 0.5 }}>
       <motion.div className="absolute left-0 right-0 h-[2px] bg-cyan-400 shadow-[0_0_25px_#22d3ee]"
-        initial={{ top: '0%' }} animate={{ top: '100%' }} transition={{ duration: 1.0, ease: 'easeInOut' }} />
+        initial={{ top: '0%' }} animate={{ top: '100%' }} transition={{ duration: 1.2, ease: 'easeInOut' }} />
       <div className="absolute inset-0 flex items-center justify-center">
         <span className="text-cyan-300 font-mono text-sm tracking-[0.5em] animate-pulse">INITIALIZING HOLOGRAPHIC PROFILE…</span>
       </div>
@@ -174,7 +349,8 @@ function HoloBootSequence() {
 function useCountUp(target: number, duration = 1200) {
   const [val, setVal] = useState(0);
   useEffect(() => {
-    let raf: number; const start = performance.now();
+    let raf: number;
+    const start = performance.now();
     const tick = (now: number) => {
       const p = Math.min(1, (now - start) / duration);
       setVal(Math.round(target * (1 - Math.pow(1 - p, 3))));
@@ -186,7 +362,7 @@ function useCountUp(target: number, duration = 1200) {
   return val;
 }
 
-function TypewriterText({ text, speed = 28 }: { text: string; speed?: number }) {
+function TypewriterText({ text, speed = 30 }: { text: string; speed?: number }) {
   const [n, setN] = useState(0);
   useEffect(() => { setN(0); }, [text]);
   useEffect(() => {
@@ -202,18 +378,28 @@ function HoloBackdrop() {
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
       <div className="absolute bottom-0 left-0 right-0 h-1/2"
         style={{
-          backgroundImage: 'linear-gradient(rgba(6,182,212,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.15) 1px, transparent 1px)',
+          backgroundImage: 'linear-gradient(rgba(6,182,212,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,0.1) 1px, transparent 1px)',
           backgroundSize: '40px 40px',
           transform: 'perspective(500px) rotateX(60deg)',
           transformOrigin: 'bottom',
           maskImage: 'linear-gradient(to top, black, transparent)',
           WebkitMaskImage: 'linear-gradient(to top, black, transparent)',
         }} />
-      <div className="absolute inset-0 opacity-[0.05]"
+      <div className="absolute inset-0 opacity-[0.03]"
         style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, #22d3ee 2px, #22d3ee 3px)' }} />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,rgba(0,0,0,0.85)_100%)]" />
     </div>
   );
+}
+
+// ==================== 主组件 ====================
+interface CareerProfileProps {
+  userSkills: Set<number>;
+  careers: any[];
+  onBack: () => void;
+  abilityScores?: number[];
+  unlockedPaths?: Set<number>;
+  stats?: GameStats;
 }
 
 export default function CareerProfile({ userSkills, careers, onBack, abilityScores, unlockedPaths, stats }: CareerProfileProps) {
@@ -221,33 +407,13 @@ export default function CareerProfile({ userSkills, careers, onBack, abilityScor
     return careers.filter((c: any) => userSkills.has(c.id));
   }, [careers, userSkills]);
 
-  const connectionPoints = useMemo(() => {
-    const lines: number[][] = [];
-    for (let i = 0; i < masteredCareers.length; i++) {
-      for (let j = i + 1; j < masteredCareers.length; j++) {
-        const c1 = masteredCareers[i];
-        const c2 = masteredCareers[j];
-        if (c1.category === c2.category && c1.position.distanceTo(c2.position) < 15) {
-          lines.push([
-            c1.position.x, c1.position.y, c1.position.z,
-            c2.position.x, c2.position.y, c2.position.z
-          ]);
-        }
-      }
-    }
-    return lines;
-  }, [masteredCareers]);
-
-  // 👇 所有 hooks 与派生数据都在组件顶层计算
   const masteredCount = useCountUp(userSkills.size);
-  const hasRealData = abilityScores ? abilityScores.some(score => score > 0) : false;
-  const radarSkills: number[] = hasRealData && abilityScores ? abilityScores : [12, 12, 12, 12, 12, 12];
+  const safeAbilityScores = abilityScores && abilityScores.length === 6 ? abilityScores : [12, 12, 12, 12, 12, 12];
 
   const categoryCount = [0, 0, 0, 0, 0];
   masteredCareers.forEach((c: any) => { categoryCount[c.category]++; });
   const topCategory = categoryCount.indexOf(Math.max(...categoryCount));
-  const futureTitles = ["首席 AI 架构师", "数据科学总监", "全栈技术专家", "产品副总裁", "设计总监"];
-  const predictedTitle = userSkills.size > 0 ? futureTitles[topCategory] : "未知";
+  const predictedTitle = userSkills.size > 0 ? FUTURE_GOALS[topCategory] : "未知";
 
   const aiComment = userSkills.size === 0
     ? "你尚未开始探索。回到宇宙，点亮你的第一个技能吧！"
@@ -255,89 +421,193 @@ export default function CareerProfile({ userSkills, careers, onBack, abilityScor
     ? "你已踏上旅程。继续保持好奇心，探索更多可能性。"
     : "你展现了强大的学习能力。你的技能树正在形成独特的形状。";
 
-  // 🌟 P3：接入共享的 computeBadges，传入 stats
-  const badges = computeBadges(userSkills.size, unlockedPaths?.size ?? 0, abilityScores, stats);
+  const badges = computeBadges(userSkills.size, unlockedPaths?.size ?? 0, safeAbilityScores, stats);
+
+  const currentLevel = Math.floor((stats?.xp || 0) / 500) + 1;
+  const xpProgress = ((stats?.xp || 0) % 500) / 500 * 100;
+
+  const ratingCounts = useMemo(() => {
+    const counts: Record<string, number> = { S: 0, A: 0, B: 0, C: 0 };
+    Object.values(stats?.ratings || {}).forEach((r: string) => {
+      counts[r] = (counts[r] || 0) + 1;
+    });
+    return counts;
+  }, [stats?.ratings]);
 
   return (
-    <div className="w-full h-screen bg-slate-900 relative overflow-hidden flex">
+    <div className="w-full h-screen bg-slate-900 relative overflow-hidden flex text-white font-sans">
       <HoloBootSequence />
       <HoloBackdrop />
 
-      {/* 左侧 70%：3D 星座 */}
-      <div className="w-[70%] h-full relative">
+      {/* 左侧 60%：3D 星座 */}
+      <div className="w-[60%] h-full relative">
         <Canvas camera={{ position: [0, 0, 30], fov: 60 }}>
           <ambientLight intensity={0.5} />
           <pointLight position={[10, 10, 10]} intensity={1} />
           <Stars radius={50} depth={30} count={1000} factor={2} saturation={0} fade speed={1} />
-          {masteredCareers.map((career: any) => (
-            <ProfilePlanet key={career.id} data={career} position={career.position} />
+
+          {/* 所有职业星球（已掌握高亮 + 未掌握暗淡） */}
+          {careers.map((career: any) => (
+            <PulsingPlanet
+              key={career.id}
+              data={career}
+              position={career.position}
+              isMastered={userSkills.has(career.id)}
+              color={CATEGORY_COLORS[career.category] || "#ffffff"}
+            />
           ))}
-          <ProfileConnections points={connectionPoints} />
-          <OrbitControls enablePan={false} enableZoom={true} minDistance={10} maxDistance={50} autoRotate autoRotateSpeed={0.5} />
+
+          {/* 同类别连线 */}
+          <MasteredConnections careers={careers} userSkills={userSkills} />
+
+          {/* 成长轨迹线 */}
+          <GrowthTrajectory careers={careers} userSkills={userSkills} />
+
+          {/* 命运路径 */}
+          {unlockedPaths && (
+            <DestinyPathLines careers={careers} userSkills={userSkills} unlockedPaths={unlockedPaths} />
+          )}
+
+          {/* 终极目标节点 */}
+          {CATEGORY_COLORS.map((color: string, idx: number) => (
+            <FutureGoalNode key={idx} category={idx} title={FUTURE_TITLES[idx]} color={color} />
+          ))}
+
+          <OrbitControls enablePan={false} enableZoom={true} minDistance={10} maxDistance={50} autoRotate autoRotateSpeed={0.3} />
           <EffectComposer>
             <Bloom luminanceThreshold={0.1} intensity={1.5} />
           </EffectComposer>
         </Canvas>
 
-        <button
-          onClick={onBack}
-          className="absolute top-6 left-6 z-40 bg-black/80 border border-white/20 text-white px-4 py-2 rounded-full backdrop-blur-md hover:bg-white/10 transition-all flex items-center gap-2 font-bold text-sm"
-        >
-          ← 返回宇宙探索
+        <button onClick={onBack} className="absolute top-6 left-6 z-40 bg-black/80 border border-white/20 text-white px-4 py-2 rounded-full backdrop-blur-md hover:bg-white/10 hover:border-cyan-400/50 transition-all flex items-center gap-2 font-bold text-sm group">
+          <span className="group-hover:-translate-x-1 transition-transform">←</span> 返回宇宙探索
         </button>
 
         <div className="absolute top-6 right-6 z-40 text-right">
           <div className="text-cyan-400 font-mono text-xs tracking-widest mb-1">YOUR CONSTELLATION</div>
-          <div className="text-white font-mono text-3xl font-bold">
-            {masteredCount} <span className="text-white/40 text-lg">/ {careers.length} Skills</span>
+          <div className="text-white font-mono text-4xl font-bold">
+            {masteredCount} <span className="text-white/40 text-xl">/ {careers.length} Skills</span>
           </div>
         </div>
       </div>
 
-      {/* 右侧 30%：档案面板 */}
-      <div className="w-[30%] h-full bg-black/60 backdrop-blur-xl border-l border-white/10 p-8 overflow-y-auto flex flex-col relative z-10">
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="mb-8">
-          <h2 className="text-3xl font-bold text-white mb-2">全息职业档案</h2>
-          <p className="text-white/60 text-sm">基于你的学习轨迹生成</p>
+      {/* 右侧 40%：数据驾驶舱 */}
+      <div className="w-[40%] h-full bg-black/60 backdrop-blur-xl border-l border-white/10 p-8 overflow-y-auto flex flex-col relative z-10 custom-scrollbar">
+
+        {/* 1. 等级与 XP */}
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+          <div className="flex items-end justify-between mb-2">
+            <div>
+              <div className="text-cyan-400 font-mono text-xs tracking-widest mb-1">EXPLORER LEVEL</div>
+              <div className="text-white font-bold text-3xl">Lv.{currentLevel}</div>
+            </div>
+            <div className="text-right">
+              <div className="text-white/60 text-xs mb-1">Total XP</div>
+              <div className="text-cyan-400 font-mono text-xl font-bold">{stats?.xp || 0}</div>
+            </div>
+          </div>
+          <div className="relative h-2 bg-white/5 rounded-full overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${xpProgress}%` }}
+              transition={{ duration: 1.5, ease: "easeOut" }}
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-cyan-500 to-blue-500 shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+            />
+          </div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-          className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 rounded-xl p-6 mb-6">
-          <div className="text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2">AI 预测你的未来</div>
-          <div className="text-2xl font-bold text-white">{predictedTitle}</div>
+        {/* 2. AI 预测 + 雷达图 */}
+        <div className="grid grid-cols-1 gap-4 mb-6">
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
+            className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-xl p-5 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl -mr-8 -mt-8 group-hover:bg-cyan-500/20 transition-all" />
+            <div className="text-cyan-400 text-xs font-bold uppercase tracking-wider mb-1">AI PREDICTION</div>
+            <div className="text-xl font-bold text-white">{predictedTitle}</div>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}
+            className="bg-white/5 border border-white/10 rounded-xl p-5">
+            <div className="text-white/80 font-bold text-sm mb-2">能力模型</div>
+            <RadarChart3D skills={safeAbilityScores} />
+          </motion.div>
+        </div>
+
+        {/* 3. 评级分布 */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+          className="bg-white/5 border border-white/10 rounded-xl p-5 mb-6">
+          <div className="text-white/80 font-bold text-sm mb-3">评级分布</div>
+          <div className="space-y-2">
+            {(['S', 'A', 'B', 'C'] as const).map((rating, i) => {
+              const count = ratingCounts[rating] || 0;
+              const total = Object.values(ratingCounts).reduce((a, b) => a + b, 0);
+              const pct = total ? (count / total) * 100 : 0;
+              const colorMap: Record<string, string> = {
+                S: 'bg-yellow-400',
+                A: 'bg-emerald-400',
+                B: 'bg-blue-400',
+                C: 'bg-slate-400'
+              };
+              const textColor: Record<string, string> = {
+                S: 'text-yellow-400',
+                A: 'text-emerald-400',
+                B: 'text-blue-400',
+                C: 'text-slate-400'
+              };
+              return (
+                <div key={rating}>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className={`font-bold ${textColor[rating]}`}>{rating}</span>
+                    <span className="text-white/60">{count}</span>
+                  </div>
+                  <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${pct}%` }}
+                      transition={{ delay: 0.5 + i * 0.1, duration: 0.8 }}
+                      className={`h-full ${colorMap[rating]}`}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-          className="bg-white/5 border border-white/10 rounded-xl p-6 mb-6">
-          <h3 className="text-white/80 font-bold text-sm mb-4">能力模型</h3>
-          <RadarChart3D skills={radarSkills} />
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
-          className="bg-white/5 border border-white/10 rounded-xl p-6">
-          <h3 className="text-white/80 font-bold text-sm mb-4">AI 深度复盘</h3>
-          <p className="text-white/70 text-sm leading-relaxed">
-            <TypewriterText text={aiComment} />
-          </p>
-        </motion.div>
-
+        {/* 4. 成就徽章 */}
         {badges.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }} className="mt-6">
-            <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3">成就徽章 · Achievements</h3>
-            <div className="flex flex-wrap gap-3">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mb-6">
+            <div className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <span>🏆</span> 成就徽章 · Achievements
+            </div>
+            <div className="grid grid-cols-2 gap-3">
               {badges.map((b, i) => (
-                <motion.div key={b.name} initial={{ opacity: 0, scale: 0.6, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ delay: 0.9 + i * 0.12, type: 'spring' }}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg border bg-black/40 backdrop-blur-md ${RARITY_STYLE[b.rarity]}`}>
-                  <span className="text-xl">{b.icon}</span>
-                  <div>
-                    <div className="text-xs font-bold">{b.name}</div>
-                    <div className="text-[10px] opacity-60">{b.desc}</div>
+                <motion.div key={b.name}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5 + i * 0.1, type: 'spring' }}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  className={`flex items-center gap-2 p-3 rounded-lg border bg-black/40 backdrop-blur-md transition-all cursor-default ${RARITY_STYLE[b.rarity]}`}>
+                  <span className="text-2xl">{b.icon}</span>
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold truncate">{b.name}</div>
+                    <div className="text-[10px] opacity-60 truncate">{b.desc}</div>
                   </div>
                 </motion.div>
               ))}
             </div>
           </motion.div>
         )}
+
+        {/* 5. AI 深度复盘 */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
+          className="mt-auto bg-white/5 border border-white/10 rounded-xl p-5">
+          <div className="text-white/80 font-bold text-sm mb-3 flex items-center gap-2">
+            <span>🤖</span> AI 深度复盘
+          </div>
+          <p className="text-white/70 text-sm leading-relaxed min-h-[60px]">
+            <TypewriterText text={aiComment} />
+          </p>
+        </motion.div>
       </div>
     </div>
   );
