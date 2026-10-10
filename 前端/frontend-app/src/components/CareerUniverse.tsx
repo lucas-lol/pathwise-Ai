@@ -79,6 +79,55 @@ function PageOverlay({ show, children, direction = 'right' }: { show: boolean; c
   );
 }
 
+// 🎬 Demo 过场：HUD 数字滚动计数
+function useCountUp(target: number, duration = 1400): number {
+  const [val, setVal] = useState(target);
+  const prevRef = useRef(target);
+  useEffect(() => {
+    const from = prevRef.current;
+    prevRef.current = target;
+    if (from === target) return;
+    let raf: number;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / duration);
+      const e = 1 - Math.pow(1 - p, 3);
+      setVal(Math.round(from + (target - from) * e));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+  return val;
+}
+
+// 🎬 Demo 过场：相机自动导览（拉远俯瞰 → 环绕 → 两站导览 → 归位）
+function DemoCameraTour({ trigger, controlsRef }: { trigger: number; controlsRef: React.MutableRefObject<any> }) {
+  const { camera } = useThree();
+  useEffect(() => {
+    if (trigger === 0 || !controlsRef.current) return;
+    const controls = controlsRef.current;
+    controls.enabled = false;
+    const tl = gsap.timeline({ onComplete: () => { controls.enabled = true; controls.update(); } });
+    tl.to(camera.position, { x: 0, y: 38, z: 62, duration: 1.2, ease: 'power2.inOut', onUpdate: () => camera.lookAt(0, 0, 0) }, 0);
+    const orbit = { a: 0 };
+    tl.to(orbit, {
+      a: Math.PI * 0.6, duration: 2.2, ease: 'sine.inOut',
+      onUpdate: () => {
+        const r = camera.position.length();
+        camera.position.x = Math.sin(orbit.a) * r * 0.9;
+        camera.position.z = Math.cos(orbit.a) * r * 0.9;
+        camera.lookAt(0, 0, 0);
+      }
+    }, 1.2);
+    tl.to(camera.position, { x: 22, y: 10, z: 22, duration: 1.1, ease: 'power2.inOut', onUpdate: () => camera.lookAt(0, 0, 0) }, 3.4);
+    tl.to(camera.position, { x: -18, y: 26, z: -14, duration: 1.1, ease: 'power2.inOut', onUpdate: () => camera.lookAt(0, 6, 0) }, 4.6);
+    tl.to(camera.position, { x: 0, y: 0, z: 50, duration: 1.3, ease: 'power3.inOut', onUpdate: () => camera.lookAt(0, 0, 0) }, 5.8);
+    return () => { tl.kill(); controls.enabled = true; };
+  }, [trigger, camera, controlsRef]);
+  return null;
+}
+
 function Burst({ data, onDone }: { data: BurstData; onDone: (id: number) => void }) {
   const ref = useRef<THREE.Mesh>(null); const life = useRef(0);
   useFrame((_state, delta) => {
@@ -295,6 +344,9 @@ export default function CareerUniverse() {
   const [careers, setCareers] = useState<CareerData[]>(() => enrichCareers(CAREERS));
   const [activeCrisis, setActiveCrisis] = useState<CrisisData | null>(null);
   const [downedCareers, setDownedCareers] = useState<Set<number>>(new Set());
+  const [demoFlash, setDemoFlash] = useState(0);
+  const [demoBanner, setDemoBanner] = useState(false);
+  const [demoTour, setDemoTour] = useState(0);
 
   useEffect(() => {
     fetch('http://localhost:8000/api/careers').then((res: Response) => { if (!res.ok) throw new Error(); return res.json(); }).then((rawData: any) => { setCareers(enrichCareers(processRawCareers(rawData))); console.log('%c✅ Engine 连接成功', 'color: #22c55e;'); }).catch(() => { console.log('%cℹ️ Engine 离线，使用本地数据', 'color: #94a3b8;'); });
@@ -309,14 +361,27 @@ export default function CareerUniverse() {
   const forceFlyTo = (id: number) => { setActiveId(id); setCameraTrigger((p) => p + 1); };
   const spawnBurst = (position: THREE.Vector3, color: string) => { const id = Date.now() + Math.random(); setBursts((prev) => [...prev, { id, position: position.clone(), color }]); };
 
-  const activateDemoMode = () => {
+    const activateDemoMode = () => {
     const pick = (cat: number, n: number): number[] => careers.filter((x: CareerData) => x.category === cat).sort((a: CareerData, b: CareerData) => a.tier - b.tier).slice(0, n).map((x: CareerData) => x.id);
     const demoSkills = [...pick(0, 5), ...pick(2, 5)];
-    setUserSkills(new Set(demoSkills)); setUnlockedPaths(new Set([0, 2]));
+    playSound('demo');
+    setDemoFlash(f => f + 1);
+    setDemoBanner(true);
+    setTimeout(() => setDemoBanner(false), 2600);
+    setUserSkills(new Set(demoSkills));
+    setUnlockedPaths(new Set([0, 2]));
     setAbilityScores({ technical: 68, logic: 74, communication: 52, stress: 45, innovation: 61, leadership: 38 });
-    setCareersWithAttack(new Set()); setActiveCrisis(null); setDownedCareers(new Set());
+    setCareersWithAttack(new Set());
     setStats((prev) => ({ ...prev, simSuccess: Math.max(prev.simSuccess, 8), craftCount: Math.max(prev.craftCount, 2), xp: Math.max(prev.xp, 640), maxCombo: Math.max(prev.maxCombo, 3), ratings: { ...prev.ratings, [demoSkills[0]]: 'S', [demoSkills[1]]: 'A', [demoSkills[2]]: 'S', [demoSkills[5]]: 'A' } }));
-    showToast("✨ 演示状态已载入", 'success');
+    // 连锁点亮：每 110ms 炸一颗金色冲击波
+    demoSkills.forEach((id, i) => {
+      setTimeout(() => {
+        const c = careers.find((x: CareerData) => x.id === id);
+        if (c) { spawnBurst(c.position, '#ffd700'); playSound('click'); }
+      }, 250 + i * 110);
+    });
+    setTimeout(() => setDemoTour(t => t + 1), 350);
+    showToast("✨ 演示状态已载入 · 自动导览中", 'success');
   };
 
   useEffect(() => { const onKey = (e: KeyboardEvent) => { if (e.shiftKey && e.key.toLowerCase() === 'd') activateDemoMode(); }; window.addEventListener('keydown', onKey); return () => window.removeEventListener('keydown', onKey); }, [careers]);
@@ -428,6 +493,8 @@ setActiveCrisis({ id: Date.now(), careerId: targetId, clicksNeeded: 3, timeLeft:
     setSelectedCareer(null); setActiveId(null);
   };
 
+  const hudXp = useCountUp(stats.xp, 1400);
+  const hudSkills = useCountUp(userSkills.size, 1400);
   const labelCareer = displayCareers.find((c: CareerData) => c.id === (activeId !== null ? activeId : hoveredId));
   const toastColor = toast.type === 'error' ? 'bg-red-500/90 border-red-400/50' : (toast.type === 'success' ? 'bg-green-500/90 border-green-400/50' : 'bg-yellow-500/90 border-yellow-400/50');
   const personaCards: PersonaCard[] = [{ id: 'student', icon: '🎓', title: '迷茫的大学生', desc: '想探索职业方向，找到适合自己的路', goal: '科技与 AI 领航者', color: 'from-blue-500 to-cyan-500' }, { id: 'career-changer', icon: '💼', title: '想转行的职场人', desc: '有明确目标，但需要补齐技能差距', goal: '工程与建造大宗师', color: 'from-purple-500 to-pink-500' }, { id: 'lifelong-learner', icon: '📚', title: '终身学习者', desc: '想持续成长，不断拓展能力边界', goal: '商业与社会塑造者', color: 'from-orange-500 to-red-500' }];
@@ -471,6 +538,21 @@ setActiveCrisis({ id: Date.now(), careerId: targetId, clicksNeeded: 3, timeLeft:
 
       {selectedForCraft !== null && (<div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-40 bg-black/80 border border-cyan-500/50 px-6 py-3 rounded-full backdrop-blur-md shadow-2xl"><div className="text-cyan-400 font-bold text-sm">🔧 合成台：已选中 <span className="text-white">{careers[selectedForCraft].name}</span> · 点击另一个已点亮技能</div></div>)}
 
+      {demoFlash > 0 && (
+        <motion.div key={demoFlash} className="absolute inset-0 z-[95] pointer-events-none bg-cyan-200" initial={{ opacity: 0.85 }} animate={{ opacity: 0 }} transition={{ duration: 0.7, ease: 'easeOut' }} />
+      )}
+      <AnimatePresence>
+        {demoBanner && (
+          <motion.div className="absolute inset-0 z-[96] pointer-events-none flex items-center justify-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ type: 'spring', damping: 18 }} className="text-center">
+              <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-white to-yellow-300 drop-shadow-[0_0_30px_rgba(34,211,238,0.8)]">DEMO STATE LOADED</div>
+              <div className="mt-3 text-cyan-200/80 font-mono text-sm tracking-[0.5em]">演示状态载入 · 自动导览启动</div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+
       {activeCrisis && (
         <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="absolute top-24 left-1/2 transform -translate-x-1/2 z-50 bg-red-900/90 border-2 border-red-500 px-6 py-3 rounded-xl shadow-[0_0_30px_rgba(255,0,0,0.6)] flex items-center gap-4">
           <div className="text-red-100 font-bold text-lg animate-pulse">⚠️ 系统危机!</div>
@@ -484,7 +566,7 @@ setActiveCrisis({ id: Date.now(), careerId: targetId, clicksNeeded: 3, timeLeft:
       <div className="absolute top-6 left-6 z-10 pointer-events-none max-w-sm">
         <div className="text-cyan-400 font-mono text-xs tracking-widest mb-1">{userPersona ? `JOURNEY TO ${getGoalTitle().toUpperCase()}` : 'SYSTEM STATUS'}</div>
         <div className="text-white font-mono text-xl font-bold">{getProgressNarrative()}</div>
-        <div className="text-yellow-400 font-mono text-xs mt-2">已掌握 <span className="text-white">{userSkills.size}</span> / {careers.length} 技能 · 命运路径 <span className="text-white">{unlockedPaths.size}</span> / 5 {userInterests.size > 0 && <span className="ml-2 text-cyan-400">· 兴趣匹配已激活</span>}</div>
+        <div className="text-yellow-400 font-mono text-xs mt-2">已掌握 <span className="text-white">{hudSkills}</span> / {careers.length} 技能 · 命运路径 <span className="text-white">{unlockedPaths.size}</span> / 5 {userInterests.size > 0 && <span className="ml-2 text-cyan-400">· 兴趣匹配已激活</span>}</div>
         {nextSteps.length > 0 && !selectedCareer && (
           <div className="mt-4 space-y-2 pointer-events-auto">
             <div className="text-[10px] text-white/40 uppercase tracking-widest font-bold mb-1">Current Objectives</div>
@@ -502,7 +584,7 @@ setActiveCrisis({ id: Date.now(), careerId: targetId, clicksNeeded: 3, timeLeft:
           </div>
         )}
         <div className="text-cyan-400 font-mono text-xs mt-3 pt-3 border-t border-white/10">
-          XP <span className="text-white">{stats.xp}</span> · 合成 <span className="text-white">{stats.craftCount}</span> · 危机解除 <span className="text-white">{stats.crisisFixed}</span>
+          XP <span className="text-white">{hudXp}</span> · 合成 <span className="text-white">{stats.craftCount}</span> · 危机解除 <span className="text-white">{stats.crisisFixed}</span>
           {stats.combo > 1 && <span className="ml-2 text-orange-400 font-bold">🔥 连击 x{stats.combo}</span>}
         </div>
       </div>
@@ -530,6 +612,7 @@ setActiveCrisis({ id: Date.now(), careerId: targetId, clicksNeeded: 3, timeLeft:
           {bursts.map((b: BurstData) => (<Burst key={b.id} data={b} onDone={(id: number) => setBursts((prev) => prev.filter((x) => x.id !== id))} />))}
           {!isCameraMoving && !selectedCareer && labelCareer && !labelCareer.prerequisites.some((p: number) => !userSkills.has(p)) && (userSkills.has(labelCareer.id) || activeId === labelCareer.id || hoveredId === labelCareer.id) && (<Html zIndexRange={[10, 0]} position={[labelCareer.position.x, labelCareer.position.y + 1.8, labelCareer.position.z]} center distanceFactor={15} className="pointer-events-none" style={{ transition: 'opacity 0.3s' }}><div className={`px-3 py-1.5 rounded-lg text-xs font-bold backdrop-blur-md shadow-[0_0_15px_rgba(255,255,255,0.5)] whitespace-nowrap border ${activeId === labelCareer.id ? 'bg-white/20 border-white/50 text-white' : 'bg-black/90 border-white/20 text-white'}`}>{labelCareer.name}<div className="text-[10px] text-white/70 mt-0.5 text-center">匹配度 {labelCareer.match}%{stats.ratings[labelCareer.id] ? ` · 评级 ${stats.ratings[labelCareer.id]}` : ''}</div></div></Html>)}
           <OrbitControls ref={controlsRef} enablePan={false} enableZoom={true} minDistance={4} maxDistance={80} enableDamping={true} dampingFactor={0.08} rotateSpeed={0.5} zoomSpeed={0.8} />
+           <DemoCameraTour trigger={demoTour} controlsRef={controlsRef} />
           <CameraController trigger={cameraTrigger} targetPosition={activeId !== null ? careers.find((c: CareerData) => c.id === activeId)?.position || null : null} isActive={activeId !== null} controlsRef={controlsRef} onAnimStart={() => setIsCameraMoving(true)} onAnimEnd={() => setIsCameraMoving(false)} />
           <EffectComposer>
             {/* 亮度回调：恢复泛光 glow 感，减轻暗角 */}
